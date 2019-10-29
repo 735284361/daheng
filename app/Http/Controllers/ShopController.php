@@ -34,7 +34,7 @@ class ShopController extends Controller
         foreach ($attr as $k=>$v) {
             $map['sku->'.$k] = $v;
         }
-        //  测试
+        //  测试123
         return GoodsSku::where($map)->where('goods_id',$id)->first();
     }
 }
