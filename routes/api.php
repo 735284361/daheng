@@ -20,11 +20,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::any('/wechat/login', 'WeChatController@login');
 Route::any('/wechat/register', 'WeChatController@register');
 
-//前端小程序拿到的地址：https://域名/api/v1/自己写的接口
-Route::group(['prefix' => '/v1','middleware' => 'auth:api'], function () {
-    Route::any('/profile', 'WeChatController@profile');
-});
-
 Route::group(['prefix' => 'v1'], function () {
     // 系统参数
     Route::get('config/value','SysParamController@value');
@@ -35,4 +30,12 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('shop/goods/list','ShopController@lists');
     Route::get('shop/goods/detail','ShopController@detail');
     Route::get('shop/goods/price','ShopController@price');
+});
+
+Route::group(['prefix' => '/pay'], function () {
+    Route::any('/pay', 'PayController@pay');
+//    Route::group(['middleware' => ['auth:api']], function() {
+//        Route::any('/pay', 'PayController@pay');
+//    });
+    Route::any('/callback', 'PayController@callback');
 });
