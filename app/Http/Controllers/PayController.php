@@ -32,11 +32,9 @@ class PayController extends Controller
         $openId = auth('api')->user()->open_id;
 
         $result = $payment->order->unify([
-            'body' => '原卤大亨',
+            'body' => 'Q弹鸡翅【麻辣、微辣】',
             'out_trade_no' => $orderNo,
             'total_fee' => $totalFee,
-//            'spbill_create_ip' => '', // 可选，如不传该参数，SDK 将会自动获取相应 IP 地址
-//            'notify_url' => 'http://dh.raohouhai.com/pay/callback', // 支付结果通知网址，如果不设置则会使用配置里的默认地址
             'trade_type' => 'JSAPI', // 请对应换成你的支付方式对应的值类型
             'openid' => $openId,
         ]);
@@ -53,6 +51,7 @@ class PayController extends Controller
 
         $response = $payment->handlePaidNotify(function($message, $fail){
             Log::warning('continue');
+            Log::warning($message);
             // 使用通知里的 "微信支付订单号" 或者 "商户订单号" 去自己的数据库找到订单
             $order = Order::where('order_no',$message['out_trade_no'])->find();
 
