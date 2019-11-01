@@ -50,8 +50,28 @@ class PayController extends Controller
         $payment = \EasyWeChat::payment();
 
         $response = $payment->handlePaidNotify(function($message, $fail){
-            Log::warning('continue');
+//            array (
+//                'appid' => 'wx16711afd0c23cc36',
+//                'bank_type' => 'CFT',
+//                'cash_fee' => '1',
+//                'fee_type' => 'CNY',
+//                'is_subscribe' => 'N',
+//                'mch_id' => '1561162401',
+//                'nonce_str' => '5dbbc130dcf25',
+//                'openid' => 'opjVL5GvAS-NsWVFQ6CxaOtpXAMU',
+//                'out_trade_no' => '2019110105225643223',
+//                'result_code' => 'SUCCESS',
+//                'return_code' => 'SUCCESS',
+//                'sign' => '0E2AFC94958F4086526D41F0F8A65FDE',
+//                'time_end' => '20191101132309',
+//                'total_fee' => '1',
+//                'trade_type' => 'JSAPI',
+//                'transaction_id' => '4200000449201911015497249599',
+//            )
+
+            $message = json_decode($message);
             Log::warning($message);
+
             // 使用通知里的 "微信支付订单号" 或者 "商户订单号" 去自己的数据库找到订单
             $order = Order::where('order_no',$message['out_trade_no'])->find();
 
