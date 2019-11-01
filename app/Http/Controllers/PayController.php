@@ -69,7 +69,7 @@ class PayController extends Controller
 //                'transaction_id' => '4200000449201911015497249599',
 //            )
 
-            Log::warning($message->out_trade_no);
+            Log::warning($message['out_trade_no']);
 
             // 使用通知里的 "微信支付订单号" 或者 "商户订单号" 去自己的数据库找到订单
             $order = Order::where('order_no',$message['out_trade_no'])->find();
