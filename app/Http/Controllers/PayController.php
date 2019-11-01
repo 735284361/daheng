@@ -29,7 +29,7 @@ class PayController extends Controller
     {
         $payment = \EasyWeChat::payment();
 
-        $openId = 'opjVL5GvAS-NsWVFQ6CxaOtpXAMU';// Auth::user()->open_id;
+        $openId = auth('api')->user()->open_id;
 
         $result = $payment->order->unify([
             'body' => '原卤大亨',
