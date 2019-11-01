@@ -110,8 +110,8 @@ return [
              'app_id'             => env('WECHAT_PAYMENT_APPID', ''),
              'mch_id'             => env('WECHAT_PAYMENT_MCH_ID', 'your-mch-id'),
              'key'                => env('WECHAT_PAYMENT_KEY', 'key-for-signature'),
-             'cert_path'          => env('WECHAT_PAYMENT_CERT_PATH', 'storage/cert/apiclient_cert.pem'),    // XXX: 绝对路径！！！！
-             'key_path'           => env('WECHAT_PAYMENT_KEY_PATH', 'storage/cert/apiclient_key.pem'),      // XXX: 绝对路径！！！！
+             'cert_path'          => env('WECHAT_PAYMENT_CERT_PATH', './storage/cert/apiclient_cert.pem'),    // XXX: 绝对路径！！！！
+             'key_path'           => env('WECHAT_PAYMENT_KEY_PATH', './storage/cert/apiclient_key.pem'),      // XXX: 绝对路径！！！！
              'notify_url'         => 'http://dh.raohouhai.com/pay/callback',                           // 默认支付结果通知地址
          ],
          // ...
