@@ -33,9 +33,8 @@ Route::group(['prefix' => 'v1'], function () {
 });
 
 Route::group(['prefix' => '/pay'], function () {
-    Route::any('/pay', 'PayController@pay');
-//    Route::group(['middleware' => ['auth:api']], function() {
-//        Route::any('/pay', 'PayController@pay');
-//    });
+    Route::group(['middleware' => ['auth:api']], function() {
+        Route::any('/pay', 'PayController@pay');
+    });
     Route::any('/callback', 'PayController@callback');
 });
