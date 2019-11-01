@@ -67,12 +67,10 @@ class PayController extends Controller
 //                'total_fee' => '1',
 //                'trade_type' => 'JSAPI',
 //                'transaction_id' => '4200000449201911015497249599',
-//            )
-
-            Log::warning($message['out_trade_no']);
+//            );
 
             // 使用通知里的 "微信支付订单号" 或者 "商户订单号" 去自己的数据库找到订单
-            $order = Order::where('order_no',$message['out_trade_no'])->find();
+            $order = Order::where('order_no',$message['out_trade_no'])->first();
 
             if (!$order || $order->status == Order::ORDER_STATUS_PAID) { // 如果订单不存在 或者 订单已经支付过了
                 return true; // 告诉微信，我已经处理完了，订单没找到，别再通知我了
@@ -100,4 +98,21 @@ class PayController extends Controller
         Log::warning('finish');
         return $response;
     }
+
+    // 退款
+    public function refund(Request $request)
+    {
+        $orderNo = $request->order_no;
+        $refundNo = 'TK'.date('YmdHis').rand(10000,99999);;
+
+        $order = Order::where('order_no',$orderNo)->first()->toArray();
+
+        $payment = \EasyWeChat::payment();
+        $result = $payment->refund->byOutTradeNumber($orderNo, $refundNo, $order['total_fee'] * 100, $order['total_fee'] * 100, [
+            // 可在此处传入其他参数，详细参数见微信支付文档
+            'refund_desc' => '退运费',
+        ]);
+        return $result;
+    }
+
 }

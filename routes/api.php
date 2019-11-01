@@ -37,4 +37,5 @@ Route::group(['prefix' => '/pay'], function () {
         Route::any('/pay', 'PayController@pay');
     });
     Route::any('/callback', 'PayController@callback');
+    Route::any('/refund', 'PayController@refund');
 });
