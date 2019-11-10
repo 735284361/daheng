@@ -12,8 +12,7 @@ class BannerController extends Controller
     // 获取轮播列表
     public function getList()
     {
-        $statusOnline = Banner::STATUS_ONLINE;
-        $list = Banner::where('status',$statusOnline)->get();
+        $list = Banner::where('status',Banner::STATUS_ONLINE)->get();
         $list ? $code = 0 : $code = 1;
 
         return response()->json([

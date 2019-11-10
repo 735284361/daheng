@@ -13,7 +13,7 @@ class SysParamController extends Controller
     public function value(Request $request)
     {
         $key = $request->key;
-        $data = SysParams::where('code',$key)->first();
+        $data = SysParams::where('code',$key)->where('status',SysParams::PUBLIC_PARAM)->first();
         $data ? $code = 0 : $code = 1;
 
         return response()->json([

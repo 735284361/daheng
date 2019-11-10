@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\SysParams;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -39,10 +40,18 @@ class SysParamsController extends AdminController
         $grid->column('value', __('内容'));
         $grid->column('remark', __('备注'));
         $grid->column('status', __('状态'))->display(function($status) {
-            return SysParams::getStatus($status);
+            $statusCss = SysParams::getStatus($status);
+            if ($status == SysParams::PUBLIC_PARAM) {
+                $statusCss = "<span class='label label-success'>$statusCss</span>";
+            } else {
+                $statusCss = "<span class='label label-warning'>$statusCss</span>";
+            }
+            return $statusCss;
         });
 //        $grid->column('switch_status', __('Switch status'));
-//        $grid->column('type', __('Type'));
+        $grid->column('type', __('参数类型'))->display(function ($type) {
+            return SysParams::getParamsType($type);
+        });
         $grid->column('created_at', __('创建时间'));
         $grid->column('updated_at', __('更新时间'));
 
@@ -67,7 +76,9 @@ class SysParamsController extends AdminController
             return SysParams::getStatus($status);
         });
 //        $show->field('switch_status', __('Switch status'));
-//        $show->field('type', __('Type'));
+        $show->field('type', __('参数类型'))->as(function($type) {
+            return SysParams::getParamsType($type);
+        });
         $show->field('created_at', __('创建时间'));
         $show->field('updated_at', __('更新时间'));
 
@@ -83,13 +94,29 @@ class SysParamsController extends AdminController
     {
         $form = new Form(new SysParams);
 
-        $form->text('code', __('编号'))->rules('required');
-        $form->textarea('value', __('内容'))->rules('required',['required'=>'必填']);
+        $form->text('code', __('编号'))->required();
+        $form->textarea('value', __('内容'))->required();
         $form->text('remark', __('备注'));
-        $form->select('status', __('状态'),'123')->options(self::$status)->rules('required',['required'=>'必填']);
+        $form->select('status', __('状态'))->options(self::$status)->required();
+        $form->select('type', __('参数类型'))->options(SysParams::getParamsType())->default(SysParams::TXT_PARAM)->required();
 //        $form->switch('switch_status', __('Switch status'));
-//        $form->switch('type', __('Type'))->default(1);
-
+//        $form->image('pic', __('图片'));
+//        $txtParam = SysParams::TXT_PARAM;
+//        $imgParam = SysParams::IMG_PARAM;
+//
+//        $script = <<<yy
+//        $("select[name='type']").change(function(){
+//            var type = $(this).val();
+//            if(type==$txtParam){
+//                $("textarea[name='value']").parent().parent().hide();
+//                $("input[name='pic']").closest('.form-group').show();
+//            }else if(type==$imgParam) {
+//                $("textarea[name='value']").parent().parent().show();
+//                $("input[name='pic']").closest('.form-group').hide();
+//            }
+//        })
+//yy;
+//        Admin::script($script);
         return $form;
     }
 }

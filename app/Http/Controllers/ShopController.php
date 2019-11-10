@@ -5,15 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\Goods;
 use App\Models\GoodsSku;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller
 {
     //
 
     // 获取商品列表
-    public function lists()
+    public function lists(Request $request)
     {
-        return Goods::where('status',Goods::STATUS_ONLINE)->get();
+        $categoryId = $request->input('categoryId',"");
+        $categoryId == "" ? '' : $maps['category_id'] = $categoryId;
+        $maps['status'] = Goods::STATUS_ONLINE;
+        $perPage = $request->input('per_page',100);
+        $data =  Goods::where($maps)->paginate($perPage)->toArray();
+        if ($data && count($data) > 0) {
+            $arr = ['code' => 0,'msg' => 'success' ,'data' => $data['data']];
+        } else {
+            $arr = ['code' => 700,'msg' => '暂无数据'];
+        }
+        return $arr;
     }
 
     // 获取商品详细信息

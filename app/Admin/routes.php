@@ -13,4 +13,7 @@ Route::group([
     $router->resource('sys-params', SysParamsController::class);
     $router->resource('banners', BannerController::class);
     $router->resource('goods', GoodsController::class);
+    $router->resource('goods-categories', GoodsCategoryController::class);
+    $router->resource('sys-pics', SysPicController::class);
+
 });

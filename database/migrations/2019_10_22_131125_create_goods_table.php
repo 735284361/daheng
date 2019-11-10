@@ -22,9 +22,19 @@ class CreateGoodsTable extends Migration
             $table->decimal('price')->default(0)->comment('价格');
             $table->decimal('line_price')->default(0)->nullable()->comment('划线价');
             $table->integer('stock_num')->default(0)->comment('库存');
-            $table->longText('content')->comment('产品详情');
+            $table->integer('category_id')->comment('商品分类');
+            $table->tinyInteger('recommend_status')->default(20)->comment('是否推荐');
+            $table->integer('sort')->default(255)->comment('排序');
+            $table->integer('number_fav')->default(0)->comment('收藏数');
+            $table->integer('number_reputation')->default(0)->comment('评论数');
+            $table->integer('number_score')->default(0)->comment('总评分');
+            $table->integer('number_orders')->default(0)->comment('订单数');
+            $table->integer('number_sells')->default(0)->comment('销售数');
+            $table->integer('number_views')->default(0)->comment('浏览数');
+            $table->tinyInteger('status')->default(20)->comment('状态');
+            $table->string('pic_url')->comment('图片地址');
+            $table->json('pics')->comment('轮播图片');
             $table->string('sku_type')->comment('规格类型');
-            $table->tinyInteger('status')->default(10)->comment('状态');
             $table->timestamps();
         });
     }

@@ -1,16 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Services;
 
-use App\Models\Order;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use function EasyWeChat\Kernel\Support\generate_sign;
-
-class PayController extends Controller
+class PayService
 {
-    //
+
+    const CALLBACK_SINCE_PAY_GOODS = 'payGoods';
 
     public function pay()
     {
@@ -25,18 +20,21 @@ class PayController extends Controller
         return ['code' => 0,'data' => $payParams];
     }
 
-    private function getPayParams($orderNo, $totalFee)
+    private function getPayParams($body, $orderNo, $totalFee, $notifyUrl)
     {
         $payment = \EasyWeChat::payment();
 
         $openId = auth('api')->user()->open_id;
 
+        $attach = [];
         $result = $payment->order->unify([
-            'body' => 'Q弹鸡翅【麻辣、微辣】',
+            'body' => $body,
             'out_trade_no' => $orderNo,
             'total_fee' => $totalFee,
+            'notify_url' => $notifyUrl,
             'trade_type' => 'JSAPI', // 请对应换成你的支付方式对应的值类型
             'openid' => $openId,
+            'attach' => $attach
         ]);
 
         $jssdk = $payment->jssdk;

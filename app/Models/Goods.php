@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Goods extends Model
 {
@@ -11,6 +12,10 @@ class Goods extends Model
     // 产品状态
     const STATUS_ONLINE = 10; // 上架
     const STATUS_OFFLINE = 20; // 下架
+
+    // 推荐状态
+    const RECOMMEND_STATUS_YES = 10; // 推荐
+    const RECOMMEND_STATUS_NO = 20; // 普通
 
     // 商品规格
     public function properties()
@@ -24,6 +29,38 @@ class Goods extends Model
         return $this->hasMany(GoodsSku::class,'goods_id','id');
     }
 
+    // 商品介绍
+    public function content()
+    {
+        return $this->hasOne(GoodsContent::class,'goods_id','id');
+    }
+
+    // 商品分类
+    public function category()
+    {
+        return $this->belongsTo(GoodsCategory::class,'category_id','id');
+    }
+
+    public function getPicUrlAttribute($value)
+    {
+        return Storage::disk(config('filesystems.default'))->url($value);
+    }
+
+    // 商品详情轮播
+    public function getPicsAttribute($value)
+    {
+        return json_decode($value,true);
+    }
+
+    // 商品详情轮播
+    public function setPicsAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['pics'] = json_encode($value);
+        }
+    }
+
+    // 获取商品规格
     public function getSku($id = null)
     {
         if ($id === null) return;
@@ -62,6 +99,24 @@ class Goods extends Model
 
         if ($ind !== null) {
             return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::STATUS_OFFLINE];
+        }
+        return $arr;
+    }
+
+    /**
+     * 获取商品推荐属性
+     * @param null $ind
+     * @return array|mixed
+     */
+    public static function getRecommendStatus($ind = null)
+    {
+        $arr = [
+            self::RECOMMEND_STATUS_YES => '推荐',
+            self::RECOMMEND_STATUS_NO => '普通',
+        ];
+
+        if ($ind !== null) {
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::RECOMMEND_STATUS_NO];
         }
         return $arr;
     }

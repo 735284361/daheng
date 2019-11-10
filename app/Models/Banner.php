@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Banner extends Model
 {
@@ -10,6 +11,11 @@ class Banner extends Model
 
     const STATUS_ONLINE = 10;
     const STATUS_OFFLINE = 20;
+
+    public function getPicUrlAttribute($value)
+    {
+        return Storage::disk(config('filesystems.default'))->url($value);
+    }
 
     /**
      * 获取轮播图的状态
