@@ -31,7 +31,8 @@ class ShopController extends Controller
     public function detail(Request $request)
     {
         $id = $request->id;
-        $data = Goods::where('id',$id)->with('properties')->with('skuArr')->first()->toArray();
+        $data = Goods::where('id',$id)->with('properties')->with('skuArr')
+            ->with('reputation')->with('content')->first()->toArray();
         $data['sku_arr'] = array_column($data['sku_arr'],'sku');
         return response()->json($data);
     }

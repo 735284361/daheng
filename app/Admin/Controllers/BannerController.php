@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Banner;
+use App\Models\Goods;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -87,15 +88,13 @@ class BannerController extends AdminController
     {
         $form = new Form(new Banner);
 
-        $form->select('goods_id', __('商品'))->options(function() {
-            return ['1'=>'goods1','2'=>'goods2'];
-        })->rules('required');
-        $form->number('sort', __('排序'))->default(0)->min(0);
+        $goods = Goods::all();
+        $list = $goods->pluck('name','id')->all();
+        $form->select('goods_id', __('商品'))->options($list)->rules('required');
+        $form->number('sort', __('排序'))->default(255)->min(0);
         $form->select('status', __('状态'))->default(Banner::STATUS_ONLINE)
             ->options(Banner::getStatus())->rules('required');
         $form->text('title', __('标题'));
-//        $form->cropper('pic_url', __('图片'))->uniqueName()->cRatio(100,100)
-//            ->rules('required');
         $form->image('pic_url', __('图片'))->uniqueName()->rules('required|max:500');
 
         return $form;

@@ -41,18 +41,29 @@ class Goods extends Model
         return $this->belongsTo(GoodsCategory::class,'category_id','id');
     }
 
+    // 商品评论
+    public function reputation()
+    {
+        return $this->hasMany(GoodsReputation::class,'goods_id','id')->with('user');
+    }
+
+    // 获取-商品列表图
     public function getPicUrlAttribute($value)
     {
         return Storage::disk(config('filesystems.default'))->url($value);
     }
 
-    // 商品详情轮播
+    // 获取-商品详情轮播
     public function getPicsAttribute($value)
     {
-        return json_decode($value,true);
+        $list = json_decode($value,true);
+        $list = array_map(function($value) {
+            return Storage::disk(config('filesystems.default'))->url($value);
+        },$list);
+        return $list;
     }
 
-    // 商品详情轮播
+    // 设置-商品详情轮播
     public function setPicsAttribute($value)
     {
         if (is_array($value)) {
