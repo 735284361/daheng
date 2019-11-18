@@ -17,6 +17,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+//Route::get('v1/address/saveAddress','AddressController@postAddress');
+
 Route::any('/wechat/login', 'WeChatController@login');
 Route::any('/wechat/register', 'WeChatController@register');
 
@@ -30,6 +33,18 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('shop/goods/detail','ShopController@detail');
     Route::get('shop/goods/price','ShopController@price');
     Route::get('shop/category/list','CategoryController@lists'); // 分类
+
+    // 验证登录
+    Route::group([ 'middleware'=>['auth:api']], function() {
+        // 用户地址
+        Route::group(['prefix' => 'address'], function() {
+            Route::get('list','AddressController@lists');
+            Route::get('detail','AddressController@detail');
+            Route::post('saveAddress','AddressController@postAddress');
+            Route::get('delete','AddressController@delete');
+            Route::post('setDefault','AddressController@setDefault');
+        });
+    });
 });
 
 Route::group(['prefix' => '/pay'], function () {
