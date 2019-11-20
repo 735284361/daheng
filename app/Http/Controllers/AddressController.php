@@ -49,7 +49,22 @@ class AddressController extends Controller
             }
             return ['code' => 0, 'msg' => '获取成功', 'data' => $address];
         } else {
-            return ['code' => 0, 'msg' => '获取失败'];
+            return ['code' => 1, 'msg' => '获取失败'];
+        }
+    }
+
+    /**
+     * 获取默认地址
+     * @param Request $request
+     * @return array
+     */
+    public function default(Request $request)
+    {
+        $data = ShippingAddress::where('user_id',auth('api')->id())->where('is_default',ShippingAddress::ADDRESS_DEFAULT)->first();
+        if ($data) {
+            return ['code' => 0, 'msg' => '获取成功', 'data' => $data];
+        } else {
+            return ['code' => 700, 'msg' => '获取失败'];
         }
     }
 
@@ -80,6 +95,11 @@ class AddressController extends Controller
         return ShippingAddress::where('id',$request->id)->where('user_id',auth('api')->id())->delete();
     }
 
+    /**
+     * 设置默认地址
+     * @param Request $request
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function setDefault(Request $request)
     {
         $this->validate($request,['id' => 'required|integer']);

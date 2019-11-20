@@ -37,16 +37,21 @@ class ShopController extends Controller
         return response()->json($data);
     }
 
-    // 获取规格价格
+    /**
+     * 获取商品指定规格的数据
+     * @param Request $request
+     * @return mixed
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function price(Request $request)
     {
+        $this->validate($request,['id'=>'required','attrs'=>'required','attrs.*'=>'required']);
         $id = $request->id;
         $attr = json_decode($request->attrs,true);
 
         foreach ($attr as $k=>$v) {
             $map['sku->'.$k] = $v;
         }
-        //  测试123git push adad
         return GoodsSku::where($map)->where('goods_id',$id)->first();
     }
 }

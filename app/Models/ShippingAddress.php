@@ -18,4 +18,6 @@ class ShippingAddress extends Model
     const ADDRESS_STATUS_ENABLE = 10; // 正常
     const ADDRESS_STATUS_DISABLE = 20; // 禁用
 
+    const ADDRESS_DEFAULT = 1; // 默认地址
+
 }

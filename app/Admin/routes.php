@@ -15,5 +15,6 @@ Route::group([
     $router->resource('goods', GoodsController::class);
     $router->resource('goods-categories', GoodsCategoryController::class);
     $router->resource('sys-pics', SysPicController::class);
+    $router->resource('users', UsersController::class);
 
 });

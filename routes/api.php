@@ -43,6 +43,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('saveAddress','AddressController@postAddress');
             Route::get('delete','AddressController@delete');
             Route::post('setDefault','AddressController@setDefault');
+            Route::get('default','AddressController@default');
         });
     });
 });
