@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Goods;
 use App\Models\GoodsSku;
+use App\Models\ShippingFee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -53,5 +54,21 @@ class ShopController extends Controller
             $map['sku->'.$k] = $v;
         }
         return GoodsSku::where($map)->where('goods_id',$id)->first();
+    }
+
+    /**
+     * 获取指定省份的运费模板
+     * @param Request $request
+     * @return array
+     */
+    public function shippingFee(Request $request)
+    {
+        $province = $request->province;
+        if ($fee = ShippingFee::where('province',$province)->first()) {
+            return ['code' => 0,'msg' => 'success','data' => $fee];
+        } else {
+            $fee = ShippingFee::where('province','其他')->first();
+            return ['code' => 0,'msg' => 'success','data' => $fee];
+        }
     }
 }

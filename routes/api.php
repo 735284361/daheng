@@ -32,7 +32,17 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('shop/goods/list','ShopController@lists');
     Route::get('shop/goods/detail','ShopController@detail');
     Route::get('shop/goods/price','ShopController@price');
-    Route::get('shop/category/list','CategoryController@lists'); // 分类
+    Route::get('shop/shipping/fee','ShopController@shippingFee');
+    Route::get('shop/category/list','CategoryController@lists');
+
+    // 支付
+    Route::group(['prefix' => '/pay'], function () {
+        Route::group(['middleware' => ['auth:api']], function() {
+            Route::any('/pay', 'PayController@pay');
+        });
+        Route::any('/callback', 'PayController@callback');
+        Route::any('/refund', 'PayController@refund');
+    });
 
     // 验证登录
     Route::group([ 'middleware'=>['auth:api']], function() {
@@ -48,10 +58,3 @@ Route::group(['prefix' => 'v1'], function () {
     });
 });
 
-Route::group(['prefix' => '/pay'], function () {
-    Route::group(['middleware' => ['auth:api']], function() {
-        Route::any('/pay', 'PayController@pay');
-    });
-    Route::any('/callback', 'PayController@callback');
-    Route::any('/refund', 'PayController@refund');
-});
