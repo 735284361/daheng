@@ -5,7 +5,7 @@ namespace App\Services;
 class PayService
 {
 
-    public function getPayParams($orderNo, $totalFee, $body = nulll)
+    public function getPayParams($orderNo, $totalFee, $body = null)
     {
         $body == null ? $body = '原卤大亨' : '';
         $payment = \EasyWeChat::payment();

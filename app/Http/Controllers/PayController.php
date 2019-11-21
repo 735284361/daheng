@@ -5,15 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Services\PayService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use function EasyWeChat\Kernel\Support\generate_sign;
 
 class PayController extends Controller
 {
     //
 
-    protected $payService;
+    public $payService;
 
     public function __construct()
     {
@@ -29,6 +26,17 @@ class PayController extends Controller
         $order->order_no = $orderNo;
         $order->save();
 
-        return ['code' => 0,'data' => $payParams];
+        return ['code' => 0,'data' => $payParams['result']];
+    }
+
+    public function refund(Request $request)
+    {
+        $orderNo = $request->order_no;
+        $refundNumber = date('YmdHis').rand(10000,99999);
+
+        $pay = \EasyWeChat::payment();
+
+        return $pay->refund->byOutTradeNumber($orderNo,$refundNumber,1,1);
+
     }
 }
