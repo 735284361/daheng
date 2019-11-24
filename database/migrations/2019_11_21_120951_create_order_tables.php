@@ -20,15 +20,15 @@ class CreateOrderTables extends Migration
             $table->integer('user_id')->comment('用户ID');
             $table->integer('product_count')->comment('商品数量');
             $table->double('product_amount_total',10,2)->comment('商品总价');
-            $table->double('order_amount_total',10,2)->comment('实际付款金额');
             $table->integer('logistics_fee')->default(0)->comment('运费金额');
+            $table->double('order_amount_total',10,2)->comment('实际付款金额');
             $table->timestamp('pay_time')->nullable()->comment('付款时间');
             $table->timestamp('delivery_time')->nullable()->comment('发货时间');
             $table->timestamp('order_settlement_time')->nullable()->comment('订单结算时间');
             $table->integer('order_settlement_status')->default(0)->comment('订单结算状态 0未结算 1已结算');
             $table->integer('after_status')->default(0)->comment('用户售后状态 0 未发起售后 1 申请售后 -1 售后已取消 2 处理中 200 处理完毕');
             $table->integer('status')->default(0)->comment('订单状态 0未付款,1已付款,2已发货,3已签收,-1退货申请,-2退货中,-3已退货,-4取消交易');
-            $table->string('remark')->comment('订单备注');
+            $table->string('remark')->nullable()->comment('订单备注');
             $table->timestamps();
         });
 
@@ -57,6 +57,7 @@ class CreateOrderTables extends Migration
 
         Schema::create('order_event_logs', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('order_no')->comment('订单编号');
             $table->integer('event')->comment('订单事件编号');
             $table->timestamps();
         });

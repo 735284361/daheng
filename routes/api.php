@@ -55,6 +55,11 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('setDefault','AddressController@setDefault');
             Route::get('default','AddressController@default');
         });
+
+        // 订单
+        Route::group(['prefix' => 'order'], function() {
+            Route::post('create','OrderController@create');
+        });
     });
 });
 

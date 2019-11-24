@@ -10,9 +10,20 @@ class Order extends Model
 
     protected $table = 'order';
 
-    const ORDER_STATUS_PENDING = 10; // 待支付
-    const ORDER_STATUS_PAID = 20; // 已支付
-    const ORDER_STATUS_FINISH = 30; // 订单已完成
-    const ORDER_STATUS_PAID_FAIL = 40; // 已支付
+    const STATUS_UNPAID = 0; // 未付款
+    const STATUS_PAID = 1; // 已付款
+    const STATUS_SHIPPED = 2; // 已发货
+    const STATUS_RECEIVED = 3; // 已签收
+    const STATUS_COMPLETED = 4; // 已完成
+
+    const PRE_BUY = 'GM'; // 购买订单前缀
+    const PRE_REFUND = 'TK'; // 退款订单前缀
+    const PRE_WITHDRAW = 'TX'; // 提现
+
+
+    public function getOrderNo($pre)
+    {
+        return $pre.date('YmdHis').rand(10000,99999);
+    }
 
 }

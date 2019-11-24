@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Goods;
 use App\Models\GoodsSku;
 use App\Models\ShippingFee;
+use App\Services\ShippingFeeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -63,12 +64,8 @@ class ShopController extends Controller
      */
     public function shippingFee(Request $request)
     {
-        $province = $request->province;
-        if ($fee = ShippingFee::where('province',$province)->first()) {
-            return ['code' => 0,'msg' => 'success','data' => $fee];
-        } else {
-            $fee = ShippingFee::where('province','其他')->first();
-            return ['code' => 0,'msg' => 'success','data' => $fee];
-        }
+        $shippingFeeService = new ShippingFeeService();
+        $fee = $shippingFeeService->getShippingFee($request->province, $request->total_fee);
+        return ['code' => 0,'msg' => 'success','data' => $fee];
     }
 }

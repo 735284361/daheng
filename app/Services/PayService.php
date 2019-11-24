@@ -15,7 +15,7 @@ class PayService
         $result = $payment->order->unify([
             'body' => $body,
             'out_trade_no' => $orderNo,
-            'total_fee' => $totalFee,
+            'total_fee' => $totalFee * 100,
             'trade_type' => 'JSAPI', // 请对应换成你的支付方式对应的值类型
             'openid' => $openId,
         ]);
