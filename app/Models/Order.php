@@ -26,4 +26,25 @@ class Order extends Model
         return $pre.date('YmdHis').rand(10000,99999);
     }
 
+
+    /**
+     * 获取轮播图的状态
+     * @param null $ind
+     * @return array|mixed
+     */
+    public static function getStatus($ind = null)
+    {
+        $arr = [
+            self::STATUS_UNPAID => '未付款',
+            self::STATUS_PAID => '已付款',
+            self::STATUS_SHIPPED => '已发货',
+            self::STATUS_RECEIVED => '已签收',
+            self::STATUS_COMPLETED => '已完成',
+        ];
+
+        if ($ind !== null) {
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::STATUS_UNPAID];
+        }
+        return $arr;
+    }
 }

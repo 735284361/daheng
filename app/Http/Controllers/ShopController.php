@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Goods;
 use App\Models\GoodsSku;
 use App\Models\ShippingFee;
+use App\Services\GoodsService;
 use App\Services\ShippingFeeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,16 +14,22 @@ class ShopController extends Controller
 {
     //
 
+    protected $goodsService;
+
+    public function __construct()
+    {
+        $this->goodsService = new GoodsService();
+    }
+
     // 获取商品列表
     public function lists(Request $request)
     {
         $categoryId = $request->input('categoryId',"");
         $categoryId == "" ? '' : $maps['category_id'] = $categoryId;
         $maps['status'] = Goods::STATUS_ONLINE;
-        $perPage = $request->input('per_page',100);
-        $data =  Goods::where($maps)->paginate($perPage)->toArray();
-        if ($data && count($data) > 0) {
-            $arr = ['code' => 0,'msg' => 'success' ,'data' => $data['data']];
+        $data =  Goods::where($maps)->get();
+        if ($data) {
+            $arr = ['code' => 0,'msg' => 'success' ,'data' => $data];
         } else {
             $arr = ['code' => 700,'msg' => '暂无数据'];
         }
@@ -33,9 +40,19 @@ class ShopController extends Controller
     public function detail(Request $request)
     {
         $id = $request->id;
-        $data = Goods::where('id',$id)->with('properties')->with('skuArr')
-            ->with('reputation')->with('content')->first()->toArray();
-        $data['sku_arr'] = array_column($data['sku_arr'],'sku');
+        $data = Goods::where('id',$id)
+            ->with('properties')
+            ->with('skuArr')
+            ->with('reputation')
+            ->with('content')
+            ->first();
+        if ($data) {
+            $data = json_decode($data,true);
+            if (empty($data['properties']) || $data['sku_type'] == 'single') {
+                $data['properties'] = null;
+            }
+            $data['sku_arr'] = array_column($data['sku_arr'],'sku');
+        }
         return response()->json($data);
     }
 
@@ -67,5 +84,21 @@ class ShopController extends Controller
         $shippingFeeService = new ShippingFeeService();
         $fee = $shippingFeeService->getShippingFee($request->province, $request->total_fee);
         return ['code' => 0,'msg' => 'success','data' => $fee];
+    }
+
+    public function getGoodsStock(Request $request)
+    {
+        $this->validate($request,['goods_id'=>'required|integer','property_id'=>'nullable|integer']);
+        // 商品库存信息
+        $stock = $this->goodsService->getSku($request->goods_id,$request->property_id);
+        // 商品状态
+        $goods = Goods::find($request->goods_id);
+        $isOnline = false;
+        if ($goods && $goods->status == Goods::STATUS_ONLINE) {
+            $isOnline = true;
+        }
+        $stock['is_online'] = $isOnline;
+
+        return ['code' => 0, 'msg' => 'Success', 'data' => $stock];
     }
 }

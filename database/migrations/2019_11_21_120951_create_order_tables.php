@@ -37,6 +37,7 @@ class CreateOrderTables extends Migration
             $table->string('order_no')->comment('订单编号');
             $table->string('goods_id')->comment('商品编号');
             $table->string('sku')->nullable()->comment('商品规格');
+            $table->integer('property_id')->nullable()->comment('规格ID');
             $table->integer('product_count')->nullable()->comment('商品数量');
             $table->integer('product_price')->nullable()->comment('商品单价');
             $table->timestamps();

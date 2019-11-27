@@ -44,7 +44,7 @@ class GoodsController extends AdminController
         $grid->column('description', __('Description'))->hide();
         $grid->column('price', __('价格'))->sortable();
         $grid->column('line_price', __('Line price'))->hide();
-        $grid->column('stock_num', __('Stock num'))->hide();
+        $grid->column('stock', __('Stock num'))->hide();
         $grid->column('category_id', __('Category id'))->hide();
         $grid->column('sort', __('Sort'))->hide();
 //        $grid->column('number_fav', __('收藏数'))->sortable();
@@ -99,7 +99,7 @@ class GoodsController extends AdminController
 //        $show->field('description', __('Description'));
         $show->field('price', __('商品价格'));
         $show->field('line_price', __('划线价格'));
-        $show->field('stock_num', __('商品库存'));
+        $show->field('stock', __('商品库存'));
         $show->field('category_id', __('商品分类'));
         $show->field('sort', __('Sort'));
 //        $show->field('number_fav', __('Number fav'));
@@ -133,7 +133,7 @@ class GoodsController extends AdminController
 //        $form->text('description', __('Description'));
         $form->decimal('price', __('商品价格'))->default(0.00)->rules(['required']);
         $form->decimal('line_price', __('划线价格'))->default(0.00)->rules(['required']);
-        $form->number('stock_num', __('商品库存'))->default(0)->rules(['required']);
+        $form->number('stock', __('商品库存'))->default(0)->rules(['required']);
         $form->select('category_id', __('商品分类'))->options(function() {
             $categories = GoodsCategory::where('status',GoodsCategory::STATUS_ENABLE)->get(['id','name'])->toArray();
             $arr=[];

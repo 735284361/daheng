@@ -32,6 +32,7 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('shop/goods/list','ShopController@lists');
     Route::get('shop/goods/detail','ShopController@detail');
     Route::get('shop/goods/price','ShopController@price');
+    Route::get('shop/goods/goods_stock','ShopController@getGoodsStock');
     Route::get('shop/shipping/fee','ShopController@shippingFee');
     Route::get('shop/category/list','CategoryController@lists');
 
