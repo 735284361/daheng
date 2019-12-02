@@ -22,16 +22,17 @@ class OrderController extends AdminController
      */
     protected $title = 'App\Models\Order';
 
-    public function show($id,Content $content)
+    public function show($id, Content $content)
     {
-        $envs = [
-            ['name' => 'PHP version',       'value' => 'PHP/'.PHP_VERSION],
-            ['name' => 'Laravel version',   'value' => app()->version()],
-            ['name' => 'CGI',               'value' => php_sapi_name()],
-            ['name' => 'Uname',             'value' => php_uname()],
-        ];
+        \DB::enableQueryLog();
+        $order = Order::with('goods')->with('address')->with('eventLogs')->find($id);
+        $sql = \DB::getQueryLog();
+//        dd($sql);
 
-        $view = view('admin.order.show', compact('envs'));
+        $order = json_decode($order,true);
+//        dd($order['event_logs']);
+
+        $view = view('admin.order.show', compact('order'));
 
         return $content
             ->title('订单')
@@ -59,7 +60,7 @@ class OrderController extends AdminController
         $grid->column('order_amount_total', __('订单金额'));
         $grid->column('pay_time', __('付款时间'));
         $grid->column('delivery_time', __('发货时间'));
-        $grid->column('status', __('订单状态'))->using(Order::getStatus())->label('default');
+        $grid->column('status', __('订单状态'))->label('default');
         $grid->column('remark', __('备注'));
         $grid->column('created_at', __('下单时间'));
         $grid->column('updated_at', __('更新时间'));

@@ -39,7 +39,7 @@ class CreateAgentTables extends Migration
         Schema::create('agent_order_maps', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('agent_id')->comment('代理商编号');
-            $table->string('order_no')->comment('订单编号');
+            $table->string('order_no')->unique()->comment('订单编号');
             $table->double('commission',10,2)->comment('佣金');
             $table->timestamps();
         });

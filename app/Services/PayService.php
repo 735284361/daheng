@@ -2,6 +2,15 @@
 
 namespace App\Services;
 
+use App\Jobs\CompleteOrder;
+use App\Models\AgentMember;
+use App\Models\AgentOrderMaps;
+use App\Models\Order;
+use App\Models\OrderEventLog;
+use App\Models\OrderGoods;
+use App\Models\UserBill;
+use App\User;
+
 class PayService
 {
 
@@ -30,6 +39,74 @@ class PayService
             $data['result'] = $jssdk->bridgeConfig($result['prepay_id'],false);
             return $data;
         }
+    }
+
+
+    public function callback()
+    {
+        $payment = \EasyWeChat::payment();
+
+        $response = $payment->handlePaidNotify(function($message, $fail){
+            // 使用通知里的 "微信支付订单号" 或者 "商户订单号" 去自己的数据库找到订单
+            $order = Order::where('order_no',$message['out_trade_no'])->first();
+
+            if (!$order || $order->status == Order::STATUS_PAID) { // 如果订单不存在 或者 订单已经支付过了
+                return true; // 告诉微信，我已经处理完了，订单没找到，别再通知我了
+            }
+
+            ///////////// <- 建议在这里调用微信的【订单查询】接口查一下该笔订单的情况，确认是已经支付 /////////////
+
+            if ($message['return_code'] === 'SUCCESS') { // return_code 表示通信状态，不代表支付状态
+                if (array_get($message, 'result_code') === 'SUCCESS') {
+                    // 用户是否支付成功
+                    $order->status = Order::STATUS_PAID;
+                } elseif (array_get($message, 'result_code') === 'FAIL') {
+                    // 用户支付失败
+                    $order->status = Order::STATUS_PAY_FAILED;
+                }
+            } else {
+                return $fail('通信失败，请稍后再通知我');
+            }
+            // 保存订单
+            $order->save();
+            // 更新资金流水记录表
+            $order->bill()->create([
+                'user_id' => $order->user_id,
+                'amount' => $order->order_amount_total,
+                'amount_type' => UserBill::AMOUNT_TYPE_EXPEND,
+                'status' => UserBill::BILL_STATUS_NORMAL,
+                'bill_type' => UserBill::BILL_TYPE_BUY
+            ]);
+            // 更新订单日志
+            $order->eventLogs()->create([
+                'order_no' => $order->order_no,
+                'event' => OrderEventLog::ORDER_PAID
+            ]);
+            // 代理
+            $agent = AgentMember::where('user_id',$order->user_id)->first();
+            if ($agent) { // 如果存在代理关系 则进入代理流程
+                // 佣金计算
+                $orderGoods = OrderGoods::where('order_no',$order->order_no)->get();
+                $commission = 0;
+                foreach ($orderGoods as $goods) {
+                    $commission += $goods->product_count * $goods->dist_price;
+                }
+                // 添加代理订单关系
+                $agentOrder = new AgentOrderMaps();
+                $agentOrder->agent_id = $agent->agent_id;
+                $agentOrder->order_no = $order->order_no;
+                $agentOrder->commission = $commission;
+                $agentOrder->save();
+            }
+
+            // 支付成功 进入消息发送系统
+            MessageService::paySuccessMsg($order);
+            // 定时结束订单任务
+            CompleteOrder::dispatch($order);
+            echo "SUCCESS";
+            return true; // 返回处理完成
+        });
+        return $response;
     }
 
 }

@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Http\Requests\OrderRequest;
+use App\Models\AgentOrderMaps;
 use App\Models\GoodsSku;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\OrderEventLog;
 use App\Models\OrderGoods;
+use App\Models\UserBill;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -16,6 +18,7 @@ class OrderService
 
     protected $payService;
     protected $goodsService;
+    protected $order;
 
 
     public function __construct()
@@ -24,6 +27,14 @@ class OrderService
         $this->goodsService = new GoodsService();
     }
 
+    /**
+     * 生成订单
+     * @param OrderRequest $request
+     * @return array
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function create(OrderRequest $request)
     {
         $goods = json_decode($request->goodsJsonStr,true);
@@ -56,6 +67,7 @@ class OrderService
             $good['property_id'] = $goods[$i]['propertyChildIds'];
             $good['product_count'] = $goods[$i]['number'];
             $good['product_price'] = $sku['price'];
+            $good['dist_price'] = $sku['dist_price'];
             $good['created_at'] = Carbon::now();
             $good['updated_at'] = Carbon::now();
             $goodsList[] = $good;
@@ -105,10 +117,47 @@ class OrderService
             DB::rollBack();
             return ['code' => 1, 'msg' => 'Fail'];
         }
-
-        // TODO 添加用户账单 支付成功 发送
-        // TODO 添加分销信息 支付成功处理
-        // TODO 消息分发 支付成功处理
-
     }
+
+    public function completeOrder(Order $order)
+    {
+        $this->order = $order;
+        // 订单结束
+        // 只有订单状态为已支付 才进行订单关闭的操作
+        if ($this->order->status != Order::STATUS_PAID) {
+            return;
+        }
+
+        DB::transaction(function() {
+            // 更新订单状态
+            $this->order->status = Order::STATUS_COMPLETED;
+            $this->order->save();
+            // 更新订单日志
+            $this->order->eventLogs()->create([
+                'order_no' => $this->order->order_no,
+                'event' => OrderEventLog::ORDER_COMPLETED
+            ]);
+
+            // 订单分成流程
+            $agentInfo = AgentOrderMaps::where('order_no',$this->order->order_no)->first();
+            if ($agentInfo) {
+                // 更新代理商资金流水表
+                $this->order->bill()->create([
+                    'user_id' => $agentInfo->agent_id,
+                    'amount' => $agentInfo->commission,
+                    'amount_type' => UserBill::AMOUNT_TYPE_INCOME,
+                    'status' => UserBill::BILL_STATUS_NORMAL,
+                    'bill_type' => UserBill::BILL_TYPE_COMMISSION
+                ]);
+                // TODO 增加用户代理的消费金额
+
+            }
+            // 通知服务
+            MessageService::orderCompleteMsg($this->order);
+
+            return;
+        });
+    }
+
+
 }

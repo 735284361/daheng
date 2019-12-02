@@ -29,6 +29,7 @@ class CreateOrderTables extends Migration
             $table->integer('after_status')->default(0)->comment('用户售后状态 0 未发起售后 1 申请售后 -1 售后已取消 2 处理中 200 处理完毕');
             $table->integer('status')->default(0)->comment('订单状态 0未付款,1已付款,2已发货,3已签收,-1退货申请,-2退货中,-3已退货,-4取消交易');
             $table->string('remark')->nullable()->comment('订单备注');
+            $table->tinyInteger('comment_status')->default(0)->comment('评论状态');
             $table->timestamps();
         });
 
@@ -40,6 +41,9 @@ class CreateOrderTables extends Migration
             $table->integer('property_id')->nullable()->comment('规格ID');
             $table->integer('product_count')->nullable()->comment('商品数量');
             $table->integer('product_price')->nullable()->comment('商品单价');
+            $table->decimal('dist_price')->nullable()->comment('单个商品佣金');
+            $table->integer('score')->default(0)->comment('评分');
+            $table->string('comment')->nullable()->comment('评价');
             $table->timestamps();
         });
 

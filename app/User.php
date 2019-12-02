@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\AgentMember;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -39,4 +40,9 @@ class User extends Authenticatable
     ];
 
     protected $guarded=[];
+
+    public function agent()
+    {
+        return $this->belongsTo(AgentMember::class,'id','user_id');
+    }
 }

@@ -18,6 +18,16 @@ class OrderEventLog extends Model
     const ORDER_PAY_FAILED = -1; // 支付失败
 
     /**
+     * 将事件的编号自动转化为对应的文字提示
+     * @param $value
+     * @return array|mixed
+     */
+    public function getEventAttribute($value)
+    {
+        return self::getEvents($value);
+    }
+
+    /**
      * 获取订单事件名称
      * @param null $ind
      * @return array|mixed
