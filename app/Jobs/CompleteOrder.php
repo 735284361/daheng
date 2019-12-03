@@ -26,7 +26,7 @@ class CompleteOrder implements ShouldQueue
     {
         //
 //        $deley = 10 * 24 * 3600; // 10天后自动完成订单
-        $deley = 120;
+        $deley = 60;
         $this->order = $order;
         $this->delay($deley);
     }
