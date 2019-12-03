@@ -10,6 +10,7 @@ use App\Models\OrderEventLog;
 use App\Models\OrderGoods;
 use App\Models\UserBill;
 use App\User;
+use Illuminate\Support\Facades\DB;
 
 class PayService
 {
@@ -67,44 +68,42 @@ class PayService
             } else {
                 return $fail('通信失败，请稍后再通知我');
             }
-            // 保存订单
-            $order->save();
-            // 更新资金流水记录表
-            $order->bill()->create([
-                'user_id' => $order->user_id,
-                'amount' => $order->order_amount_total,
-                'amount_type' => UserBill::AMOUNT_TYPE_EXPEND,
-                'status' => UserBill::BILL_STATUS_NORMAL,
-                'bill_type' => UserBill::BILL_TYPE_BUY
-            ]);
-            // 更新订单日志
-            $order->eventLogs()->create([
-                'order_no' => $order->order_no,
-                'event' => OrderEventLog::ORDER_PAID
-            ]);
-            // 代理
-            $agent = AgentMember::where('user_id',$order->user_id)->first();
-            if ($agent) { // 如果存在代理关系 则进入代理流程
-                // 佣金计算
-                $orderGoods = OrderGoods::where('order_no',$order->order_no)->get();
-                $commission = 0;
-                foreach ($orderGoods as $goods) {
-                    $commission += $goods->product_count * $goods->dist_price;
-                }
-                // 添加代理订单关系
-                $agentOrder = new AgentOrderMaps();
-                $agentOrder->agent_id = $agent->agent_id;
-                $agentOrder->order_no = $order->order_no;
-                $agentOrder->commission = $commission;
-                $agentOrder->save();
-            }
+            $exception = DB::transaction(function() use ($order) {
+                // 保存订单
+                $order->save();
 
-            // 支付成功 进入消息发送系统
-            MessageService::paySuccessMsg($order);
-            // 定时结束订单任务
-            CompleteOrder::dispatch($order);
-            echo "SUCCESS";
-            return true; // 返回处理完成
+                // 更新资金流水记录表
+                $order->bill()->create([
+                    'user_id' => $order->user_id,
+                    'amount' => $order->order_amount_total,
+                    'amount_type' => UserBill::AMOUNT_TYPE_EXPEND,
+                    'status' => UserBill::BILL_STATUS_NORMAL,
+                    'bill_type' => UserBill::BILL_TYPE_BUY
+                ]);
+
+                // 更新订单日志
+                $order->eventLogs()->create([
+                    'order_no' => $order->order_no,
+                    'event' => OrderEventLog::ORDER_PAID
+                ]);
+
+                // 保存订单和代理的关系
+                AgentService::saveAgentOrderMap($order);
+
+                // 支付成功 进入消息发送系统
+                MessageService::paySuccessMsg($order);
+
+                // 定时结束订单任务
+                CompleteOrder::dispatch($order);
+            });
+
+            if (!$exception) {
+                echo "SUCCESS";
+                return true; // 返回处理完成
+            } else {
+                echo "FAIL";
+                return false;
+            }
         });
         return $response;
     }

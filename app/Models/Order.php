@@ -50,6 +50,7 @@ class Order extends Model
         return $this->hasMany(OrderEventLog::class,'order_no','order_no');
     }
 
+    // 多态关联账单
     public function bill()
     {
         return $this->morphMany(UserBill::class,'billable');

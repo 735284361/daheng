@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\OrderRequest;
+use App\Models\AgentMember;
 use App\Models\AgentOrderMaps;
 use App\Models\GoodsSku;
 use App\Models\Order;
@@ -119,6 +120,16 @@ class OrderService
         }
     }
 
+    public function orderPaySuccess()
+    {
+
+    }
+
+    /**
+     * 结束订单
+     * @param Order $order
+     * @throws \Throwable
+     */
     public function completeOrder(Order $order)
     {
         $this->order = $order;
@@ -149,8 +160,9 @@ class OrderService
                     'status' => UserBill::BILL_STATUS_NORMAL,
                     'bill_type' => UserBill::BILL_TYPE_COMMISSION
                 ]);
-                // TODO 增加用户代理的消费金额
-
+                // 增加用户代理的消费金额
+                AgentMember::where('user_id',$agentInfo['user_id'])->increment('order_number');
+                AgentMember::where('user_id',$agentInfo['user_id'])->increment('amount',$agentInfo->commission);
             }
             // 通知服务
             MessageService::orderCompleteMsg($this->order);

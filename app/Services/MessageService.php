@@ -11,7 +11,10 @@ class MessageService
 
     // 消息通知类型
     // 10 订单模块
-    const ORDER_PAY_SUCCESS = 1001;
+    const ORDER_PAID = 1001; // 订单支付成功
+    const ORDER_SHIPPED = 1002; // 已发货
+    const ORDER_RECEIVED = 1003; // 已签收
+    const ORDER_COMPLETED = 1004; // 已完成
 
     /**
      * 支付成功消息通知
@@ -26,7 +29,7 @@ class MessageService
         // 系统通知系统
         // 用户 订单支付成功
         $user = User::find($order['user_id']);
-        $user->notify(new OrderNotification($order,self::ORDER_PAY_SUCCESS));
+        $user->notify(new OrderNotification($order,self::ORDER_PAID));
         return;
     }
 
@@ -39,28 +42,7 @@ class MessageService
         // 系统通知系统
         // 用户 订单支付成功
         $user = User::where('uid',$order['user_id'])->first();
-        $user->notify(new OrderCompleteToUser($order));
-        // 讲师 订单需要确认通知
-        $teacherId = $order['teacher_id'];
-        $teacher = User::whereHas('teacherInfo' , function($query) use ($teacherId) {
-            $query->where('id',$teacherId)->select();
-        })->first();
-        $teacher->notify(new OrderCompleteToTeacher($order));
-        return;
-    }
-
-    public static function teacherCancelOrderMsg(Order $order)
-    {
-        // 系统通知系统
-        // 用户 订单支付成功
-        $user = User::where('uid',$order['user_id'])->first();
-        $user->notify(new TeacherCancelOrderToUser($order));
-        // 讲师 订单需要确认通知
-        $teacherId = $order['teacher_id'];
-        $teacher = User::whereHas('teacherInfo' , function($query) use ($teacherId) {
-            $query->where('id',$teacherId)->select();
-        })->first();
-        $teacher->notify(new TeacherCancelOrderToTacher($order));
+        $user->notify(new OrderNotification($order,self::ORDER_COMPLETED));
         return;
     }
 

@@ -17,26 +17,19 @@ class PayController extends Controller
         $this->payService = new PayService();
     }
 
-    public function pay()
+    public function callback(Request $request)
     {
-        $orderNo = date('YmdHis').rand(10000,99999);
-        $payParams = $this->payService->getPayParams($orderNo, 1);
-
-        $order = new Order();
-        $order->order_no = $orderNo;
-        $order->save();
-
-        return ['code' => 0,'data' => $payParams['result']];
+        return $this->payService->callback();
     }
 
-    public function refund(Request $request)
-    {
-        $orderNo = $request->order_no;
-        $refundNumber = date('YmdHis').rand(10000,99999);
-
-        $pay = \EasyWeChat::payment();
-
-        return $pay->refund->byOutTradeNumber($orderNo,$refundNumber,1,1);
-
-    }
+//    public function refund(Request $request)
+//    {
+//        $orderNo = $request->order_no;
+//        $refundNumber = date('YmdHis').rand(10000,99999);
+//
+//        $pay = \EasyWeChat::payment();
+//
+//        return $pay->refund->byOutTradeNumber($orderNo,$refundNumber,1,1);
+//
+//    }
 }

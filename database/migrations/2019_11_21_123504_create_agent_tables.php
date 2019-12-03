@@ -32,7 +32,7 @@ class CreateAgentTables extends Migration
             $table->integer('agent_id')->comment('代理商编号');
             $table->string('user_id')->comment('用户编号');
             $table->double('amount')->default(0)->comment('消费金额');
-            $table->string('order_number')->default(0)->comment('订单数量');
+            $table->integer('order_number')->default(0)->comment('订单数量');
             $table->timestamps();
         });
 
