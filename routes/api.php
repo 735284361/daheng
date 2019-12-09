@@ -60,6 +60,7 @@ Route::group(['prefix' => 'v1'], function () {
         // 订单
         Route::group(['prefix' => 'order'], function() {
             Route::post('create','OrderController@create');
+            Route::get('statistics','OrderController@statistics');
         });
     });
 });

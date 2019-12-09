@@ -13,4 +13,9 @@ class Agent extends Model
         $this->hasMany(AgentMember::class,'agent_id','id');
     }
 
+    // 多态关联账单
+    public function bill()
+    {
+        return $this->morphMany(UserBill::class,'billable');
+    }
 }

@@ -13,11 +13,9 @@ class GoodsService
         // 如果有属性ID 则查询对应的属性信息
         // 如果没有属性ID 则直接查询商品信息
         if ($propertyId) {
-            $data = GoodsSku::where('id',$propertyId)->value('sku');
-            return ['stock' => $data->stock, 'price' => $data->price];
+            return GoodsSku::where('id',$propertyId)->value('sku');
         } else {
-            $data = Goods::find($goodsId);
-            return ['stock' => $data->stock, 'price' => $data->price];
+            return Goods::find($goodsId);
         }
     }
 

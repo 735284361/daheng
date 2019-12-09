@@ -12,18 +12,18 @@ class OrderNotification extends Notification
     use Queueable;
 
     protected $order;
-    protected $type;
+    protected $status;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($order,$type)
+    public function __construct($order,$status)
     {
         //
         $this->order = $order;
-        $this->type = $type;
+        $this->status = $status;
     }
 
     /**
@@ -61,8 +61,8 @@ class OrderNotification extends Notification
     {
         return [
             //
-            'type' => $this->type,
             'order_no' => $this->order->order_no,
+            'status' => $this->status,
         ];
     }
 }

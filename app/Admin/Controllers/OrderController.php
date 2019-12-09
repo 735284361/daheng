@@ -24,16 +24,11 @@ class OrderController extends AdminController
 
     public function show($id, Content $content)
     {
-        \DB::enableQueryLog();
         $order = Order::with('goods')->with('address')->with('eventLogs')->find($id);
-        $sql = \DB::getQueryLog();
-//        dd($sql);
 
-        $order = json_decode($order,true);
-//        dd($order['event_logs']);
+        $data = json_decode($order,true);
 
-        $view = view('admin.order.show', compact('order'));
-
+        $view = view('admin.order.order', compact('data'))->withModel($order);
         return $content
             ->title('订单')
             ->description('订单信息...')

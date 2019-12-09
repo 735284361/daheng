@@ -22,8 +22,6 @@ class CreateOrderTables extends Migration
             $table->double('product_amount_total',10,2)->comment('商品总价');
             $table->integer('logistics_fee')->default(0)->comment('运费金额');
             $table->double('order_amount_total',10,2)->comment('实际付款金额');
-            $table->timestamp('pay_time')->nullable()->comment('付款时间');
-            $table->timestamp('delivery_time')->nullable()->comment('发货时间');
             $table->timestamp('order_settlement_time')->nullable()->comment('订单结算时间');
             $table->integer('order_settlement_status')->default(0)->comment('订单结算状态 0未结算 1已结算');
             $table->integer('after_status')->default(0)->comment('用户售后状态 0 未发起售后 1 申请售后 -1 售后已取消 2 处理中 200 处理完毕');
@@ -57,6 +55,8 @@ class CreateOrderTables extends Migration
             $table->string('county')->comment('县');
             $table->string('detail_info')->comment('详细地址');
             $table->string('postal_code')->comment('邮编')->nullable();
+            $table->string('delivery_company')->comment('快递公司')->nullable();
+            $table->string('delivery_number')->comment('快递单号')->nullable();
             $table->timestamps();
         });
 
@@ -64,6 +64,7 @@ class CreateOrderTables extends Migration
             $table->bigIncrements('id');
             $table->string('order_no')->comment('订单编号');
             $table->integer('event')->comment('订单事件编号');
+            $table->integer('remark')->nullable()->comment('备注');
             $table->timestamps();
         });
     }

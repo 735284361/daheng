@@ -8,8 +8,10 @@ use App\Models\AgentOrderMaps;
 use App\Models\Order;
 use App\Models\OrderGoods;
 use App\Services\MessageService;
+use App\Services\UserAccountService;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TestController extends Controller
 {
@@ -49,8 +51,14 @@ class TestController extends Controller
 //            $agentOrder->save();
 //        }
 
-        $order = Order::find(11);
-        CompleteOrder::dispatch($order);
+//        $order = Order::find(11);
+//        CompleteOrder::dispatch($order);
+
+        $account = new UserAccountService();
+        DB::enableQueryLog();
+        $account->incBalance(8,100);
+        $sql = DB::getQueryLog();
+        dd($sql);
     }
 
 }

@@ -13,9 +13,10 @@ class Order extends Model
     const STATUS_UNPAID = 0; // 未付款
     const STATUS_PAID = 1; // 已付款
     const STATUS_SHIPPED = 2; // 已发货
-    const STATUS_RECEIVED = 3; // 已签收
+    const STATUS_RECEIVED = 3; // 已签收 待评价
     const STATUS_COMPLETED = 4; // 已完成
     const STATUS_PAY_FAILED = -1; // 支付失败
+    const STATUS_ORDER_CLOSE = -2; // 订单关闭
 
     const PRE_BUY = 'GM'; // 购买订单前缀
     const PRE_REFUND = 'TK'; // 退款订单前缀
@@ -57,16 +58,6 @@ class Order extends Model
     }
 
     /**
-     * 获取订单状态的转换属性
-     * @param $value
-     * @return array|mixed
-     */
-    public function getStatusAttribute($value)
-    {
-        return self::getStatus($value);
-    }
-
-    /**
      * 获取轮播图的状态
      * @param null $ind
      * @return array|mixed
@@ -80,6 +71,7 @@ class Order extends Model
             self::STATUS_RECEIVED => '已签收',
             self::STATUS_COMPLETED => '已完成',
             self::STATUS_PAY_FAILED => '支付失败',
+            self::STATUS_ORDER_CLOSE => '订单关闭',
         ];
 
         if ($ind !== null) {

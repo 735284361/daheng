@@ -2,15 +2,7 @@
 
 namespace App\Services;
 
-use App\Jobs\CompleteOrder;
-use App\Models\AgentMember;
-use App\Models\AgentOrderMaps;
 use App\Models\Order;
-use App\Models\OrderEventLog;
-use App\Models\OrderGoods;
-use App\Models\UserBill;
-use App\User;
-use Illuminate\Support\Facades\DB;
 
 class PayService
 {
@@ -56,53 +48,17 @@ class PayService
             }
 
             ///////////// <- 建议在这里调用微信的【订单查询】接口查一下该笔订单的情况，确认是已经支付 /////////////
-
+            $orderService = new OrderService();
             if ($message['return_code'] === 'SUCCESS') { // return_code 表示通信状态，不代表支付状态
                 if (array_get($message, 'result_code') === 'SUCCESS') {
                     // 用户是否支付成功
-                    $order->status = Order::STATUS_PAID;
+                    return $orderService->paySuccess($order);
                 } elseif (array_get($message, 'result_code') === 'FAIL') {
                     // 用户支付失败
-                    $order->status = Order::STATUS_PAY_FAILED;
+                    return $orderService->payFailed($order);
                 }
             } else {
                 return $fail('通信失败，请稍后再通知我');
-            }
-            $exception = DB::transaction(function() use ($order) {
-                // 保存订单
-                $order->save();
-
-                // 更新资金流水记录表
-                $order->bill()->create([
-                    'user_id' => $order->user_id,
-                    'amount' => $order->order_amount_total,
-                    'amount_type' => UserBill::AMOUNT_TYPE_EXPEND,
-                    'status' => UserBill::BILL_STATUS_NORMAL,
-                    'bill_type' => UserBill::BILL_TYPE_BUY
-                ]);
-
-                // 更新订单日志
-                $order->eventLogs()->create([
-                    'order_no' => $order->order_no,
-                    'event' => OrderEventLog::ORDER_PAID
-                ]);
-
-                // 保存订单和代理的关系
-                AgentService::saveAgentOrderMap($order);
-
-                // 支付成功 进入消息发送系统
-                MessageService::paySuccessMsg($order);
-
-                // 定时结束订单任务
-                CompleteOrder::dispatch($order);
-            });
-
-            if (!$exception) {
-                echo "SUCCESS";
-                return true; // 返回处理完成
-            } else {
-                echo "FAIL";
-                return false;
             }
         });
         return $response;
