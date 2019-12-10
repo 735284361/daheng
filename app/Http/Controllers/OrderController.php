@@ -30,6 +30,10 @@ class OrderController extends Controller
         return $this->orderService->create($request);
     }
 
+    /**
+     * 订单状态统计
+     * @return array
+     */
     public function statistics()
     {
         $data = $this->orderService->statistics();
@@ -39,4 +43,30 @@ class OrderController extends Controller
             return ['code' => 1];
         }
     }
+
+    /**
+     * 订单列表
+     * @return array
+     */
+    public function lists()
+    {
+        $list = $this->orderService->orderList();
+        if ($list) {
+            return ['code' => 0, 'data' => $list];
+        } else {
+            return ['code' => 1];
+        }
+    }
+
+    public function detail(Request $request)
+    {
+        $this->validate($request,['id'=>'required|integer']);
+        $list = $this->orderService->orderDetail($request->id);
+        if ($list) {
+            return ['code' => 0, 'data' => $list];
+        } else {
+            return ['code' => 1];
+        }
+    }
+
 }

@@ -11,6 +11,7 @@ class AgentOrderMaps extends Model
     // 状态
     const STATUS_UNSETTLE = 0; // 未结算
     const STATUS_SETTLED = 1; // 已结算
+    const STATUS_CANCEL = -1; // 已取消
 
     // 对应的订单信息
     public function order()

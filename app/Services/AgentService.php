@@ -8,6 +8,7 @@ use App\Models\AgentOrderMaps;
 use App\Models\Order;
 use App\Models\OrderGoods;
 use App\Models\UserBill;
+use Carbon\Carbon;
 
 class AgentService
 {
@@ -20,6 +21,44 @@ class AgentService
     public function getAgentInfo($userId)
     {
         return Agent::where('user_id',$userId)->first();
+    }
+
+    /**
+     * 申请代理商
+     * @return mixed
+     */
+    public function applyAgent()
+    {
+        return Agent::firstOrCreate(['user_id'=>auth('api')->id()]);
+    }
+
+    public function statistics($userId)
+    {
+        // 本月销量
+        $list = AgentOrderMaps::with('order')
+            ->where('agent_id',$userId)
+            ->whereBetween('created_at',[
+                Carbon::now()->firstOfMonth(),
+                Carbon::now()
+            ])
+            ->get();
+        $total = 0;
+        $list->map(function ($data) use (&$total) {
+            $total += $data->order->order_amount_total;
+        });
+        return $total;
+    }
+
+    public function agentOrderList()
+    {
+
+    }
+
+    public function agentMembers($agentId)
+    {
+        return AgentMember::with(array('user'=>function($query){
+            $query->select('id','nickname','avatar');
+        }))->where('agent_id',$agentId)->get();
     }
 
     /**

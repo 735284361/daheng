@@ -47,6 +47,7 @@ Route::group(['prefix' => 'v1'], function () {
 
     // 验证登录
     Route::group([ 'middleware'=>['auth:api']], function() {
+        Route::get('test','TestController@test');
         // 用户地址
         Route::group(['prefix' => 'address'], function() {
             Route::get('list','AddressController@lists');
@@ -61,9 +62,20 @@ Route::group(['prefix' => 'v1'], function () {
         Route::group(['prefix' => 'order'], function() {
             Route::post('create','OrderController@create');
             Route::get('statistics','OrderController@statistics');
+            Route::get('list','OrderController@lists');
+            Route::get('detail','OrderController@detail');
+        });
+
+        // 代理商
+        Route::group(['prefix' => 'agent'], function() {
+            Route::get('detail','AgentController@getAgentInfo');
+            Route::post('apply','AgentController@apply');
+            Route::get('statistics','AgentController@statistics');
+            Route::get('members','AgentController@members');
+            Route::get('qrcode','AgentController@getQrcode');
+            Route::get('invite','AgentController@invite')->name('agent.invite');
         });
     });
 });
 
-Route::get('test','TestController@test');
 

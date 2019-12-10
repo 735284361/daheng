@@ -325,9 +325,28 @@ class OrderService
         return $this->order->address->save();
     }
 
+    /**
+     * 订单状态分类统计
+     * @return mixed
+     */
     public function statistics()
     {
         return Order::where('user_id',auth('api')->id())->selectRaw('status, count(*) count')->groupBy('status')->get();
+    }
+
+    /**
+     * 获取订单列表
+     * @return Order[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function orderList()
+    {
+        $list = Order::with('goods')->where('user_id',auth('api')->id())->get();
+        return $list;
+    }
+
+    public function orderDetail($id)
+    {
+        return Order::with('goods')->with('eventLogs')->with('address')->find($id);
     }
 
 }

@@ -24,6 +24,7 @@ class CreateUsersTable extends Migration
             $table->text('avatar')->comment('头像');
             $table->string('session_key')->nullable();
             $table->rememberToken();
+            $table->tinyInteger('is_agent')->default(0)->comment('是否是代理商');
             $table->timestamps();
         });
     }
