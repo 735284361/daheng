@@ -23,8 +23,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::any('/wechat/login', 'WeChatController@login');
 Route::any('/wechat/register', 'WeChatController@register');
 
+Route::get('test','TestController@test');
+
 Route::group(['prefix' => 'v1'], function () {
-    Route::get('test','TestController@test');
     // 系统参数
     Route::get('config/value','SysParamController@value');
     // 轮播
