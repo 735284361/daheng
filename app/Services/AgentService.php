@@ -61,6 +61,19 @@ class AgentService
         }))->where('agent_id',$agentId)->get();
     }
 
+
+    public function getQrCode()
+    {
+        $app = \EasyWeChat::miniProgram();
+        $response = $app->app_code->get('pages/distribution/code/code');
+//        $path = storage_path('qrcode');
+        $path = storage_path('app/public/qrcord/');
+        if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+            $filename = $response->saveAs($path, auth('api')->id().'.png');
+        }
+        dd(env('APP_URL').$path.$filename);
+    }
+
     /**
      * 保存订单和代理的关系
      * @param Order $order

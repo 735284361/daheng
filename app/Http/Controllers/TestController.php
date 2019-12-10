@@ -70,8 +70,7 @@ class TestController extends Controller
 //        $agent->applyAgent();
 //        $agent->agentMembers($id);
 
-        $name = $id.".png";
-        return QrCode::size(300)->generate('Hello,LaravelAcademy!',public_path('qrcods/'.$name));
+        $agent->getQrCode();
 
 //        dd(DB::getQueryLog());
     }
