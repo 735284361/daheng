@@ -23,7 +23,7 @@ class AgentController extends Controller
      */
     public function getAgentInfo()
     {
-        $data = $this->agentService->getAgentInfo(auth('uid')->id());
+        $data = $this->agentService->getAgentInfo(auth('api')->id());
         if ($data) {
             return ['code' => 0, 'msg' => '成功', 'data' => $data];
         } else {
@@ -44,34 +44,6 @@ class AgentController extends Controller
             return ['code' => 1, 'msg' => '失败'];
         }
 
-    }
-
-    /**
-     * 本月销售数据统计
-     * @return array
-     */
-    public function statistics()
-    {
-        $data = $this->agentService->statistics(auth('api')->id());
-        if ($data) {
-            return ['code' => 0, 'msg' => 'Success','data' => $data];
-        } else {
-            return ['code' => 1, 'msg' => 'Fail'];
-        }
-    }
-
-    /**
-     * 成员列表
-     * @return array
-     */
-    public function members()
-    {
-        $data = $this->agentService->agentMembers(auth('api')->id());
-        if ($data) {
-            return ['code' => 0, 'data' => $data];
-        } else {
-            return ['code' => 1];
-        }
     }
 
     /**
@@ -98,10 +70,24 @@ class AgentController extends Controller
      */
     public function invite(Request $request)
     {
-        $this->validate($request,['id'=>'exists:agent,user_id']);
+        $this->validate($request,['id'=>'exists:agents,user_id']);
         return $this->agentService->acceptInvite($request->id,auth('api')->id());
     }
 
+    /**
+     * 本月销售数据统计
+     * @return array
+     */
+    public function statistics()
+    {
+        $data = $this->agentService->statistics(auth('api')->id());
+        if ($data) {
+            return ['code' => 0, 'msg' => '成功','data' => $data];
+        } else {
+            return ['code' => 1, 'msg' => '失败'];
+        }
+    }
+    
     /**
      * 获取代理商订单列表
      * @return array
@@ -111,5 +97,20 @@ class AgentController extends Controller
         $list = $this->agentService->agentOrderList(auth('api')->id());
         return ['code' => 0, 'data' => $list];
     }
+
+    /**
+     * 成员列表
+     * @return array
+     */
+    public function members()
+    {
+        $data = $this->agentService->agentMembers(auth('api')->id());
+        if ($data) {
+            return ['code' => 0, 'data' => $data];
+        } else {
+            return ['code' => 1];
+        }
+    }
+
 
 }

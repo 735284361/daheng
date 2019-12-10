@@ -33,6 +33,11 @@ class AgentService
         return Agent::firstOrCreate(['user_id'=>auth('api')->id()]);
     }
 
+    /**
+     * 月销量统计
+     * @param $userId
+     * @return mixed
+     */
     public function statistics($userId)
     {
         // 本月销量
@@ -47,7 +52,10 @@ class AgentService
         $list->map(function ($data) use (&$total) {
             $total += $data->order->order_amount_total;
         });
-        return $total;
+
+        $data['amount'] = $total;
+        $data['divide'] = 10;
+        return $data;
     }
 
     /**
@@ -112,22 +120,22 @@ class AgentService
     public function acceptInvite($agentId, $userId)
     {
         // 判断是否已经加入过别人的代理
-        if ($data = AgentMember::with('user')->where('user_id',$userId)->exist()) {
-            return ['code' => 0, 'msg' => '已加入：'.$data->user->nickname.'的代理，不能重复加入'];
+        if ($data = AgentMember::with('user')->where('user_id',$userId)->exists()) {
+            return ['code' => 1, 'msg' => '已加入：'.$data->user->nickname.'的代理，不能重复加入'];
         }
         // 判断代理商是否存在
         $agentInfo = $this->getAgentInfo($agentId);
         if (!$agentInfo) {
-            return ['code' => 0, 'msg' => '该代理商不存在'];
+            return ['code' => 1, 'msg' => '该代理商不存在'];
         }
         // 判断代理商状态
         if ($agentInfo->status != Agent::STATUS_NORMAL) {
-            return ['code' => 0, 'msg' => '该代理商暂不支持加入'];
+            return ['code' => 1, 'msg' => '该代理商暂不支持加入'];
         }
         // 判断自己是否是代理商
         $myAgent = $this->getAgentInfo($userId);
         if ($myAgent) {
-            return ['code' => 0, 'msg' => '你已经是代理商，不能加入他人的代理'];
+            return ['code' => 1, 'msg' => '你已经是代理商，不能加入他人的代理'];
         }
         // 加入代理
 
