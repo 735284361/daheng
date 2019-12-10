@@ -24,7 +24,6 @@ Route::any('/wechat/login', 'WeChatController@login');
 Route::any('/wechat/register', 'WeChatController@register');
 
 Route::get('test','TestController@test');
-
 Route::group(['prefix' => 'v1'], function () {
     // 系统参数
     Route::get('config/value','SysParamController@value');
