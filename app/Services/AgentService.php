@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderGoods;
 use App\Models\UserBill;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class AgentService
 {
@@ -49,11 +50,27 @@ class AgentService
         return $total;
     }
 
-    public function agentOrderList()
+    /**
+     * 获取代理商订单
+     * @param $agentId
+     * @return Order[]|array|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function agentOrderList($agentId)
     {
-
+        $data = AgentOrderMaps::where('agent_id',$agentId)->get('order_no');
+        $list = array();
+        if ($data) {
+            $data = array_column(json_decode($data,true),'order_no');
+            $list = Order::with('goods')->whereIn('order_no',$data)->get();
+        }
+        return $list;
     }
 
+    /**
+     * 分销成员
+     * @param $agentId
+     * @return AgentMember[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
     public function agentMembers($agentId)
     {
         return AgentMember::with(array('user'=>function($query){
@@ -61,17 +78,64 @@ class AgentService
         }))->where('agent_id',$agentId)->get();
     }
 
-
-    public function getQrCode()
+    /**
+     * 获取分销二维码
+     * @param $userId
+     * @return string
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
+     */
+    public function getQrCode($userId)
     {
-        $app = \EasyWeChat::miniProgram();
-        $response = $app->app_code->get('pages/distribution/code/code');
-//        $path = storage_path('qrcode');
-        $path = storage_path('app/public/qrcord/');
-        if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
-            $filename = $response->saveAs($path, auth('api')->id().'.png');
+        $agent = $this->getAgentInfo($userId);
+        if ($agent && $agent->qrcode) {
+            $qrcode = $agent->qrcode;
+        } else {
+            $app = \EasyWeChat::miniProgram();
+            $response = $app->app_code->get('pages/distribution/code/code?id='.auth('api')->id());
+            $path = storage_path('app/public/qrcode');
+            if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+                $filename = $response->saveAs($path, uniqid().'.png');
+            }
+            $agent->qrcode = $qrcode = 'qrcode/'.$filename;
+            $agent->save();
         }
-        dd(env('APP_URL').$path.$filename);
+        return asset('storage/'.$qrcode);
+    }
+
+    /**
+     * 加入代理商的成员
+     * @param $agentId
+     * @param $userId
+     * @return array
+     */
+    public function acceptInvite($agentId, $userId)
+    {
+        // 判断是否已经加入过别人的代理
+        if ($data = AgentMember::with('user')->where('user_id',$userId)->exist()) {
+            return ['code' => 0, 'msg' => '已加入：'.$data->user->nickname.'的代理，不能重复加入'];
+        }
+        // 判断代理商是否存在
+        $agentInfo = $this->getAgentInfo($agentId);
+        if (!$agentInfo) {
+            return ['code' => 0, 'msg' => '该代理商不存在'];
+        }
+        // 判断代理商状态
+        if ($agentInfo->status != Agent::STATUS_NORMAL) {
+            return ['code' => 0, 'msg' => '该代理商暂不支持加入'];
+        }
+        // 判断自己是否是代理商
+        $myAgent = $this->getAgentInfo($userId);
+        if ($myAgent) {
+            return ['code' => 0, 'msg' => '你已经是代理商，不能加入他人的代理'];
+        }
+        // 加入代理
+
+        $agentMember = new AgentMember();
+        $agentMember->agent_id = $agentId;
+        $agentMember->user_id = $userId;
+        $agentMember->save();
+        return ['code' => 0, 'msg' => '加入成功'];
     }
 
     /**

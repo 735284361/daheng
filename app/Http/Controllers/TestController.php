@@ -69,8 +69,8 @@ class TestController extends Controller
 //        return $agent->getAgentInfo(9);
 //        $agent->applyAgent();
 //        $agent->agentMembers($id);
-
-        $agent->getQrCode();
+//        return $agent->getQrCode($id);
+        $agent->agentOrderList(8);
 
 //        dd(DB::getQueryLog());
     }

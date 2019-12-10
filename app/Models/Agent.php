@@ -8,6 +8,12 @@ class Agent extends Model
 {
     // 代理商用户模型
 
+    const STATUS_APPLY = 0; // 申请
+    const STATUS_NORMAL = 1; // 正常
+    const STATUS_DISABLE = -1; // 禁用
+    const STATUS_REFUSE = -2; // 审核未通过
+
+
     protected $fillable = ['user_id'];
 
     public function members()

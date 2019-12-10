@@ -76,6 +76,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('members','AgentController@members');
             Route::get('qrcode','AgentController@getQrcode');
             Route::get('invite','AgentController@invite')->name('agent.invite');
+            Route::get('orders','AgentController@orders');
         });
     });
 });
