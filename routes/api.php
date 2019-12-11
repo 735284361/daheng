@@ -66,6 +66,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('statistics','OrderController@statistics');
             Route::get('list','OrderController@lists');
             Route::get('detail','OrderController@detail');
+            Route::post('reputation','OrderController@reputation');
         });
 
         // 代理商
@@ -77,6 +78,10 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('qrcode','AgentController@getQrcode');
             Route::get('invite','AgentController@invite')->name('agent.invite');
             Route::get('orders','AgentController@orders');
+        });
+
+        Route::group(['prefix' => 'bill'], function() {
+            Route::get('list','UserBillController@lists');
         });
     });
 });

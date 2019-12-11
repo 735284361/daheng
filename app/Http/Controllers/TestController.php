@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderGoods;
 use App\Services\AgentService;
 use App\Services\MessageService;
+use App\Services\OrderService;
 use App\Services\UserAccountService;
 use App\User;
 use Illuminate\Http\Request;
@@ -22,8 +23,11 @@ class TestController extends Controller
     public function test()
     {
         // 支付成功消息发送
-//        $order = Order::find(10);
+        $order = Order::find(14);
 //        return MessageService::paySuccessMsg($order);
+        // 支付成功
+        $orderService = new OrderService();
+        $orderService->paySuccess($order);
 
         // 用户账单
 //        $order = Order::where('order_no','GM2019112614502267154')->first();
@@ -62,15 +66,16 @@ class TestController extends Controller
 //        $sql = DB::getQueryLog();
 //        dd($sql);
 
-        $agent = new AgentService();
-        DB::enableQueryLog();
-        $id = 8;
+        // 代理
+//        $agent = new AgentService();
+//        DB::enableQueryLog();
+//        $id = 8;
 //        return $agent->statistics();
 //        return $agent->getAgentInfo(9);
 //        $agent->applyAgent();
 //        $agent->agentMembers($id);
 //        return $agent->getQrCode($id);
-        $agent->agentOrderList(8);
+//        $agent->agentOrderList(8);
 
 //        dd(DB::getQueryLog());
     }

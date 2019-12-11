@@ -30,4 +30,47 @@ class UserBill extends Model
         return $this->morphTo();
     }
 
+
+
+    public static function getStatus($ind = null)
+    {
+        $arr = [
+            self::BILL_STATUS_NORMAL => '正常',
+            self::BILL_STATUS_WAITING_INCOME => '入账中',
+        ];
+
+        if ($ind !== null) {
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::BILL_STATUS_NORMAL];
+        }
+        return $arr;
+    }
+
+    public static function getAmountType($ind = null)
+    {
+        $arr = [
+            self::AMOUNT_TYPE_EXPEND => '支出',
+            self::AMOUNT_TYPE_INCOME => '收入',
+        ];
+
+        if ($ind !== null) {
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::AMOUNT_TYPE_EXPEND];
+        }
+        return $arr;
+    }
+
+    public static function getBillType($ind = null)
+    {
+        $arr = [
+            self::BILL_TYPE_BUY => '购物',
+            self::BILL_TYPE_RECHARGE => '充值',
+            self::BILL_TYPE_WITHDRAW => '提现',
+            self::BILL_TYPE_COMMISSION => '佣金',
+            self::BILL_TYPE_DIVIDE => '分成'
+        ];
+
+        if ($ind !== null) {
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::BILL_TYPE_BUY];
+        }
+        return $arr;
+    }
 }

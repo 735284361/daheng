@@ -185,8 +185,15 @@ class AgentService
             // 增加代理商的账户余额
             $this->incAgentBalance($agentOrderMaps->agent_id, $agentOrderMaps->commission);
             // 更新代理商资金流水表
-            $this->saveBillInfo($agentOrderMaps->agent_id, $agentOrderMaps->commission, UserBill::AMOUNT_TYPE_INCOME,
-                UserBill::BILL_STATUS_NORMAL,UserBill::BILL_TYPE_COMMISSION);
+            $this->saveBillInfo(
+                $orderNo,
+                $agentOrderMaps->agent_id,
+                UserBill::getBillType(UserBill::BILL_TYPE_COMMISSION),
+                $agentOrderMaps->commission,
+                UserBill::AMOUNT_TYPE_INCOME,
+                UserBill::BILL_STATUS_NORMAL,
+                UserBill::BILL_TYPE_COMMISSION
+            );
             // 增加用户代理的消费金额
             AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('order_number');
             AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('amount',$agentOrderMaps->commission);
@@ -219,18 +226,21 @@ class AgentService
 
     /**
      * 保存账单
+     * @param $orderNo
      * @param $userId
+     * @param $billName
      * @param $amount
      * @param $amountType
      * @param $status
      * @param $billType
      * @return mixed
      */
-    private function saveBillInfo($userId, $amount, $amountType, $status, $billType)
+    private function saveBillInfo($orderNo, $userId, $billName, $amount, $amountType, $status, $billType)
     {
-        $agent = $this->getAgentInfo($userId);
-        return $agent->bill()->create([
+        $order = Order::where('order_no',$orderNo);
+        return $order->bill()->create([
             'user_id' => $userId,
+            'bill_name' => $billName,
             'amount' => $amount,
             'amount_type' => $amountType,
             'status' => $status,

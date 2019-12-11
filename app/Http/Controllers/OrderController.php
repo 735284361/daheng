@@ -58,6 +58,12 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * 订单详情
+     * @param Request $request
+     * @return array
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function detail(Request $request)
     {
         $this->validate($request,['id'=>'required|integer']);
@@ -66,6 +72,16 @@ class OrderController extends Controller
             return ['code' => 0, 'data' => $list];
         } else {
             return ['code' => 1];
+        }
+    }
+
+    public function reputation(Request $request)
+    {
+        $res = $this->orderService->reputation($request);
+        if ($res) {
+            return ['code' => 0, 'msg' => '成功'];
+        } else {
+            return ['code' => 1, 'msg' => '失败'];
         }
     }
 

@@ -87,7 +87,7 @@ class AgentController extends Controller
             return ['code' => 1, 'msg' => '失败'];
         }
     }
-    
+
     /**
      * 获取代理商订单列表
      * @return array

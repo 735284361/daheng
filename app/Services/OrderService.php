@@ -9,6 +9,7 @@ use App\Models\OrderAddress;
 use App\Models\OrderGoods;
 use App\Models\UserBill;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderService
@@ -132,12 +133,12 @@ class OrderService
         $exception = DB::transaction(function() use($remark) {
             $status = Order::STATUS_PAID;
             // 保存订单
-            $this->updateOrderStatus($status);
+            $this->updateOrderStatus($status, $remark);
+            $goods = OrderGoods::with('goods')->where('order_no',$this->order->order_no)->first();
+            $billName = $goods->goods->name;
             // 更新资金流水记录表
-            $this->saveBillInfo($this->order->user_id, $this->order->order_amount_total, UserBill::AMOUNT_TYPE_EXPEND,
+            $this->saveBillInfo($this->order->user_id, $billName, $this->order->order_amount_total, UserBill::AMOUNT_TYPE_EXPEND,
                 UserBill::BILL_STATUS_NORMAL, UserBill::BILL_TYPE_BUY);
-            // 更新订单日志
-            $this->saveEventLog($status, $remark);
             // 保存订单和代理的关系
             AgentService::saveAgentOrderMap($this->order);
             // 支付成功 进入消息发送系统
@@ -161,9 +162,7 @@ class OrderService
         $exception = DB::transaction(function() use($remark) {
             $status = Order::STATUS_ORDER_CLOSE;
             // 修改订单状态
-            $this->updateOrderStatus($status);
-            // 更新订单日志
-            $this->saveEventLog($status, $remark);
+            $this->updateOrderStatus($status, $remark);
             // 支付成功 进入消息发送系统
             $this->sendMsg($status);
         });
@@ -187,8 +186,6 @@ class OrderService
             $this->updateOrderStatus($status);
             // 保存快递信息
             $this->saveDeliveryInfo($deliveryCompany, $deliveryNumber);
-            // 更新订单日志
-            $this->saveEventLog($status);
             // 支付成功 进入消息发送系统
             $this->sendMsg($status);
         });
@@ -213,8 +210,6 @@ class OrderService
             $status = Order::STATUS_PAY_FAILED;
             // 保存订单
             $this->updateOrderStatus($status);
-            // 更新订单日志
-            $this->saveEventLog($status);
             // 支付成功 进入消息发送系统
             $this->sendMsg($status);
         });
@@ -244,9 +239,7 @@ class OrderService
         $exception = DB::transaction(function() use ($remark) {
             $status = Order::STATUS_COMPLETED;
             // 更新订单状态
-            $this->updateOrderStatus($status);
-            // 更新订单日志
-            $this->saveEventLog($status, $remark);
+            $this->updateOrderStatus($status, $remark);
             // 订单分成流程
             $agentService = new AgentService();
             $agentService->orderCommission($this->order->order_no);
@@ -260,12 +253,17 @@ class OrderService
     /**
      * 更新订单状态
      * @param $status
+     * @param $remark null
      * @return mixed
      */
-    private function updateOrderStatus($status)
+    private function updateOrderStatus($status, $remark = null)
     {
+        // 更新订单状态
         $this->order->status = $status;
-        return $this->order->save();
+        $this->order->save();
+        // 更新订单日志
+        $this->saveEventLog($status, $remark);
+        return;
     }
 
     /**
@@ -286,16 +284,18 @@ class OrderService
     /**
      * 存储资金流水
      * @param $userId
+     * @param $billName
      * @param $amount
      * @param $amountType
      * @param $status
      * @param $billType
      * @return mixed
      */
-    public function saveBillInfo($userId, $amount, $amountType, $status, $billType)
+    public function saveBillInfo($userId, $billName, $amount, $amountType, $status, $billType)
     {
         return $this->order->bill()->create([
             'user_id' => $userId,
+            'bill_name' => $billName,
             'amount' => $amount,
             'amount_type' => $amountType,
             'status' => $status,
@@ -344,9 +344,45 @@ class OrderService
         return $list;
     }
 
+    /**
+     * 订单详情
+     * @param $id
+     * @return Order|Order[]
+     */
     public function orderDetail($id)
     {
         return Order::with('goods')->with('eventLogs')->with('address')->find($id);
+    }
+
+    public function reputation(Request $request)
+    {
+        $data = $request->postJsonString;
+        if ($data && !empty($data)) {
+            $data = json_decode($data,true);
+            $exception = DB::transaction(function () use ($data) {
+                $orderId = $data['orderId'];
+                // 修改订单评论状态
+                // TODO 更新商品总分
+                // TODO 更新订单评论状态
+                $order = Order::find($orderId);
+                $this->completeOrder($order,'用户评论完成');
+                // 更新订单对应商品的评论
+                $reputations = $data['reputations'];
+                foreach ($reputations as $reputation) {
+                    $this->updateGoodsReputation($reputation['id'],$reputation['reputation'],$reputation['remark']);
+                }
+            });
+            return $exception ? false : true;
+        }
+        return false;
+    }
+
+    public function updateGoodsReputation($id, $score, $comment)
+    {
+        $goods = OrderGoods::find($id);
+        $goods->score = $score;
+        $goods->comment = $comment;
+        return $goods->save();
     }
 
 }
