@@ -42,7 +42,8 @@ class CreateAgentTables extends Migration
             $table->integer('agent_id')->comment('代理商编号');
             $table->string('order_no')->unique()->comment('订单编号');
             $table->double('commission',10,2)->comment('佣金');
-            $table->integer('status')->default(0)->comment('状态');
+            $table->integer('status')->default(0)->comment('佣金结算状态');
+            $table->integer('status_divide')->default(0)->comment('分成结算状态');
             $table->timestamps();
         });
     }

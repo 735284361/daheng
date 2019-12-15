@@ -30,8 +30,6 @@ class UserBill extends Model
         return $this->morphTo();
     }
 
-
-
     public static function getStatus($ind = null)
     {
         $arr = [

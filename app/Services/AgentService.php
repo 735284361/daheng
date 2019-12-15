@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Agent;
 use App\Models\AgentMember;
 use App\Models\AgentOrderMaps;
+use App\Models\DivideRate;
 use App\Models\Order;
 use App\Models\OrderGoods;
 use App\Models\UserBill;
@@ -41,21 +42,120 @@ class AgentService
     public function statistics($userId)
     {
         // 本月销量
-        $list = AgentOrderMaps::with('order')
-            ->where('agent_id',$userId)
-            ->whereBetween('created_at',[
-                Carbon::now()->firstOfMonth(),
-                Carbon::now()
-            ])
-            ->get();
-        $total = 0;
-        $list->map(function ($data) use (&$total) {
-            $total += $data->order->order_amount_total;
-        });
+        $endAt = Carbon::now();
+        $total = $this->getSalesAmount($userId, $endAt);
+        $divide = $this->getDivideAmount($total);
 
         $data['amount'] = $total;
-        $data['divide'] = 10;
+        $data['divide'] = $divide;
         return $data;
+    }
+
+    /**
+     * 代理提成月度结算
+     * @param $userId
+     */
+    public function agentOrderSettle($userId)
+    {
+        $endAt = Carbon::now()->subMonth()->lastOfMonth();
+        // TODO 判断是否已经结算
+        $salesAmount = $this->getSalesAmount($userId, $endAt);
+        $divideAmount = $this->getDivideAmount($salesAmount);
+        // 修改代理订单状态为已提成
+        $this->setDivided($userId, $endAt);
+        // 增加代理商余额
+        if ($divideAmount > 0) {
+            $this->incAgentBalance($userId, $divideAmount);
+        }
+        // 保存提成账单
+        $this->saveAgentDivideBill($userId, $divideAmount);
+    }
+
+    /**
+     * 保存代理分成订单流水
+     * @param $userId
+     * @param $amount
+     * @return mixed
+     */
+    private function saveAgentDivideBill($userId, $amount)
+    {
+        $agent = Agent::where('user_id',$userId)->first();
+        return $agent->bill()->create([
+            'user_id' => $userId,
+            'bill_name' => UserBill::getBillType(UserBill::BILL_TYPE_DIVIDE),
+            'amount' => $amount,
+            'amount_type' => UserBill::AMOUNT_TYPE_INCOME,
+            'status' => UserBill::BILL_STATUS_NORMAL,
+            'bill_type' => UserBill::BILL_TYPE_DIVIDE
+        ]);
+    }
+
+    /**
+     * 设置代理订单为已结算
+     * @param $userId
+     * @param $endAt
+     * @return bool|int
+     */
+    private function setDivided($userId, $endAt)
+    {
+        return AgentOrderMaps::with('order')
+            ->where('agent_id',$userId)
+            ->where('status',AgentOrderMaps::STATUS_SETTLED) // 订单已完成
+            ->where('status_divide',AgentOrderMaps::STATUS_DIVIDE_UNSETTLE) // 未参与分成的订单
+            ->where('created_at','<=',$endAt)
+            ->update([
+                'status_divide'=>AgentOrderMaps::STATUS_DIVIDE_SETTLED
+            ]);
+    }
+
+    /**
+     * 按指定时间获取代理订单列表
+     * @param $userId
+     * @param $endAt
+     * @return AgentOrderMaps[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
+    private function getAgentOrderList($userId, $endAt)
+    {
+        // 本月销量
+        $list = AgentOrderMaps::with('order')
+            ->where('agent_id',$userId)
+            ->where('status',AgentOrderMaps::STATUS_SETTLED) // 订单已完成
+            ->where('status_divide',AgentOrderMaps::STATUS_DIVIDE_UNSETTLE) // 未参与分成的订单
+            ->where('created_at','<=',$endAt)
+            ->get();
+        return $list;
+    }
+
+    /**
+     * 获取指定时间段的销售额
+     * @param $userId
+     * @param $endAt
+     * @return int
+     */
+    private function getSalesAmount($userId, $endAt)
+    {
+        // 本月销量
+        $list = $this->getAgentOrderList($userId, $endAt);
+        $total = 0;
+        $list->map(function ($data) use (&$total) {
+            $total += $data->order->product_amount_total;
+        });
+        return $total;
+    }
+
+    /**
+     * 获取提成数
+     * @param $total
+     * @return float|int
+     */
+    private function getDivideAmount($total)
+    {
+        $divideRate = DivideRate::where('sales_start','<',$total)->where('sales_end','>=',$total)->first();
+        if ($divideRate) {
+            return round(($divideRate->proportion * $total) / 100);
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -237,7 +337,7 @@ class AgentService
      */
     private function saveBillInfo($orderNo, $userId, $billName, $amount, $amountType, $status, $billType)
     {
-        $order = Order::where('order_no',$orderNo);
+        $order = Order::where('order_no',$orderNo)->first();
         return $order->bill()->create([
             'user_id' => $userId,
             'bill_name' => $billName,

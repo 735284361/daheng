@@ -34,6 +34,7 @@ class CreateOrderTables extends Migration
         Schema::create('order_goods', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('order_no')->comment('订单编号');
+            $table->integer('user_id')->comment('用户编号');
             $table->string('goods_id')->comment('商品编号');
             $table->string('sku')->nullable()->comment('商品规格');
             $table->integer('property_id')->nullable()->comment('规格ID');

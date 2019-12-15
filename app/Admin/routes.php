@@ -28,4 +28,6 @@ Route::group([
     $router->group(['prefix' => 'delivery'], function($router) {
         $router->get('list','Api\DeliveryController@listProviders')->name('admin.deliver.list');
     });
+    // 月度分成
+    $router->get('divide/divide','Api\DivideController@divide')->name('admin.divide.divide');
 });

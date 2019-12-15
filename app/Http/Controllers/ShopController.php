@@ -53,6 +53,8 @@ class ShopController extends Controller
             }
             $data['sku_arr'] = array_column($data['sku_arr'],'sku');
         }
+        // 增加商品浏览量
+        $this->goodsService->incViewsCount($id);
         return response()->json($data);
     }
 

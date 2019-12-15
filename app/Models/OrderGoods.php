@@ -12,4 +12,10 @@ class OrderGoods extends Model
     {
         return $this->belongsTo(Goods::class,'goods_id','id');
     }
+
+    // 关联用户信息
+    public function user()
+    {
+        return $this->belongsTo(\App\User::class,'user_id','id')->select('id','nickname','avatar');
+    }
 }

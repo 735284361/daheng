@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Http\Requests\OrderRequest;
 use App\Jobs\CompleteOrder;
+use App\Models\Goods;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\OrderGoods;
@@ -54,19 +55,20 @@ class OrderService
             // 获取商品属性
             $sku = $this->goodsService->getSku($goods[$i]['goodsId'],$goods[$i]['propertyChildIds']);
             // 判断商品库存
-            if ($goods[$i]['number'] > $sku['stock']) {
+            if ($goods[$i]['number'] > $sku->stock) {
                 return ['code' => 1, 'msg' => '商品库存不足'];
             }
             // 计算订单总价
-            $amountTotal += $goods[$i]['number'] * $sku['price'];
+            $amountTotal += $goods[$i]['number'] * $sku->price;
             // 订单包含的商品
             $good['order_no'] = $orderNo;
+            $good['user_id'] = auth('api')->id();
             $good['goods_id'] = $goods[$i]['goodsId'];
             $good['sku'] = $goods[$i]['propertyChildName'];
             $good['property_id'] = $goods[$i]['propertyChildIds'];
             $good['product_count'] = $goods[$i]['number'];
-            $good['product_price'] = $sku['price'];
-            $good['dist_price'] = $sku['dist_price'];
+            $good['product_price'] = $sku->price;
+            $good['dist_price'] = $sku->dist_price;
             $good['created_at'] = Carbon::now();
             $good['updated_at'] = Carbon::now();
             $goodsList[] = $good;
@@ -134,8 +136,14 @@ class OrderService
             $status = Order::STATUS_PAID;
             // 保存订单
             $this->updateOrderStatus($status, $remark);
-            $goods = OrderGoods::with('goods')->where('order_no',$this->order->order_no)->first();
-            $billName = $goods->goods->name;
+            // 订单对应的商品
+            $goodsList = OrderGoods::with('goods')->where('order_no',$this->order->order_no)->get();
+            // 处理商品的数据统计
+            $billName = '';
+            foreach ($goodsList as $goods) {
+                $this->goodsService->dealGoodsCount($goods->goods_id, $goods->product_count, $goods->property_id);
+                $billName .= $goods->goods->name;
+            }
             // 更新资金流水记录表
             $this->saveBillInfo($this->order->user_id, $billName, $this->order->order_amount_total, UserBill::AMOUNT_TYPE_EXPEND,
                 UserBill::BILL_STATUS_NORMAL, UserBill::BILL_TYPE_BUY);
@@ -362,10 +370,11 @@ class OrderService
             $exception = DB::transaction(function () use ($data) {
                 $orderId = $data['orderId'];
                 // 修改订单评论状态
-                // TODO 更新商品总分
-                // TODO 更新订单评论状态
                 $order = Order::find($orderId);
                 $this->completeOrder($order,'用户评论完成');
+                // 更新订单评论状态
+                $order->comment_status = Order::COMMENTED;
+                $order->save();
                 // 更新订单对应商品的评论
                 $reputations = $data['reputations'];
                 foreach ($reputations as $reputation) {
@@ -377,12 +386,25 @@ class OrderService
         return false;
     }
 
+    /**
+     * 更新商品评论和商品的评分
+     * @param $id
+     * @param $score
+     * @param $comment
+     */
     public function updateGoodsReputation($id, $score, $comment)
     {
-        $goods = OrderGoods::find($id);
-        $goods->score = $score;
-        $goods->comment = $comment;
-        return $goods->save();
+        // 更新商品评论信息
+        $orderGoods = OrderGoods::find($id);
+        $orderGoods->score = $score;
+        $orderGoods->comment = $comment;
+        $orderGoods->save();
+        // 更新商品总评分
+        $goods = Goods::find($orderGoods->goods_id);
+        $goods->number_reputation = $goods->number_reputation + 1;
+        $goods->number_score = $goods->number_score + $score;
+        $goods->save();
+        return;
     }
 
 }

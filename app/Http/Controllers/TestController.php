@@ -23,11 +23,11 @@ class TestController extends Controller
     public function test()
     {
         // 支付成功消息发送
-        $order = Order::find(14);
+//        $order = Order::find(14);
 //        return MessageService::paySuccessMsg($order);
         // 支付成功
-        $orderService = new OrderService();
-        $orderService->paySuccess($order);
+//        $orderService = new OrderService();
+//        $orderService->paySuccess($order);
 
         // 用户账单
 //        $order = Order::where('order_no','GM2019112614502267154')->first();
@@ -78,6 +78,8 @@ class TestController extends Controller
 //        $agent->agentOrderList(8);
 
 //        dd(DB::getQueryLog());
+
+        dd(route('admin.divide.divide'));
     }
 
 }

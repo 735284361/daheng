@@ -22,6 +22,9 @@ class Order extends Model
     const PRE_REFUND = 'TK'; // 退款订单前缀
     const PRE_WITHDRAW = 'TX'; // 提现
 
+    const UNCOMMENTED = 0; // 未评论
+    const COMMENTED = 1; // 已评论
+
     /**
      * 获取订单号
      * @param $pre
@@ -55,6 +58,12 @@ class Order extends Model
     public function bill()
     {
         return $this->morphMany(UserBill::class,'billable');
+    }
+
+    // 关联用户信息
+    public function user()
+    {
+        return $this->belongsTo(\App\User::class,'user_id','id');
     }
 
     /**
