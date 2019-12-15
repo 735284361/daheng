@@ -106,6 +106,7 @@ class OrderService
             'postal_code' => $request->postal_code
         ]);
         // 发起支付
+        $totalFee = 0.01;
         $payParams = $this->payService->getPayParams($orderNo,$totalFee);
 
         if ($orderRes && $orderGoodsRes && $orderEventRes &&
