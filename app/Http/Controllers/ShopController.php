@@ -99,7 +99,7 @@ class ShopController extends Controller
         if ($goods && $goods->status == Goods::STATUS_ONLINE) {
             $isOnline = true;
         }
-        $stock['is_online'] = $isOnline;
+        $stock->is_online = $isOnline;
 
         return ['code' => 0, 'msg' => 'Success', 'data' => $stock];
     }
