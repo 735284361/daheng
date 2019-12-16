@@ -51,6 +51,7 @@ class OrderService
         // 生成订单商品
         $amountTotal = 0;
         $goodsList = [];
+        $body = Goods::find($goods[0]['goodsId'])->value('name');
         for ($i = 0; $i < count($goods); $i++) {
             // 获取商品属性
             $sku = $this->goodsService->getSku($goods[$i]['goodsId'],$goods[$i]['propertyChildIds']);
@@ -107,7 +108,7 @@ class OrderService
         ]);
         // 发起支付
         $totalFee = 0.01;
-        $payParams = $this->payService->getPayParams($orderNo,$totalFee);
+        $payParams = $this->payService->getPayParams($orderNo, $totalFee, $body);
 
         if ($orderRes && $orderGoodsRes && $orderEventRes &&
             $orderAddressRes && $payParams['code'] == 0) {

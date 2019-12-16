@@ -3,10 +3,21 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\User;
 
 class PayService
 {
 
+    /**
+     * 获取支付参数
+     * @param $orderNo
+     * @param $totalFee
+     * @param null $body
+     * @return mixed
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function getPayParams($orderNo, $totalFee, $body = null)
     {
         $body == null ? $body = '原卤大亨' : '';
@@ -34,7 +45,11 @@ class PayService
         }
     }
 
-
+    /**
+     * 支付回调
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \EasyWeChat\Kernel\Exceptions\Exception
+     */
     public function callback()
     {
         $payment = \EasyWeChat::payment();
@@ -62,6 +77,31 @@ class PayService
             }
         });
         return $response;
+    }
+
+    public function transferToBalance($orderNo, $amount, $userId, $remark)
+    {
+        $amount = $amount * 100;
+
+        $payment = \EasyWeChat::payment();
+
+        $user = User::find($userId);
+        $openId = $user->open_id;
+
+        return $payment->transfer->toBalance([
+            'partner_trade_no' => $orderNo, // 商户订单号，需保持唯一性(只能是字母或者数字，不能包含有符号)
+            'openid' => $openId,
+            'check_name' => 'NO_CHECK', // NO_CHECK：不校验真实姓名, FORCE_CHECK：强校验真实姓名
+//            're_user_name' => '王小帅', // 如果 check_name 设置为FORCE_CHECK，则必填用户真实姓名
+            'amount' => $amount, // 企业付款金额，单位为分
+            'desc' => $remark, // 企业付款操作说明信息。必填
+        ]);
+    }
+
+    public function queryBalanceOrder($orderNo)
+    {
+        $payment = \EasyWeChat::payment();
+        return $payment->transfer->queryBalanceOrder($orderNo);
     }
 
 }
