@@ -83,7 +83,7 @@
                         <td>{{$goods['pivot']['product_count']}}</td>
                         <td>{{$goods['pivot']['product_price']}}</td>
                         <td>{{$goods['pivot']['product_price'] * $goods['pivot']['product_count']}}</td>
-                        <td><span class="label label-primary">5分</span> &nbsp;&nbsp;非常愉快的一次购物！非常愉快的一次购物！非常愉快的一次购物！非常愉快的一次购物！</td>
+                        <td>@if ($goods['pivot']['score'] > 0)<span class="label label-primary">{{$goods['pivot']['score']}}分</span> &nbsp;&nbsp;{{$goods['pivot']['comment']}}@endif</td>
                     </tr>
                 @endforeach
             </table>
@@ -174,16 +174,16 @@
                     })
                     .done(function(data) {
                         if (data.code == 0) {
-                            Swal.fire('操作成功',function () {
-                                location.reload()
+                            Swal.fire('操作成功').then(function(){
+                                location.reload();
                             });
                         } else {
                             Swal.fire({
                                 'title': '失败',
                                 'text': data.msg,
                                 'type': 'fail'
-                            }, function () {
-                                location.reload()
+                            }).then(function(){
+                                location.reload();
                             });
                         }
                         resolve(data)
@@ -240,16 +240,16 @@
                 })
                     .done(function(data) {
                         if (data.code == 0) {
-                            Swal.fire('操作成功',function () {
-                                location.reload()
+                            Swal.fire('操作成功').then(function(){
+                                location.reload();
                             });
                         } else {
                             Swal.fire({
                                 'title': '失败',
                                 'text': data.msg,
                                 'type': 'fail'
-                            }, function () {
-                                location.reload()
+                            }).then(function(){
+                                location.reload();
                             });
                         }
                         resolve(data)

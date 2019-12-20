@@ -6,6 +6,7 @@ use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class WeChatController extends Controller
 {
@@ -68,12 +69,21 @@ class WeChatController extends Controller
 
         $data = $app->encryptor->decryptData($sessionKey, $iv, $encryptedData);
 
+        DB::beginTransaction();
         // 查看主库是否存在该用户
-        User::firstOrCreate(['open_id'=>$openId],[
+        $user = User::firstOrCreate(['open_id'=>$openId],[
             'nickname' => $data['nickName'],
             'open_id' => $data['openId'],
             'avatar' => $data['avatarUrl'],
         ]);
+        if ($user) {
+            $resAccount = $user->account()->firstOrCreate(['user_id'=>$user->user_id]);
+            if ($resAccount) {
+                DB::commit();
+            } else {
+                DB::rollBack();
+            }
+        }
 
         return response()->json([
             'code' => 0,

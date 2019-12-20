@@ -20,12 +20,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 //Route::get('v1/address/saveAddress','AddressController@postAddress');
 
-Route::any('/wechat/login', 'WeChatController@login');
-Route::any('/wechat/register', 'WeChatController@register');
 
 Route::get('test','TestController@test');
 
 Route::group(['prefix' => 'v1'], function () {
+    // 登录注册
+    Route::any('/wechat/login', 'WeChatController@login');
+    Route::any('/wechat/register', 'WeChatController@register');
     // 系统参数
     Route::get('config/value','SysParamController@value');
     // 轮播
@@ -65,6 +66,9 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('create','OrderController@create');
             Route::get('statistics','OrderController@statistics');
             Route::get('list','OrderController@lists');
+            Route::get('close','OrderController@closeOrder');
+            Route::get('confirm','OrderController@confirmOrder');
+            Route::post('repay','OrderController@repay');
             Route::get('detail','OrderController@detail');
             Route::post('reputation','OrderController@reputation');
         });
@@ -80,8 +84,15 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('orders','AgentController@orders');
         });
 
+        // 账单
         Route::group(['prefix' => 'bill'], function() {
             Route::get('list','UserBillController@lists');
+        });
+
+        // 用户
+        Route::group(['prefix' => 'user'], function() {
+            Route::get('account','UserController@getAccount');
+            Route::post('feedback','UserController@feedback');
         });
     });
 });

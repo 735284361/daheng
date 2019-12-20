@@ -7,6 +7,15 @@ use App\Models\UserAccount;
 class UserAccountService
 {
 
+    public function __construct()
+    {
+    }
+
+    public function getAccount($userId)
+    {
+        return UserAccount::where('user_id',$userId)->first();
+    }
+
     /**
      * 增加用户余额
      * @param $userId
@@ -15,8 +24,7 @@ class UserAccountService
      */
     public function incBalance($userId, $amount)
     {
-        $userAccount = UserAccount::updateOrCreate(['user_id' => $userId]);
-        return $userAccount->increment('balance',$amount);
+        return UserAccount::where('user_id',$userId)->increment('balance',$amount);
     }
 
 }

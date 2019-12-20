@@ -36,6 +36,8 @@ class GoodsController extends AdminController
     {
         $grid = new Grid(new Goods);
 
+        $grid->model()->orderBy('id','desc');
+
         $grid->column('id', __('ID'));
         $grid->column('user_id', __('User id'))->hide();
         $grid->column('store_id', __('Store id'))->hide();

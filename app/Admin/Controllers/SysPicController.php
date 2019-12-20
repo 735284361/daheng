@@ -26,6 +26,8 @@ class SysPicController extends AdminController
     {
         $grid = new Grid(new SysPic);
 
+        $grid->model()->orderBy('id','desc');
+
         $grid->column('id', __('ID'));
         $grid->column('pic_url', __('图片'))->image('',150,150);
         $grid->column('remark', __('备注'));

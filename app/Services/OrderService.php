@@ -51,7 +51,7 @@ class OrderService
         // 生成订单商品
         $amountTotal = 0;
         $goodsList = [];
-        $body = Goods::find($goods[0]['goodsId'])->value('name');
+//        $body = Goods::find($goods[0]['goodsId'])->value('name');
         for ($i = 0; $i < count($goods); $i++) {
             // 获取商品属性
             $sku = $this->goodsService->getSku($goods[$i]['goodsId'],$goods[$i]['propertyChildIds']);
@@ -107,8 +107,8 @@ class OrderService
             'postal_code' => $request->postal_code
         ]);
         // 发起支付
-        $totalFee = 0.01;
-        $payParams = $this->payService->getPayParams($orderNo, $totalFee, $body);
+//        $totalFee = 0.01;
+        $payParams = $this->payService->getPayParams($orderNo, $totalFee);
 
         if ($orderRes && $orderGoodsRes && $orderEventRes &&
             $orderAddressRes && $payParams['code'] == 0) {
@@ -160,13 +160,37 @@ class OrderService
     }
 
     /**
+     * 重新支付订单
+     * @param $orderId
+     * @return array
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function repay($orderId)
+    {
+        $order = Order::find($orderId);
+        if ($order) {
+            if ($order->status != Order::STATUS_UNPAID) {
+                return ['code' => 1,'msg' => '订单失效'];
+            }
+            // 获取支付信息
+            $payInfo = $this->payService->getPayParams($order->order_no, $order->order_amount_total);
+            if ($payInfo['code'] == 0) {
+                return ['code' => 0,'msg' => 'Success','data' => $payInfo['result']];
+            }
+        }
+        return ['code' => 1,'msg' => '发起支付失败'];
+    }
+
+    /**
      * 关闭订单
      * @param Order $order
-     * @param $remark
+     * @param null $remark
      * @return bool
      * @throws \Throwable
      */
-    public function closeOrder(Order $order, $remark)
+    public function closeOrder(Order $order, $remark = null)
     {
         $this->order = $order;
         $exception = DB::transaction(function() use($remark) {
@@ -218,6 +242,26 @@ class OrderService
         }
         $exception = DB::transaction(function() {
             $status = Order::STATUS_PAY_FAILED;
+            // 保存订单
+            $this->updateOrderStatus($status);
+            // 支付成功 进入消息发送系统
+            $this->sendMsg($status);
+        });
+        return $exception ? false : true;
+    }
+
+    /**
+     * 确认收货
+     * @param Order $order
+     * @return bool
+     * @throws \Throwable
+     */
+    public function confirmOrder(Order $order)
+    {
+        $this->order = $order;
+
+        $exception = DB::transaction(function() {
+            $status = Order::STATUS_RECEIVED;
             // 保存订单
             $this->updateOrderStatus($status);
             // 支付成功 进入消息发送系统
@@ -350,7 +394,14 @@ class OrderService
      */
     public function orderList()
     {
-        $list = Order::with('goods')->where('user_id',auth('api')->id())->get();
+        $status = [
+            Order::STATUS_UNPAID,
+            Order::STATUS_PAID,
+            Order::STATUS_SHIPPED,
+            Order::STATUS_RECEIVED,
+            Order::STATUS_COMPLETED
+        ];
+        $list = Order::with('goods')->where('user_id',auth('api')->id())->whereIn('status',$status)->get();
         return $list;
     }
 
@@ -364,6 +415,12 @@ class OrderService
         return Order::with('goods')->with('eventLogs')->with('address')->find($id);
     }
 
+    /**
+     * 订单评论
+     * @param Request $request
+     * @return bool
+     * @throws \Throwable
+     */
     public function reputation(Request $request)
     {
         $data = $request->postJsonString;

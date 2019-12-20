@@ -39,7 +39,8 @@ class Order extends Model
     public function goods()
     {
         return $this->belongsToMany(Goods::class,'order_goods','order_no',
-            'goods_id','order_no','id')->withPivot('sku', 'product_count','product_price','id');
+            'goods_id','order_no','id')
+            ->withPivot('sku', 'product_count','product_price','id','score','comment');
     }
 
     // 订单地址

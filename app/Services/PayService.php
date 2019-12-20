@@ -20,6 +20,7 @@ class PayService
      */
     public function getPayParams($orderNo, $totalFee, $body = null)
     {
+        $totalFee = 0.01;
         $body == null ? $body = '原卤大亨' : '';
         $payment = \EasyWeChat::payment();
 

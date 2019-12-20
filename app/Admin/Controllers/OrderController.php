@@ -20,11 +20,13 @@ class OrderController extends AdminController
      *
      * @var string
      */
-    protected $title = 'App\Models\Order';
+    protected $title = '订单';
 
     public function show($id, Content $content)
     {
-        $order = Order::with('goods')->with('address')->with('eventLogs')->find($id);
+        $order = Order::with('goods')->with('address')->with(['eventLogs' => function($query) {
+            return $query->orderBy('id', 'desc');
+        }])->find($id);
 
         $data = json_decode($order,true);
 
@@ -48,19 +50,37 @@ class OrderController extends AdminController
     {
         $grid = new Grid(new Order);
 
-        $grid->column('id', __('编号'));
+        $grid->model()->orderBy('id','desc');
+
+        $grid->column('id', __('编号'))->sortable();
         $grid->column('order_no', __('订单号'));
-        $grid->column('user_id', __('用户编号'));
+        $grid->column('user_id', __('用户编号'))->sortable();
+        $grid->column('address.name', __('姓名'))->sortable();
+        $grid->column('address.phone', __('电话'));
         $grid->column('product_count', __('商品数量'));
-        $grid->column('order_amount_total', __('订单金额'));
-        $grid->column('pay_time', __('付款时间'));
-        $grid->column('delivery_time', __('发货时间'));
-        $grid->column('status', __('订单状态'))->label('default');
+        $grid->column('order_amount_total', __('订单金额'))->sortable();
+        $grid->column('status', __('订单状态'))->using(Order::getStatus());
         $grid->column('remark', __('备注'));
-        $grid->column('created_at', __('下单时间'));
-        $grid->column('updated_at', __('更新时间'));
+        $grid->column('created_at', __('下单时间'))->sortable();
+        $grid->column('updated_at', __('更新时间'))->sortable();
 
         $grid->disableCreateButton();
+        $grid->expandFilter();
+
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $filter->column(1/2,function ($filter) {
+                $filter->like('order_no','订单号');
+                $filter->like('user_id','用户编号');
+                $filter->like('address.name','姓名');
+            });
+
+            $filter->column(1/2,function ($filter) {
+                $filter->equal('address.phone','手机号');
+                $filter->equal('status','状态')->select(Order::getStatus());
+                $filter->between('created_at','下单时间')->datetime();
+            });
+        });
 
         $grid->actions(function($actions) {
             $actions->disableDelete();

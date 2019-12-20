@@ -35,6 +35,8 @@ class BannerController extends AdminController
     {
         $grid = new Grid(new Banner);
 
+        $grid->model()->orderBy('id','desc');
+
         $grid->column('id', __('ID'));
         $grid->column('goods_id', __('商品ID'));
         $grid->column('sort', __('排序'));

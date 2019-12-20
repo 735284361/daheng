@@ -35,6 +35,8 @@ class SysParamsController extends AdminController
     {
         $grid = new Grid(new SysParams);
 
+        $grid->model()->orderBy('id','desc');
+
         $grid->column('id', __('ID'));
         $grid->column('code', __('编号'));
         $grid->column('value', __('内容'));

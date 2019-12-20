@@ -17,7 +17,7 @@ class CreateUserAccountTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unique();
             $table->unsignedInteger('balance')->default(0)->comment('余额');
-            $table->unsignedInteger('withdrawals')->default(0)->comment('已提现');
+            $table->unsignedInteger('withdrawn')->default(0)->comment('已提现');
             $table->unsignedInteger('cash_in')->default(0)->comment('提现中');
             $table->timestamps();
         });

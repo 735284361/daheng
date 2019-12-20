@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\OrderRequest;
+use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 
@@ -59,6 +60,21 @@ class OrderController extends Controller
     }
 
     /**
+     * 重新支付
+     * @param Request $request
+     * @return array
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function repay(Request $request)
+    {
+        $this->validate($request,['orderId' => 'required']);
+        return $this->orderService->repay($request->orderId);
+    }
+
+    /**
      * 订单详情
      * @param Request $request
      * @return array
@@ -75,6 +91,47 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * 关闭订单
+     * @param Request $request
+     * @return array
+     * @throws \Illuminate\Validation\ValidationException
+     * @throws \Throwable
+     */
+    public function closeOrder(Request $request)
+    {
+        $this->validate($request,['orderId'=>'required']);
+
+        $order = Order::find($request->orderId);
+
+        $res = $this->orderService->closeOrder($order);
+        if ($res) {
+            return ['code' => 0, 'msg' => 'Success'];
+        } else {
+            return ['code' => 1, 'msg' => '取消失败'];
+        }
+    }
+
+    public function confirmOrder(Request $request)
+    {
+        $this->validate($request,['orderId'=>'required']);
+
+        $order = Order::find($request->orderId);
+
+        $res = $this->orderService->confirmOrder($order);
+        if ($res) {
+            return ['code' => 0, 'msg' => 'Success'];
+        } else {
+            return ['code' => 1, 'msg' => '取消失败'];
+        }
+    }
+
+    /**
+     * 订单评论
+     * @param Request $request
+     * @return array
+     * @throws \Throwable
+     */
     public function reputation(Request $request)
     {
         $res = $this->orderService->reputation($request);

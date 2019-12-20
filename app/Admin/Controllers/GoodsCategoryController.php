@@ -26,6 +26,8 @@ class GoodsCategoryController extends AdminController
     {
         $grid = new Grid(new GoodsCategory);
 
+        $grid->model()->orderBy('id','desc');
+
         $grid->column('id', __('ID'));
         $grid->column('name', __('分类名称'));
         $grid->column('sort', __('分类排序'));
