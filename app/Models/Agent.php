@@ -31,7 +31,6 @@ class Agent extends Model
     // 代理商的基本信息
     public function user()
     {
-        dd(3);
         return $this->belongsTo(\App\User::class,'user_id','id');
     }
 

@@ -48,7 +48,7 @@ class AgentService
 
         $data['amount'] = $total;
         $data['divide'] = $divide;
-        
+
         return $data;
     }
 

@@ -20,6 +20,7 @@ Route::group([
     $router->resource('orders', OrderController::class);
     $router->resource('withdraws', WithdrawController::class);
     $router->resource('agents', AgentController::class);
+    $router->resource('feedback', FeedbackController::class);
 
     // 订单
     $router->group(['order' => 'delivery'], function($router) {

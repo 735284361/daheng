@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Feedback;
 use App\Services\UserAccountService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -36,6 +37,7 @@ class UserController extends Controller
      * 意见反馈
      * @param Request $request
      * @return array
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function feedback(Request $request)
     {
@@ -51,6 +53,16 @@ class UserController extends Controller
         } else {
             return ['code' => 1,'msg' => '失败'];
         }
+    }
+
+    /**
+     * 获取反馈类型列表
+     * @return array
+     */
+    public function getFeedBackTypes()
+    {
+        $types = Feedback::getTypes();
+        return ['code' => 0, 'msg' => 'Success', 'data' => $types];
     }
 
 }
