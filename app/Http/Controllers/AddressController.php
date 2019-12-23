@@ -24,7 +24,7 @@ class AddressController extends Controller
      */
     public function lists()
     {
-        $list = ShippingAddress::where('status',ShippingAddress::ADDRESS_STATUS_ENABLE)->get();
+        $list = ShippingAddress::where('status',ShippingAddress::ADDRESS_STATUS_ENABLE)->orderBy('id','desc')->get();
         if ($list) {
             return ['code' => 0,'msg' => 'success','data'=>$list];
         } else {

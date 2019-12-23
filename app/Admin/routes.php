@@ -18,6 +18,8 @@ Route::group([
     $router->resource('users', UsersController::class);
     $router->resource('shipping-fees', ShippingFeeController::class);
     $router->resource('orders', OrderController::class);
+    $router->resource('withdraws', WithdrawController::class);
+    $router->resource('agents', AgentController::class);
 
     // 订单
     $router->group(['order' => 'delivery'], function($router) {
@@ -30,4 +32,11 @@ Route::group([
     });
     // 月度分成
     $router->get('divide/divide','Api\DivideController@divide')->name('admin.divide.divide');
+
+    // 接口
+    $router->any('withdraw/refuse', 'Api\WithdrawController@refuseWithdraw')->name('admin.withdraw.refuse');
+    $router->any('withdraw/agree', 'Api\WithdrawController@agreeWithdraw')->name('admin.withdraw.agree');
+
+    // 代理商
+    $router->post('agent/update-status','Api\AgentController@updateStatus')->name('admin.agent.update-status');
 });

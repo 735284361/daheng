@@ -24,13 +24,9 @@ class OrderController extends AdminController
 
     public function show($id, Content $content)
     {
-        $order = Order::with('goods')->with('address')->with(['eventLogs' => function($query) {
-            return $query->orderBy('id', 'desc');
-        }])->find($id);
+        $data = Order::find($id);
 
-        $data = json_decode($order,true);
-
-        $view = view('admin.order.order', compact('data'))->withModel($order);
+        $view = view('admin.order.order', compact('data'));
         return $content
             ->title('订单')
             ->description('订单信息...')
@@ -52,8 +48,16 @@ class OrderController extends AdminController
 
         $grid->model()->orderBy('id','desc');
 
-        $grid->column('id', __('编号'))->sortable();
+        $grid->model()->with('orderAgent.agent.user');
+
+        $grid->orderAgent()->agent()->user()->display(function ($continent) {
+            return $continent['nickname'];
+        });
+//        $grid->column('nickname')->display(function () {
+//            return $this->country['orderAgent']['agent']['user'];
+//        });
         $grid->column('order_no', __('订单号'));
+//        $grid->column('orderAgent.agent.user.id', __('订单号'));
         $grid->column('user_id', __('用户编号'))->sortable();
         $grid->column('address.name', __('姓名'))->sortable();
         $grid->column('address.phone', __('电话'));
@@ -62,7 +66,6 @@ class OrderController extends AdminController
         $grid->column('status', __('订单状态'))->using(Order::getStatus());
         $grid->column('remark', __('备注'));
         $grid->column('created_at', __('下单时间'))->sortable();
-        $grid->column('updated_at', __('更新时间'))->sortable();
 
         $grid->disableCreateButton();
         $grid->expandFilter();

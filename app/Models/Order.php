@@ -30,7 +30,7 @@ class Order extends Model
      * @param $pre
      * @return string
      */
-    public function getOrderNo($pre)
+    public static function getOrderNo($pre)
     {
         return $pre.date('YmdHis').rand(10000,99999);
     }
@@ -52,7 +52,7 @@ class Order extends Model
     // 订单日志
     public function eventLogs()
     {
-        return $this->hasMany(OrderEventLog::class,'order_no','order_no');
+        return $this->hasMany(OrderEventLog::class,'order_no','order_no')->orderBy('id','desc');
     }
 
     // 多态关联账单
@@ -65,6 +65,12 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(\App\User::class,'user_id','id');
+    }
+
+    // 订单对应的代理
+    public function orderAgent()
+    {
+        return $this->hasOne(AgentOrderMaps::class,'order_no','order_no');
     }
 
     /**

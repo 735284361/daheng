@@ -51,6 +51,9 @@
             <div class="col-md-3">下单时间：{{$data['created_at']}}</div>
             <div class="col-md-3">更新时间：{{$data['updated_at']}}</div>
         </div>
+        <div class="row" style="margin-bottom: 20px;">
+            <div class="col-md-3">代理商：<mark>{{$data['orderAgent']['agent']['user']['nickname']}}</mark></div>
+        </div>
         <!-- /.table-responsive -->
     </div>
     <!-- /.box-body -->
@@ -130,7 +133,7 @@
                     <td class="col-xs-4">备注</td>
                 </th>
 
-                @foreach($data['event_logs'] as $log)
+                @foreach($data['eventLogs'] as $log)
                     <tr class="row">
                         <td>{{$log['created_at']}}</td>
                         <td>{{$log['event']}}</td>

@@ -320,8 +320,8 @@ class AgentService
      */
     private function incAgentBalance($userId, $account)
     {
-        $userAccount = new UserAccountService();
-        return $userAccount->incBalance($userId, $account);
+        $userAccount = new UserAccountService($userId);
+        return $userAccount->incBalance($account);
     }
 
     /**
@@ -346,5 +346,18 @@ class AgentService
             'status' => $status,
             'bill_type' => $billType
         ]);
+    }
+
+    /**
+     * 更新代理商状态
+     * @param $id
+     * @param $status
+     * @return mixed
+     */
+    public function updateAgentStatus($id, $status)
+    {
+        $agent = Agent::find($id);
+        $agent->status = $status;
+        return $agent->save();
     }
 }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Services\UserAccountService;
 use App\Services\UserService;
-use Encore\Admin\Form\Field\Id;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -12,17 +11,20 @@ class UserController extends Controller
     //
 
     protected $userService;
-    protected $userAccountService;
 
     public function __construct()
     {
         $this->userService = new UserService();
-        $this->userAccountService = new UserAccountService();
     }
 
+    /**
+     * 获取用户账户余额
+     * @return array
+     */
     public function getAccount()
     {
-        $account = $this->userAccountService->getAccount(auth('api')->id());
+        $userAccountService = new UserAccountService(auth('api')->id());
+        $account = $userAccountService->getAccount();
         if ($account) {
             return ['code' => 0, 'msg' => 'Success', 'data' => $account];
         } else {
@@ -30,6 +32,11 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * 意见反馈
+     * @param Request $request
+     * @return array
+     */
     public function feedback(Request $request)
     {
         $this->validate($request,[

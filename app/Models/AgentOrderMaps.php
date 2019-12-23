@@ -29,4 +29,33 @@ class AgentOrderMaps extends Model
     {
         return $this->belongsTo(Agent::class,'agent_id','user_id');
     }
+
+    public static function getStatus($ind = null)
+    {
+        $arr = [
+            self::STATUS_UNSETTLE => '未结算',
+            self::STATUS_SETTLED => '已结算',
+            self::STATUS_CANCEL => '已取消',
+        ];
+
+        if ($ind !== null) {
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::STATUS_UNSETTLE];
+        }
+        return $arr;
+    }
+
+
+    public static function getDivideStatus($ind = null)
+    {
+        $arr = [
+            self::STATUS_DIVIDE_UNSETTLE => '未结算',
+            self::STATUS_DIVIDE_SETTLED => '已结算',
+            self::STATUS_DIVIDE_CANCEL => '已取消',
+        ];
+
+        if ($ind !== null) {
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::STATUS_DIVIDE_UNSETTLE];
+        }
+        return $arr;
+    }
 }

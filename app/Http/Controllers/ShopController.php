@@ -27,7 +27,7 @@ class ShopController extends Controller
         $categoryId = $request->input('categoryId',"");
         $categoryId == "" ? '' : $maps['category_id'] = $categoryId;
         $maps['status'] = Goods::STATUS_ONLINE;
-        $data =  Goods::where($maps)->get();
+        $data =  Goods::where($maps)->orderBy('sort','asc')->orderBy('number_score','desc')->get();
         if ($data) {
             $arr = ['code' => 0,'msg' => 'success' ,'data' => $data];
         } else {

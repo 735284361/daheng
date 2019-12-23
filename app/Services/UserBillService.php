@@ -35,7 +35,7 @@ class UserBillService
             $query->whereDate('created_at','>=', $startAt);
             $query->whereDate('created_at','<=', $endAt);
         }
-        $list = $query->get();
+        $list = $query->orderBy('id','desc')->get();
         $list->map(function ($data) {
            $data->amount_type_str = UserBill::getAmountType($data->amount_type);
            $data->status_str = UserBill::getStatus($data->status);

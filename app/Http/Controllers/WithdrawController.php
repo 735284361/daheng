@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\WithdrawRequest;
 use App\Services\WithdrawService;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class WithdrawController extends Controller
 {
@@ -20,7 +19,7 @@ class WithdrawController extends Controller
 
     public function apply(WithdrawRequest $request)
     {
-        $this->withdrawService->apply($request->all());
+        $this->withdrawService->apply($request->apply_total);
         return $this->withdrawService->error();
     }
 

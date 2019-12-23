@@ -42,8 +42,7 @@ class OrderService
         if (empty($goods)) {
             return ['code' => 1, 'msg' => '商品不能为空'];
         }
-        $order = new Order();
-        $orderNo = $order->getOrderNo(Order::PRE_BUY);
+        $orderNo = Order::getOrderNo(Order::PRE_BUY);
         // 商品数量
         $goodsCollect = collect($goods);
         $productCount = $goodsCollect->sum('number');
@@ -401,7 +400,11 @@ class OrderService
             Order::STATUS_RECEIVED,
             Order::STATUS_COMPLETED
         ];
-        $list = Order::with('goods')->where('user_id',auth('api')->id())->whereIn('status',$status)->get();
+        $list = Order::with('goods')
+            ->where('user_id',auth('api')->id())
+            ->whereIn('status',$status)
+            ->orderBy('id','desc')
+            ->get();
         return $list;
     }
 

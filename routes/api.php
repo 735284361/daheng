@@ -93,6 +93,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::group(['prefix' => 'user'], function() {
             Route::get('account','UserController@getAccount');
             Route::post('feedback','UserController@feedback');
+            Route::post('withdraw/apply','WithdrawController@apply');
         });
     });
 });
