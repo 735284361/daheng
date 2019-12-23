@@ -205,7 +205,7 @@ class AgentService
             if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
                 $filename = $response->saveAs($path, uniqid().'.png');
             }
-            $agent->qrcode = $qrcode = 'qrcode/'.$filename;
+            $qrcode = 'qrcode/'.$filename;
             $agent->save();
         }
         return asset('storage/'.$qrcode);
