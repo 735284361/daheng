@@ -27,6 +27,7 @@ Route::group([
         $router->post('update-status','Api\OrderController@updateOrderStatus')->name('admin.order.update-status');
         $router->post('delivery','Api\OrderController@delivery')->name('admin.order.delivery');
     });
+    
     // 快递
     $router->group(['prefix' => 'delivery'], function($router) {
         $router->get('list','Api\DeliveryController@listProviders')->name('admin.deliver.list');
