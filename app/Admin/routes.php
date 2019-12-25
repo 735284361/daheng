@@ -42,4 +42,5 @@ Route::group([
 
     // 代理商
     $router->post('agent/update-status','Api\AgentController@updateStatus')->name('admin.agent.update-status');
+    
 });
