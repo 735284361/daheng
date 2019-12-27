@@ -25,7 +25,7 @@ class GoodsController extends AdminController
      *
      * @var string
      */
-    protected $title = 'App\Models\Goods';
+    protected $title = '商品';
 
     /**
      * Make a grid builder.

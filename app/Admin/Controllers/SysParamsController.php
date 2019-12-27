@@ -24,7 +24,7 @@ class SysParamsController extends AdminController
      *
      * @var string
      */
-    protected $title = 'App\Models\SysParams';
+    protected $title = '系统参数';
 
     /**
      * Make a grid builder.

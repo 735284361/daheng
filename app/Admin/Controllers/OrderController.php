@@ -48,22 +48,13 @@ class OrderController extends AdminController
 
         $grid->model()->orderBy('id','desc');
 
-        $grid->model()->with('orderAgent.agent.user');
-
-        $grid->orderAgent()->agent()->user()->display(function ($continent) {
-            return $continent['nickname'];
-        });
-//        $grid->column('nickname')->display(function () {
-//            return $this->country['orderAgent']['agent']['user'];
-//        });
         $grid->column('order_no', __('订单号'));
-//        $grid->column('orderAgent.agent.user.id', __('订单号'));
         $grid->column('user_id', __('用户编号'))->sortable();
         $grid->column('address.name', __('姓名'))->sortable();
         $grid->column('address.phone', __('电话'));
         $grid->column('product_count', __('商品数量'));
         $grid->column('order_amount_total', __('订单金额'))->sortable();
-        $grid->column('status', __('订单状态'))->using(Order::getStatus());
+        $grid->column('status', __('订单状态'))->using(Order::getStatus())->label('danger');
         $grid->column('remark', __('备注'));
         $grid->column('created_at', __('下单时间'))->sortable();
 

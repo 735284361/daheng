@@ -24,7 +24,7 @@ class BannerController extends AdminController
      *
      * @var string
      */
-    protected $title = 'App\Models\Banner';
+    protected $title = '轮播';
 
     /**
      * Make a grid builder.

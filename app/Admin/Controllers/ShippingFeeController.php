@@ -15,7 +15,7 @@ class ShippingFeeController extends AdminController
      *
      * @var string
      */
-    protected $title = 'App\Models\ShippingFee';
+    protected $title = '运费';
 
     /**
      * Make a grid builder.

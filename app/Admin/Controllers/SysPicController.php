@@ -15,7 +15,7 @@ class SysPicController extends AdminController
      *
      * @var string
      */
-    protected $title = 'App\Models\SysPic';
+    protected $title = '图片参数';
 
     /**
      * Make a grid builder.
