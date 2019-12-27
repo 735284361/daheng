@@ -11,7 +11,7 @@ return [
     | login page.
     |
     */
-    'name' => '原卤大亨后台管理系统',
+    'name' => '原卤大亨商城管理系统',
 
     /*
     |--------------------------------------------------------------------------
@@ -22,7 +22,7 @@ return [
     | `img` tag, eg '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo' => '<b>原卤大亨后台管理系统</b>',
+    'logo' => '<b>原卤大亨商城管理系统</b>',
 
     /*
     |--------------------------------------------------------------------------
@@ -275,7 +275,7 @@ return [
     |    "skin-red", "skin-red-light", "skin-black", "skin-black-light".
     |
     */
-    'skin' => 'skin-blue-light',
+    'skin' => 'skin-black',
 
     /*
     |--------------------------------------------------------------------------
@@ -300,7 +300,7 @@ return [
     | This value is used to set the background image of login page.
     |
     */
-    'login_background_image' => '',
+    'login_background_image' => 'https://cqyldh.oss-cn-chengdu.aliyuncs.com/images/2f3e79f2b5993ed126ff5b9c4052beca.png',
 
     /*
     |--------------------------------------------------------------------------
