@@ -25,8 +25,8 @@ class CloseOrder implements ShouldQueue
      */
     public function __construct(Order $order)
     {
-//        $delay = 15 * 60; // 15分钟后自动关闭订单
-        $delay = 10; //
+        $delay = 15 * 60; // 15分钟后自动关闭订单
+//        $delay = 10; //
         $this->order = $order;
         // 设置延迟的时间，delay() 方法的参数代表多少秒之后执行
         $this->delay($delay);
