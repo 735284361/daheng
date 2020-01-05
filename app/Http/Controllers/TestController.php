@@ -79,7 +79,9 @@ class TestController extends Controller
 
 //        dd(DB::getQueryLog());
 
-        dd(route('admin.divide.divide'));
+//        dd(route('admin.divide.divide'));
+
+        dd(date('Y-m-d H:i:s'));
     }
 
 }
