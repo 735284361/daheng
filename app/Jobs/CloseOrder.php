@@ -10,11 +10,11 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Log;
 
-class CompleteOrder implements ShouldQueue
+class CloseOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
 
     protected $order;
 
@@ -25,26 +25,25 @@ class CompleteOrder implements ShouldQueue
      */
     public function __construct(Order $order)
     {
-        //
-//        $delay = 10 * 24 * 3600; // 10天后自动完成订单
-        $delay = 20;
+//        $delay = 15 * 60; // 15分钟后自动关闭订单
+        $delay = 10; //
         $this->order = $order;
+        // 设置延迟的时间，delay() 方法的参数代表多少秒之后执行
         $this->delay($delay);
     }
 
-    /**
-     * Execute the job.
-     */
+    // 定义这个任务类具体的执行逻辑
+    // 当队列处理器从队列中取出任务时，会调用 handle() 方法
     public function handle()
     {
-        // 订单结束
-        // 只有订单状态为已支付 才进行订单关闭的操作
+        // 判断对应的订单是否已经被支付
+        // 如果已经支付则不需要关闭订单，直接退出
         if ($this->order->status != Order::STATUS_UNPAID) {
             return;
         }
-        // 进入订单完成流程
+        // 订单处理
         $orderService = new OrderService();
-        $orderService->completeOrder($this->order);
+        $orderService->closeOrder($this->order);
         return;
     }
 }
