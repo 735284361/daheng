@@ -37,11 +37,6 @@ class CompleteOrder implements ShouldQueue
      */
     public function handle()
     {
-        // 订单结束
-        // 只有订单状态为已支付 才进行订单关闭的操作
-        if ($this->order->status != Order::STATUS_UNPAID) {
-            return;
-        }
         // 进入订单完成流程
         $orderService = new OrderService();
         $orderService->completeOrder($this->order);
