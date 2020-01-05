@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\OrderRequest;
+use App\Jobs\CloseOrder;
 use App\Jobs\CompleteOrder;
 use App\Models\Goods;
 use App\Models\Order;
@@ -110,7 +111,10 @@ class OrderService
         $payParams = $this->payService->getPayParams($orderNo, $totalFee);
 
         if ($orderRes && $orderGoodsRes && $orderEventRes &&
-            $orderAddressRes && $payParams['code'] == 0) {
+                $orderAddressRes && $payParams['code'] == 0) {
+
+            // 过期未支付，则取消订单任务
+            CloseOrder::dispatch($order);
             DB::commit();
             return ['code' => 0, 'msg' => 'Success', 'data' => $payParams['result']];
         } else {

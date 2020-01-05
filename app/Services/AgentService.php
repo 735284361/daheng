@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderGoods;
 use App\Models\UserBill;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class AgentService

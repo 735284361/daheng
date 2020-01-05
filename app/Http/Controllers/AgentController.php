@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agent;
 use App\Services\AgentService;
 use Illuminate\Http\Request;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Auth;
 
 class AgentController extends Controller
 {
@@ -51,9 +52,12 @@ class AgentController extends Controller
      * @return array
      * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
      * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function getQrCode()
     {
+        $this->checkIsAgent();
+        $this->authorize('create',Agent::class);
         $data = $this->agentService->getQrCode(auth('api')->id());
         if ($data) {
             return ['code' => 0, 'data' => $data];
@@ -80,6 +84,7 @@ class AgentController extends Controller
      */
     public function statistics()
     {
+        $this->checkIsAgent();
         $data = $this->agentService->statistics(auth('api')->id());
         if ($data) {
             return ['code' => 0, 'msg' => '成功','data' => $data];
@@ -94,6 +99,7 @@ class AgentController extends Controller
      */
     public function orders()
     {
+        $this->checkIsAgent();
         $list = $this->agentService->agentOrderList(auth('api')->id());
         return ['code' => 0, 'data' => $list];
     }
@@ -104,6 +110,7 @@ class AgentController extends Controller
      */
     public function members()
     {
+        $this->checkIsAgent();
         $data = $this->agentService->agentMembers(auth('api')->id());
         if ($data) {
             return ['code' => 0, 'data' => $data];
@@ -112,5 +119,9 @@ class AgentController extends Controller
         }
     }
 
+    private function checkIsAgent()
+    {
+        $this->authorize('create',Agent::class);
+    }
 
 }
