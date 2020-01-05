@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\OrderRequest;
+use App\Jobs\CloseOrder;
 use App\Jobs\CompleteOrder;
 use App\Models\Goods;
 use App\Models\Order;
@@ -112,6 +113,9 @@ class OrderService
 
         if ($orderRes && $orderGoodsRes && $orderEventRes &&
             $orderAddressRes && $payParams['code'] == 0) {
+
+            // 定时关闭订单
+            CloseOrder::dispatch($order);
             DB::commit();
             return ['code' => 0, 'msg' => 'Success', 'data' => $payParams['result']];
         } else {
