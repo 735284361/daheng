@@ -78,7 +78,8 @@ class OrderService
         $shippingFeeService = new ShippingFeeService();
         $logisticsFee = $shippingFeeService->getShippingFee($request->province, $amountTotal);
         // 订单总金额
-        $totalFee = $amountTotal + $logisticsFee;
+//        $totalFee = $amountTotal + $logisticsFee;
+        $totalFee = 0.01;
 
         DB::beginTransaction();
         $order = new Order();
@@ -108,7 +109,6 @@ class OrderService
             'postal_code' => $request->postal_code
         ]);
         // 发起支付
-//        $totalFee = 0.01;
         $payParams = $this->payService->getPayParams($orderNo, $totalFee);
 
         if ($orderRes && $orderGoodsRes && $orderEventRes &&
