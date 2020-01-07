@@ -57,7 +57,6 @@ class AgentController extends Controller
     public function getQrCode()
     {
         $this->checkIsAgent();
-        $this->authorize('create',Agent::class);
         $data = $this->agentService->getQrCode(auth('api')->id());
         if ($data) {
             return ['code' => 0, 'data' => $data];
