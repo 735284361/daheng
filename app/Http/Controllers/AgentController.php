@@ -121,7 +121,7 @@ class AgentController extends Controller
 
     private function checkIsAgent()
     {
-        $this->authorize('create',Agent::class);
+        $this->authorize('isAgent',Agent::class);
     }
 
 }
