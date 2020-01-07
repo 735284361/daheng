@@ -22,6 +22,12 @@ class AgentPolicy
 
     public function isAgent(User $user)
     {
-        return $user->is_agent == 1;
+        $agent = Agent::where('user_id',auth('api')->id())->first();
+
+        if ($agent && $agent->status == Agent::STATUS_NORMAL) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
