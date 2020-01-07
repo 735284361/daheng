@@ -26,7 +26,7 @@ class WithdrawRequest extends FormRequest
     {
         return [
             //
-            'apply_total' => 'required|integer|min:1|max:1000'
+            'apply_total' => 'required|integer|min:50|max:1000'
         ];
     }
 }

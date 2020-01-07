@@ -26,8 +26,8 @@ class CreateGoodsTable extends Migration
             $table->tinyInteger('recommend_status')->default(20)->comment('是否推荐');
             $table->integer('sort')->default(255)->comment('排序');
             $table->integer('number_fav')->default(0)->comment('收藏数');
-            $table->integer('number_reputation')->default(0)->comment('评论数');
-            $table->integer('number_score')->default(0)->comment('总评分');
+            $table->integer('number_reputation')->default(100)->comment('评论数');
+            $table->integer('number_score')->default(500)->comment('总评分');
             $table->integer('number_orders')->default(0)->comment('订单数');
             $table->integer('number_sells')->default(0)->comment('销售数');
             $table->integer('number_views')->default(0)->comment('浏览数');
