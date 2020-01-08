@@ -319,6 +319,7 @@ class OrderService
         // 更新订单状态
         $this->order->status = $status;
         $status == Order::STATUS_PAID ?  $this->order->pay_time = Carbon::now() : '';
+        
         $this->order->save();
         // 更新订单日志
         $this->saveEventLog($status, $remark);
