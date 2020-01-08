@@ -45,7 +45,7 @@ class Goods extends Model
     public function reputation()
     {
         return $this->hasMany(OrderGoods::class,'goods_id','id')
-            ->whereNotNull('comment')->with('user');
+            ->whereNotNull('comment')->orderBy('created_at','desc')->with('user');
     }
 
     // 获取-商品列表图

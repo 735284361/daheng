@@ -54,6 +54,7 @@ class OrderController extends AdminController
         $grid->column('address.phone', __('电话'));
         $grid->column('product_count', __('商品数量'));
         $grid->column('order_amount_total', __('订单金额'))->sortable();
+        $grid->column('orderAgent.commission', __('代理分成'));
         $grid->column('status', __('订单状态'))->using(Order::getStatus())->label('danger');
         $grid->column('remark', __('备注'));
         $grid->column('created_at', __('下单时间'))->sortable();

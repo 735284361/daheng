@@ -51,8 +51,16 @@
             <div class="col-md-3">下单时间：{{$data['created_at']}}</div>
             <div class="col-md-3">更新时间：{{$data['updated_at']}}</div>
         </div>
+        <!-- /.table-responsive -->
+    </div>
+
+    <div class="box-header with-border">
+        <h3 class="box-title">代理信息</h3>
+    </div>
+    <div class="box-body">
         <div class="row" style="margin-bottom: 20px;">
             <div class="col-md-3">代理商：<mark>{{$data['orderAgent']['agent']['user']['nickname']}}</mark></div>
+            <div class="col-md-3">代理分成：<mark>{{$data['orderAgent']['commission']}}</mark></div>
         </div>
         <!-- /.table-responsive -->
     </div>

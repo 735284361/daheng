@@ -78,8 +78,7 @@ class OrderService
         $shippingFeeService = new ShippingFeeService();
         $logisticsFee = $shippingFeeService->getShippingFee($request->province, $amountTotal);
         // 订单总金额
-//        $totalFee = $amountTotal + $logisticsFee;
-        $totalFee = 0.01;
+        $totalFee = $amountTotal + $logisticsFee;
 
         DB::beginTransaction();
         $order = new Order();
@@ -92,6 +91,7 @@ class OrderService
         $order->order_amount_total = $totalFee;
         $order->remark = $request->remark;
         $orderRes = $order->save();
+
         $this->order = $order;
         // 添加订单物品
         $orderGoodsRes = OrderGoods::insert($goodsList);
@@ -117,7 +117,7 @@ class OrderService
             // 定时关闭订单
             CloseOrder::dispatch($order);
             DB::commit();
-            return ['code' => 0, 'msg' => 'Success', 'data' => $payParams['result']];
+            return ['code' => 0, 'msg' => 'Success', 'data' => $payParams['result'], 'id' => $order->id];
         } else {
             DB::rollBack();
             return ['code' => 1, 'msg' => 'Fail'];
@@ -318,6 +318,7 @@ class OrderService
     {
         // 更新订单状态
         $this->order->status = $status;
+        $status == Order::STATUS_PAID ?  $this->order->pay_time = Carbon::now() : '';
         $this->order->save();
         // 更新订单日志
         $this->saveEventLog($status, $remark);
