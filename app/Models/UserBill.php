@@ -59,11 +59,11 @@ class UserBill extends Model
     public static function getBillType($ind = null)
     {
         $arr = [
-            self::BILL_TYPE_BUY => '购物',
-            self::BILL_TYPE_RECHARGE => '充值',
-            self::BILL_TYPE_WITHDRAW => '提现',
-            self::BILL_TYPE_COMMISSION => '佣金',
-            self::BILL_TYPE_DIVIDE => '分成'
+            self::BILL_TYPE_BUY => '购物消费',
+            self::BILL_TYPE_RECHARGE => '现金充值',
+            self::BILL_TYPE_WITHDRAW => '用户提现',
+            self::BILL_TYPE_COMMISSION => '订单佣金',
+            self::BILL_TYPE_DIVIDE => '销售分成'
         ];
 
         if ($ind !== null) {

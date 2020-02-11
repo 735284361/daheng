@@ -29,6 +29,8 @@ class AgentController extends AdminController
     {
         $grid = new Grid(new Agent);
 
+        $grid->model()->orderBy('id','desc');
+
         $grid->column('id', __('编号'));
         $grid->column('user_id', __('用户编号'));
         $grid->column('user.nickname', __('用户昵称'));

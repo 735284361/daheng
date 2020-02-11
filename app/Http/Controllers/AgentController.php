@@ -26,7 +26,25 @@ class AgentController extends Controller
     {
         $data = $this->agentService->getAgentInfo(auth('api')->id());
         if ($data) {
-            return ['code' => 0, 'msg' => '成功', 'data' => $data];
+            switch ($data->status) {
+                case Agent::STATUS_APPLY :
+                    $msg = '正在审核中，请耐心等待';
+                    break;
+                case Agent::STATUS_NORMAL :
+                    $msg = '您已是代理商';
+                    break;
+                case Agent::STATUS_DISABLE :
+                    $msg = '您的代理已被禁用';
+                    break;
+                case Agent::STATUS_REFUSE :
+                    $msg = '您的申请已被拒绝';
+                    break;
+                default :
+                    $msg = '代理状态错误';
+                    break;
+
+            }
+            return ['code' => 0, 'msg' => $msg, 'data' => $data];
         } else {
             return ['code' => 1, 'msg' => '没有代理商数据'];
         }

@@ -23,12 +23,13 @@ class DivideController extends Controller
     public function divide()
     {
 //        if (Carbon::now() == Carbon::now()->firstOfMonth()) {
-        if (Carbon::now() != Carbon::now()->firstOfMonth()) {
+        if (Carbon::today() != Carbon::now()->firstOfMonth()) {
             $agentList = Agent::where('status',Agent::STATUS_NORMAL)->get();
             foreach ($agentList as $agent) {
                 // 结算上个月最后一天之前的数据
                 $userId = $agent->user_id;
                 DB::transaction(function () use ($userId) {
+                    // 奖金结算
                     $this->agentService->agentOrderSettle($userId);
                 });
             }

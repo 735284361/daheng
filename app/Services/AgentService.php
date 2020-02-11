@@ -44,7 +44,8 @@ class AgentService
     {
         // 本月销量
         $endAt = Carbon::now();
-        $total = $this->getSalesAmount($userId, $endAt);
+        $amount = $this->getSalesAmount($userId, $endAt);
+        $total = $amount['total'];
         $divide = $this->getDivideAmount($total);
 
         $data['amount'] = $total;
@@ -61,10 +62,17 @@ class AgentService
     {
         $endAt = Carbon::now()->subMonth()->lastOfMonth();
         // TODO 判断是否已经结算
+        // 获取上月的销量
         $salesAmount = $this->getSalesAmount($userId, $endAt);
-        $divideAmount = $this->getDivideAmount($salesAmount);
+        $total = $salesAmount['total'];
+        $list = $salesAmount['list'];
+        // 获取销量对应的奖金数
+        $divideAmount = $this->getDivideAmount($total);
+        if ($divideAmount <= 0) {
+            return;
+        }
         // 修改代理订单状态为已提成
-        $this->setDivided($userId, $endAt);
+        $this->setDivided($list);
         // 增加代理商余额
         if ($divideAmount > 0) {
             $this->incAgentBalance($userId, $divideAmount);
@@ -82,9 +90,11 @@ class AgentService
     private function saveAgentDivideBill($userId, $amount)
     {
         $agent = Agent::where('user_id',$userId)->first();
+
+        $billName = date('n',strtotime('-1 month')).'月份销售分成';
         return $agent->bill()->create([
             'user_id' => $userId,
-            'bill_name' => UserBill::getBillType(UserBill::BILL_TYPE_DIVIDE),
+            'bill_name' => $billName,
             'amount' => $amount,
             'amount_type' => UserBill::AMOUNT_TYPE_INCOME,
             'status' => UserBill::BILL_STATUS_NORMAL,
@@ -94,20 +104,24 @@ class AgentService
 
     /**
      * 设置代理订单为已结算
-     * @param $userId
-     * @param $endAt
      * @return bool|int
      */
-    private function setDivided($userId, $endAt)
+    private function setDivided($list)
     {
-        return AgentOrderMaps::with('order')
-            ->where('agent_id',$userId)
-            ->where('status',AgentOrderMaps::STATUS_SETTLED) // 订单已完成
-            ->where('status_divide',AgentOrderMaps::STATUS_DIVIDE_UNSETTLE) // 未参与分成的订单
-            ->where('created_at','<=',$endAt)
-            ->update([
+
+        $orders = $list->pluck(['order_no'])->toArray();
+
+        return  AgentOrderMaps::whereIn('order_no',$orders)->update([
                 'status_divide'=>AgentOrderMaps::STATUS_DIVIDE_SETTLED
             ]);
+//        return AgentOrderMaps::with('order')
+//            ->where('agent_id',$userId)
+//            ->where('status',AgentOrderMaps::STATUS_SETTLED) // 订单已完成
+//            ->where('status_divide',AgentOrderMaps::STATUS_DIVIDE_UNSETTLE) // 未参与分成的订单
+//            ->where('created_at','<=',$endAt)
+//            ->update([
+//                'status_divide'=>AgentOrderMaps::STATUS_DIVIDE_SETTLED
+//            ]);
     }
 
     /**
@@ -123,7 +137,7 @@ class AgentService
             ->where('agent_id',$userId)
             ->where('status',AgentOrderMaps::STATUS_SETTLED) // 订单已完成
             ->where('status_divide',AgentOrderMaps::STATUS_DIVIDE_UNSETTLE) // 未参与分成的订单
-            ->where('created_at','<=',$endAt)
+            ->where('created_at','<=',$endAt) // 代理订单生成时间
             ->get();
         return $list;
     }
@@ -142,7 +156,10 @@ class AgentService
         $list->map(function ($data) use (&$total) {
             $total += $data->order->product_amount_total;
         });
-        return $total;
+
+        $arr['total'] = $total;
+        $arr['list'] = $list;
+        return $arr;
     }
 
     /**
@@ -153,6 +170,7 @@ class AgentService
     private function getDivideAmount($total)
     {
         $divideRate = DivideRate::where('sales_start','<',$total)->where('sales_end','>=',$total)->first();
+
         if ($divideRate) {
             return round(($divideRate->proportion * $total) / 100);
         } else {

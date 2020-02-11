@@ -14,8 +14,8 @@ class CreateStatisticalTable extends Migration
     public function up()
     {
         Schema::create('statistical', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->timestamp('day')->comment('日期');
+            $table->increments('id');
+            $table->timestamp('date')->comment('日期');
             $table->double('sales')->default(0)->comment('销售额');
             $table->double('share_amount')->default(0)->comment('分成金额');
             $table->double('order_count')->default(0)->comment('新增订单数');
@@ -23,7 +23,7 @@ class CreateStatisticalTable extends Migration
             $table->double('new_user_count')->default(0)->comment('新增用户数');
             $table->double('new_user_count')->default(0)->comment('新增用户数');
             $table->double('new_user_count')->default(0)->comment('新增用户数');
-            $table->double('new_user_count')->default(0)->comment('新增用户数');
+            $table->double('feedback_count')->default(0)->comment('用户反馈');
             $table->timestamps();
         });
     }

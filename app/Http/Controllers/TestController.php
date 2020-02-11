@@ -12,6 +12,7 @@ use App\Services\MessageService;
 use App\Services\OrderService;
 use App\Services\UserAccountService;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -81,7 +82,9 @@ class TestController extends Controller
 
 //        dd(route('admin.divide.divide'));
 
-        dd(date('Y-m-d H:i:s'));
+//        dd(date('Y-m-d H:i:s'));
+
+        echo date('n',strtotime('-1 month'));
     }
 
 }
