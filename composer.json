@@ -20,8 +20,10 @@
         "laravel-admin-ext/cropper": "1.0.2.1",
         "laravel/framework": "5.8.*",
         "laravel/horizon": "^3.4",
+        "laravel/nexmo-notification-channel": "^2.3",
         "laravel/passport": "^7.5",
         "laravel/tinker": "^1.0",
+        "leonis/easysms-notification-channel": "^1.0",
         "overtrue/laravel-wechat": "~5.0",
         "simplesoftwareio/simple-qrcode": "^2.0",
         "small-rural-dog/store": "^1.0"

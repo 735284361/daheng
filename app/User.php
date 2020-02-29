@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
+use Overtrue\EasySms\PhoneNumber;
 
 class User extends Authenticatable
 {
@@ -28,7 +29,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'phone', 'email'
+        'password', 'remember_token', 'email'
     ];
 
     /**
@@ -39,6 +40,11 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function routeNotificationForEasySms($notification)
+    {
+        return new PhoneNumber($this->number, $this->area_code);
+    }
 
     protected $guarded=[];
 

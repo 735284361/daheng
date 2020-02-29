@@ -7,15 +7,22 @@ use App\Models\AgentMember;
 use App\Models\AgentOrderMaps;
 use App\Models\Order;
 use App\Models\OrderGoods;
+use App\Notifications\VerificationCode;
+use App\Services\AdminMsgService;
 use App\Services\AgentService;
 use App\Services\MessageService;
 use App\Services\OrderService;
 use App\Services\UserAccountService;
 use App\User;
 use Carbon\Carbon;
+use Faker\Generator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Overtrue\EasySms\PhoneNumber;
 
 class TestController extends Controller
 {
@@ -84,7 +91,31 @@ class TestController extends Controller
 
 //        dd(date('Y-m-d H:i:s'));
 
-        echo date('n',strtotime('-1 month'));
+//        echo date('n',strtotime('-1 month'));
+
+//        $sms = app('easysms');
+//        try {
+//            $res = $sms->send(17600296638, [
+//                'content'  => '【HR百科互助社】尊敬的VIP会员，您好！互助社重磅推出HR百科大学，现正火热报名中。会员权益再升级：1000+名师精品课免费畅听，3大实战训练营免费参加，优秀学员名企职位推荐，优质校友会人脉资源。报名微信：huzhushe2019，退订回N',
+//                'template' => 'whUvF1',
+//                'data' => [
+////                    'type' => '提现',
+//                ],
+//            ]);
+//            dd($res);
+//        } catch (\Overtrue\EasySms\Exceptions\NoGatewayAvailableException $exception) {
+//            $message = $exception->getResults();
+//            dd($message);
+//        }
+
+
+        AdminMsgService::sendAgentApplyMsg();
+//
+////        $user = User::find(8);
+////        $res = $user->notify(new VerificationCode());
+//
+//        dd($res);
+
     }
 
 }

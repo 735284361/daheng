@@ -32,7 +32,11 @@ class AgentService
      */
     public function applyAgent()
     {
-        return Agent::firstOrCreate(['user_id'=>auth('api')->id()]);
+        $res = Agent::firstOrCreate(['user_id'=>auth('api')->id()]);
+        if ($res) {
+            AdminMsgService::sendAgentApplyMsg();
+        }
+        return $res;
     }
 
     /**
@@ -186,11 +190,12 @@ class AgentService
     public function agentOrderList($agentId)
     {
         $data = AgentOrderMaps::where('agent_id',$agentId)->get('order_no');
-        $list = array();
-        if ($data) {
-            $data = array_column(json_decode($data,true),'order_no');
-            $list = Order::with('goods')->whereIn('order_no',$data)->get();
-        }
+        $order = $data->pluck('order_no');
+        $list = Order::with('goods')->join(
+            'agent_order_maps',
+            'order.order_no',
+            'agent_order_maps.order_no'
+        )->select('order.*','agent_order_maps.commission')->whereIn('order.order_no',$order)->get();
         return $list;
     }
 
@@ -241,7 +246,7 @@ class AgentService
     {
         // 判断是否已经加入过别人的代理
         if ($data = AgentMember::with('user')->where('user_id',$userId)->exists()) {
-            return ['code' => 1, 'msg' => '已加入：'.$data->user->nickname.'的代理，不能重复加入'];
+            return ['code' => 1, 'msg' => '已加入，不能重复加入'];
         }
         // 判断代理商是否存在
         $agentInfo = $this->getAgentInfo($agentId);
@@ -378,6 +383,15 @@ class AgentService
     {
         $agent = Agent::find($id);
         $agent->status = $status;
-        return $agent->save();
+        $res = $agent->save();
+
+//        $msgStatus = [
+//            Agent::STATUS_NORMAL,
+//            Agent::STATUS_REFUSE
+//        ];
+//        if ($res && in_array($status, $msgStatus)) {
+//            MessageService::sendAgentApplyMsg($agent->phone, $status);
+//        }
+        return$res;
     }
 }
