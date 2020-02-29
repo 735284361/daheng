@@ -77,7 +77,7 @@ class OrderService
         // 计算运费
         $shippingFeeService = new ShippingFeeService();
         $logisticsFee = $shippingFeeService->getShippingFee($request->province, $amountTotal);
-        
+
         // 订单总金额
         $totalFee = $amountTotal + $logisticsFee;
 
