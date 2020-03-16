@@ -32,4 +32,14 @@ class AgentController extends Controller
         $res ? $code = 0 : $code = 1;
         return ['code' => $code];
     }
+
+    public function updateTeamStatus(Request $request)
+    {
+        $this->validate($request,['id' => 'required|integer','status' => 'required']);
+
+        $res = $this->agentService->updateTeamStatus($request->id,$request->status);
+
+        $res ? $code = 0 : $code = 1;
+        return ['code' => $code];
+    }
 }

@@ -80,8 +80,16 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('statistics','AgentController@statistics');
             Route::get('members','AgentController@members');
             Route::get('qrcode','AgentController@getQrcode');
-            Route::any('invite','AgentController@invite')->name('agent.invite');
+            Route::any('inviteMember','AgentController@inviteMember')->name('agent.inviteMember');
             Route::get('orders','AgentController@orders');
+        });
+
+        Route::group(['prefix' => 'agentTeam'], function() {
+            Route::post('applyTeam','AgentController@applyTeam');
+            Route::get('teamInfo','AgentController@teamInfo');
+            Route::get('getTeamLeaderInfo','AgentController@getTeamLeaderInfo');
+            Route::get('teamQrCode','AgentController@teamQrCode');
+            Route::get('joinTeam','AgentController@joinTeam');
         });
 
         // 账单

@@ -5,16 +5,28 @@ namespace App\Services;
 use App\Models\Agent;
 use App\Models\AgentMember;
 use App\Models\AgentOrderMaps;
+use App\Models\AgentTeam;
+use App\Models\AgentTeamUser;
 use App\Models\DivideRate;
 use App\Models\Order;
 use App\Models\OrderGoods;
 use App\Models\UserBill;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class AgentService
 {
+
+    protected $agentConsume = 200;
+
+    protected $userId;
+
+    public function __construct($userId = '')
+    {
+        $this->userId = $userId == '' ? auth('api')->id() : '';
+    }
 
     /**
      * 获取代理商信息
@@ -32,11 +44,11 @@ class AgentService
      */
     public function applyAgent()
     {
-        $res = Agent::firstOrCreate(['user_id'=>auth('api')->id()]);
-        if ($res) {
+        $agent = Agent::firstOrCreate(['user_id'=>auth('api')->id()]);
+        if ($agent->wasRecentlyCreated) {
             AdminMsgService::sendAgentApplyMsg();
         }
-        return $res;
+        return $agent;
     }
 
     /**
@@ -173,6 +185,7 @@ class AgentService
      */
     private function getDivideAmount($total)
     {
+        $total = (int)$total;
         $divideRate = DivideRate::where('sales_start','<',$total)->where('sales_end','>=',$total)->first();
 
         if ($divideRate) {
@@ -385,13 +398,257 @@ class AgentService
         $agent->status = $status;
         $res = $agent->save();
 
-//        $msgStatus = [
-//            Agent::STATUS_NORMAL,
-//            Agent::STATUS_REFUSE
-//        ];
-//        if ($res && in_array($status, $msgStatus)) {
-//            MessageService::sendAgentApplyMsg($agent->phone, $status);
-//        }
-        return$res;
+        return $res;
+    }
+
+    /**
+     * 更新团队状态
+     * @param $id
+     * @param $status
+     * @return mixed
+     */
+    public function updateTeamStatus($id, $status)
+    {
+        $agentTeam = AgentTeam::find($id);
+        $agentTeam->status = $status;
+        $res = $agentTeam->save();
+
+        // 如果状态为正常 则同时更新代理商状态
+        if ($status == AgentTeam::STATUS_NORMAL) {
+            $agent = Agent::where('user_id',$agentTeam->user_id)->first();
+            $this->updateAgentStatus($agent->id,Agent::STATUS_NORMAL);
+        }
+
+        return $res;
+    }
+
+    /**
+     * 申请团队
+     * @return array
+     */
+    public function applyTeam()
+    {
+        /**
+         * 1.检查消费金额是否满足条件
+         * 2.检查用户是否在团队里
+         */
+
+        // 检查消费金额是否满足条件
+        if (!$this->checkConsume()) {
+            $msg = "消费满".$this->agentConsume."元才能申请团队";
+            return ['code' => 1, 'msg' => $msg];
+        }
+
+        // 检查用户是否在团队里
+        $userTeam = $this->getUsersTeamInfo();
+        if ($userTeam) {
+            return ['code' => 1, 'msg' => '你已加入团队，不能申请团队'];
+        }
+
+        // 创建团队
+        $team = AgentTeam::firstOrCreate(['user_id'=>auth('api')->id()]);
+
+        if ($team->wasRecentlyCreated) {
+            // 同时处理用户代理商数据
+            $this->applyAgent();
+            $this->addTeamUser($team->id);
+            AdminMsgService::sendAgentTeamApplyMsg();
+            return ['code' => 0, 'msg' => '申请成功'];
+        } else {
+            return ['code' => 1, 'msg' => '申请失败'];
+        }
+    }
+
+    /**
+     * 加入团队
+     * @param $teamId
+     * @return array
+     */
+    public function joinTeam($teamId)
+    {
+        /**
+         * 1.是否是代理
+         * 2.是否加入过团队
+         */
+        $agent = $this->getAgentInfo($this->userId);
+        if (!$agent || $agent->status != Agent::STATUS_NORMAL)
+        {
+            return ['code' => 1001, 'msg' => '您还不是代理商，请先申请成为代理商'];
+        }
+
+        if ($this->getUsersTeamInfo()) {
+            return ['code' => 1002, 'msg' => '您已加入过团队不能重复加入'];
+        }
+
+        $team = $this->getTeamLeaderInfo($teamId);
+        if (!$team || $team->status != AgentTeam::STATUS_NORMAL) {
+            return ['code' => 1, 'msg' => '该团队暂不支持加入'];
+        }
+
+        $user = $this->addTeamUser($teamId);
+
+        if ($user->wasRecentlyCreated) {
+            return ['code' => 0, 'msg' => '加入成功'];
+        } else {
+            return ['code' => 1, 'msg' => '加入失败'];
+        }
+
+    }
+
+    /**
+     * 添加队员信息
+     * @param $teamId
+     * @return mixed
+     */
+    public function addTeamUser($teamId)
+    {
+        return AgentTeamUser::firstOrCreate(['user_id'=>$this->userId],['user_id'=>$this->userId,'team_id'=>$teamId]);
+    }
+
+    /**
+     * 团队 用户组内信息
+     * @return mixed
+     */
+    public function getUsersTeamInfo()
+    {
+        return AgentTeamUser::where('user_id',$this->userId)->first();
+    }
+
+    /**
+     * 检查用户消费金额是否满足申请条件
+     * @return bool
+     */
+    public function checkConsume()
+    {
+        $orderService = new OrderService();
+        $amount = $orderService->getUserOrderConsumeAmount();
+        if ($amount >= $this->agentConsume) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 团队邀请码
+     * @return string
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
+     */
+    public function getTeamQrCode()
+    {
+        $team = $this->getTeamLeaderInfo();
+        if ($team && $team->status != AgentTeam::STATUS_NORMAL) return false;
+        if ($team && $team->qrcode) {
+            $qrcode = $team->qrcode;
+        } else {
+            $app = \EasyWeChat::miniProgram();
+            $response = $app->app_code->get('pages/distribution/team-accept/index?id='.$team->id);
+            $path = storage_path('app/public/qrcode');
+            if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+                $filename = $response->saveAs($path, uniqid().'.png');
+            }
+            $qrcode = 'qrcode/'.$filename;
+            $team->save();
+        }
+        return asset('storage/'.$qrcode);
+    }
+
+    /**
+     * 团队 所有信息接口
+     * @return mixed
+     */
+    public function teamInfo()
+    {
+        /**
+         * 1.队长信息
+         * 2.团队销售额
+         * 3.团队成员
+         */
+
+        $data['team'] = [];
+        $data['isTeamLeader'] = false;
+        $data['users'] = [];
+
+        // 判断是否已加入团队
+        $myTeam = $this->getUsersTeamInfo();
+        if (!$myTeam) {
+            // 如果没有加入团队 则判断是否有在申请的团队
+            $teamInfo = $this->getTeamLeaderInfo();
+            if ($teamInfo) {
+                $teamInfo->statusDes = AgentTeam::getStatusDes($teamInfo->status);
+                $data['team'] = $teamInfo;
+            }
+            return $data;
+        }
+
+        $teamId = $myTeam->team_id;
+        // 获取队长信息
+        $teamInfo = $this->getTeamLeaderInfo($teamId);
+        $data['team'] = $teamInfo;
+
+        // 判断是否是队长
+        if ($myTeam->user_id == $teamInfo->user_id) {
+            $data['isTeamLeader'] = true;
+            // 计算销售统计信息
+            $userList = $this->getTeamUsersList($teamId);
+            // 销售总额
+            $totalAmount = $userList->sum('sales_volume');
+            $divide = $this->getDivideAmount($totalAmount);
+            $data['sales_total']['amount'] = $totalAmount;
+            $data['sales_total']['divide'] = $divide;
+        } else {
+            $userList = $this->getTeamUsersList($teamId, $myTeam->user_id);
+        }
+
+        $userList->map(function($item) {
+            $item->sales_volume = (integer)$item->sales_volume;
+            $item->divide = $this->getDivideAmount($item->sales_volume);
+        });
+
+        $data['users'] = $userList;
+        return $data;
+    }
+
+    /**
+     * 获取团队队长信息
+     * @param null $teamId
+     * @return AgentTeam|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|null
+     */
+    public function getTeamLeaderInfo($teamId = null)
+    {
+        $query = AgentTeam::with(array('user_info' => function($query){
+            $query->select('id','nickname','avatar');
+        }));
+        if ($teamId == null) {
+            $query->where('user_id',$this->userId);
+        } else {
+            $query->where('id',$teamId);
+        }
+
+        return $query->first();
+    }
+
+    /**
+     * 团队 获取队员信息
+     * @param $teamId
+     * @param null $userId
+     * @return AgentTeamUser[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function getTeamUsersList($teamId, $userId = null)
+    {
+        $query = AgentTeamUser::with(array('user_info' => function($query){
+            $query->select('id','nickname','avatar');
+        }))->withCount(['agent_bill as sales_volume' => function($query) {
+            $query->where('month',Carbon::now()->format('Ym'))->select(DB::raw('sum(sales_volume)'));
+        }])->rightJoin('agents', 'agents.user_id', '=', 'agent_team_users.user_id')
+            ->where('agents.status',Agent::STATUS_NORMAL)
+            ->where('team_id',$teamId);
+
+        // 如果指定了用户ID 只查询对应用户ID的数据
+        if ($userId != null) {
+            $query->where('agent_team_users.user_id', $userId);
+        }
+
+        return $query->get();
     }
 }

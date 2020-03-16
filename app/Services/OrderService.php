@@ -476,4 +476,19 @@ class OrderService
         return;
     }
 
+    /**
+     * 获取用户商品消费总额
+     * @param $userId
+     * @return mixed
+     */
+    public function getUserOrderConsumeAmount($userId = '')
+    {
+        $userId == '' ? $userId = auth('api')->id() : '';
+
+        return Order::where('user_id',$userId)
+            ->where('status', Order::STATUS_COMPLETED)
+            ->sum('order_amount_total');
+    }
+
+
 }

@@ -109,13 +109,15 @@ class TestController extends Controller
 //        }
 
 
-        AdminMsgService::sendAgentApplyMsg();
+//        AdminMsgService::sendAgentApplyMsg();
 //
 ////        $user = User::find(8);
 ////        $res = $user->notify(new VerificationCode());
 //
 //        dd($res);
 
+
+        echo Carbon::now()->format('Ym');
     }
 
 }

@@ -21,6 +21,7 @@ Route::group([
     $router->resource('withdraws', WithdrawController::class);
     $router->resource('agents', AgentController::class);
     $router->resource('feedback', FeedbackController::class);
+    $router->resource('agent-teams', AgentTeamController::class);
 
     // 订单
     $router->group(['order' => 'delivery'], function($router) {
@@ -42,4 +43,5 @@ Route::group([
 
     // 代理商
     $router->post('agent/update-status','Api\AgentController@updateStatus')->name('admin.agent.update-status');
+    $router->post('agentTeam/updateStatus','Api\AgentController@updateTeamStatus')->name('admin.agentTeam.updateStatus');
 });

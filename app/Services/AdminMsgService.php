@@ -11,6 +11,7 @@ class AdminMsgService
 {
 
     const PROJECT_APPLY_AGENT = '2QxPt2'; // 代理商申请
+    const PROJECT_APPLY_AGENT_TEAM = 'nm7fa'; // 团队申请
     const PROJECT_APPLY_WITHDRAW = 'OcUCD'; // 提现申请
 
 
@@ -23,6 +24,11 @@ class AdminMsgService
     public static function sendAgentApplyMsg()
     {
         AdminMsgService::sendMsg(self::PROJECT_APPLY_AGENT);
+    }
+
+    public static function sendAgentTeamApplyMsg()
+    {
+        AdminMsgService::sendMsg(self::PROJECT_APPLY_AGENT_TEAM);
     }
 
     // 管理员短信发送接口

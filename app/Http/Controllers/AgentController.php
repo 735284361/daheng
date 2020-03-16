@@ -89,7 +89,7 @@ class AgentController extends Controller
      * @return array
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function invite(Request $request)
+    public function inviteMember(Request $request)
     {
         $this->validate($request,['id'=>'exists:agents,user_id']);
         return $this->agentService->acceptInvite($request->id,auth('api')->id());
@@ -139,6 +139,64 @@ class AgentController extends Controller
     private function checkIsAgent()
     {
         $this->authorize('isAgent',Agent::class);
+    }
+
+    /**
+     * 团队申请
+     * @return array
+     */
+    public function applyTeam()
+    {
+        return $this->agentService->applyTeam();
+    }
+
+    /**
+     * 团队二维码
+     * @return array
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @throws \EasyWeChat\Kernel\Exceptions\RuntimeException
+     */
+    public function teamQrCode()
+    {
+        $data = $this->agentService->getTeamQrCode();
+        if ($data) {
+            return ['code' => 0, 'data' => $data];
+        } else {
+            return ['code' => 1];
+        }
+    }
+
+    /**
+     * 加入代理团队
+     * @param Request $request
+     * @return array
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function joinTeam(Request $request)
+    {
+        $this->validate($request,['id'=>'exists:agent_team,id']);
+        return $this->agentService->joinTeam($request->id);
+    }
+
+    /**
+     * 团队信息接口
+     * @return mixed
+     */
+    public function teamInfo()
+    {
+        return $this->agentService->teamInfo();
+    }
+
+    /**
+     * 获取队长信息
+     * @param Request $request
+     * @return \App\Models\AgentTeam|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|null
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function getTeamLeaderInfo(Request $request)
+    {
+        $this->validate($request,['id'=>'required|integer']);
+        return $this->agentService->getTeamLeaderInfo($request->id);
     }
 
 }
