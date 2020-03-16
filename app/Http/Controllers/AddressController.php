@@ -6,6 +6,7 @@ use App\Http\Requests\AddresssRequest;
 use App\Models\ShippingAddress;
 use App\Services\AddressService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AddressController extends Controller
 {
@@ -23,7 +24,11 @@ class AddressController extends Controller
      */
     public function lists()
     {
-        $list = ShippingAddress::where('status',ShippingAddress::ADDRESS_STATUS_ENABLE)->orderBy('id','desc')->get();
+        $userId = auth()->id();
+        $list = ShippingAddress::where('status',ShippingAddress::ADDRESS_STATUS_ENABLE)
+            ->where('user_id',$userId)
+            ->orderBy('id','desc')
+            ->get();
         if ($list) {
             return ['code' => 0,'msg' => 'success','data'=>$list];
         } else {

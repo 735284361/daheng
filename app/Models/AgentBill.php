@@ -10,6 +10,8 @@ class AgentBill extends Model
     const DIVIDE_STATUS_UNDIVIDED = 0; // 未分成
     const DIVIDE_STATUS_DIVIDED = 1; // 已分成
 
+    protected $guarded = [];
+
     // 成员对应的用户信息
     public function user_info()
     {

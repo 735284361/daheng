@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Agent;
+use App\Models\AgentBill;
 use App\Models\AgentMember;
 use App\Models\AgentOrderMaps;
 use App\Models\AgentTeam;
@@ -291,8 +292,8 @@ class AgentService
     public static function saveAgentOrderMap(Order $order)
     {
         // 代理
-        $agentInfo = AgentMember::where('user_id',$order->user_id)->first();
-        if ($agentInfo) { // 如果存在代理关系 则进入代理流程
+        $agentInfo = AgentMember::with('agent')->where('user_id',$order->user_id)->first();
+        if ($agentInfo && $agentInfo->status == Agent::STATUS_NORMAL) { // 如果存在代理关系 则进入代理流程
             // 佣金计算
             $orderGoods = OrderGoods::where('order_no',$order->order_no)->get();
             $commission = 0;
@@ -316,7 +317,10 @@ class AgentService
     public function orderCommission($orderNo)
     {
         // 订单分成流程
-        $agentOrderMaps = AgentOrderMaps::with('order')->where('order_no',$orderNo)->where('status',AgentOrderMaps::STATUS_UNSETTLE)->first();
+        $agentOrderMaps = AgentOrderMaps::with('order')
+            ->where('order_no',$orderNo)
+            ->where('status',AgentOrderMaps::STATUS_UNSETTLE)
+            ->first();
         if ($agentOrderMaps) {
             // 更新订单代理结算状态
             $this->setSettled($agentOrderMaps);
@@ -332,9 +336,11 @@ class AgentService
                 UserBill::BILL_STATUS_NORMAL,
                 UserBill::BILL_TYPE_COMMISSION
             );
-            // 增加用户代理的消费金额
+            // 增加用户代理的消费数据
             AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('order_number');
             AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('amount',$agentOrderMaps->commission);
+            // 增加代理商的销售额
+            $this->saveAgentBill($agentOrderMaps->agent_id,$agentOrderMaps->order->product_amount_total);
         }
         return;
     }
@@ -360,6 +366,24 @@ class AgentService
     {
         $userAccount = new UserAccountService($userId);
         return $userAccount->incBalance($account);
+    }
+
+    /**
+     * 增加代理商的销售数据
+     * @param $agentId
+     * @param $account
+     * @return mixed
+     */
+    private function saveAgentBill($agentId, $account)
+    {
+        $bill = AgentBill::firstOrNew(['user_id'=>$agentId,'month'=>Carbon::now()->format('Ym')]);
+        if ($bill) {
+            $salesVolume = $bill->sales_volume + $account;
+        } else {
+            $salesVolume = $account;
+        }
+        $bill->sales_volume = $salesVolume;
+        return $bill->save();
     }
 
     /**
@@ -584,6 +608,7 @@ class AgentService
         $teamId = $myTeam->team_id;
         // 获取队长信息
         $teamInfo = $this->getTeamLeaderInfo($teamId);
+        $teamInfo->statusDes = AgentTeam::getStatusDes($teamInfo->status);
         $data['team'] = $teamInfo;
 
         // 判断是否是队长

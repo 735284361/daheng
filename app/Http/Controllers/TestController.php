@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Leonis\Notifications\EasySms\Channels\EasySmsChannel;
+use phpseclib\System\SSH\Agent;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Overtrue\EasySms\PhoneNumber;
 
@@ -117,7 +118,11 @@ class TestController extends Controller
 //        dd($res);
 
 
-        echo Carbon::now()->format('Ym');
+//        echo Carbon::now()->format('Ym');
+        $agent = new AgentService();
+//        $agent->saveAgentBill('8',100);
+
+        return AgentMember::with('agent')->where('user_id',9)->first();
     }
 
 }
