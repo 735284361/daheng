@@ -56,13 +56,7 @@ class AgentController extends Controller
      */
     public function apply()
     {
-        $res = $this->agentService->applyAgent();
-        if ($res) {
-            return ['code' => 0, 'msg' => '成功'];
-        } else {
-            return ['code' => 1, 'msg' => '失败'];
-        }
-
+        return $this->agentService->applyAgent();
     }
 
     /**

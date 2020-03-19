@@ -11,6 +11,7 @@ use App\Models\AgentTeamUser;
 use App\Models\DivideRate;
 use App\Models\Order;
 use App\Models\OrderGoods;
+use App\Models\SysParams;
 use App\Models\UserBill;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -20,13 +21,18 @@ use Illuminate\Support\Facades\Storage;
 class AgentService
 {
 
-    protected $agentConsume = 200;
+    protected $agentConsume = 0;
 
     protected $userId;
 
     public function __construct($userId = '')
     {
         $this->userId = $userId == '' ? auth('api')->id() : '';
+    }
+
+    public function agentConsumeCon()
+    {
+        return SysParams::where('code','agentConsumeCon')->getField('content');
     }
 
     /**
@@ -45,11 +51,22 @@ class AgentService
      */
     public function applyAgent()
     {
+        // 检查消费金额是否满足条件
+        if (!$this->checkConsume()) {
+            $msg = "消费满".$this->agentConsume."元才能申请团队";
+            return ['code' => 1, 'msg' => $msg];
+        }
+
         $agent = Agent::firstOrCreate(['user_id'=>auth('api')->id()]);
         if ($agent->wasRecentlyCreated) {
             AdminMsgService::sendAgentApplyMsg();
         }
-        return $agent;
+
+        if ($agent) {
+            return ['code' => 0, 'msg' => '申请成功'];
+        } else {
+            return ['code' => 1, 'msg' => '申请失败'];
+        }
     }
 
     /**
@@ -239,7 +256,7 @@ class AgentService
             $qrcode = $agent->qrcode;
         } else {
             $app = \EasyWeChat::miniProgram();
-            $response = $app->app_code->get('pages/distribution/code/code?id='.auth('api')->id());
+            $response = $app->app_code->get('pages/distribution/accept/index?id='.auth('api')->id());
             $path = storage_path('app/public/qrcode');
             if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
                 $filename = $response->saveAs($path, uniqid().'.png');

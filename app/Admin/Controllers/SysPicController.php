@@ -65,7 +65,7 @@ class SysPicController extends AdminController
     {
         $form = new Form(new SysPic);
 
-        $form->image('pic_url', __('图片'))->uniqueName();
+        $form->file('pic_url', __('图片'))->uniqueName();
         $form->text('remark', __('备注'));
 
         return $form;
