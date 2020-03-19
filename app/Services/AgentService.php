@@ -293,7 +293,7 @@ class AgentService
     {
         // 代理
         $agentInfo = AgentMember::with('agent')->where('user_id',$order->user_id)->first();
-        if ($agentInfo && $agentInfo->status == Agent::STATUS_NORMAL) { // 如果存在代理关系 则进入代理流程
+        if ($agentInfo && $agentInfo->agent->status == Agent::STATUS_NORMAL) { // 如果存在代理关系 则进入代理流程
             // 佣金计算
             $orderGoods = OrderGoods::where('order_no',$order->order_no)->get();
             $commission = 0;
