@@ -77,15 +77,25 @@ class AgentService
     public function statistics($userId)
     {
         // 本月销量
-        $endAt = Carbon::now();
-        $amount = $this->getSalesAmount($userId, $endAt);
-        $total = $amount['total'];
-        $divide = $this->getDivideAmount($total);
+        $sales = $this->getCurrentMonthSales($userId);
+        $total = $divide = 0;
+        if ($sales) {
+            $total = $sales->sales_volume;
+            $divide = $this->getDivideAmount($total);
+        }
 
         $data['amount'] = $total;
         $data['divide'] = $divide;
 
         return $data;
+    }
+
+    public function getCurrentMonthSales($userId)
+    {
+        return AgentBill::where([
+            'user_id' => $userId,
+            'month'   => Carbon::now()->format('Ym')
+        ])->first();
     }
 
     /**
@@ -262,6 +272,7 @@ class AgentService
                 $filename = $response->saveAs($path, uniqid().'.png');
             }
             $qrcode = 'qrcode/'.$filename;
+            $agent->qrcode = $qrcode;
             $agent->save();
         }
         return asset('storage/'.$qrcode);
