@@ -109,7 +109,7 @@ class AgentService
         $subMonth = Carbon::now()->subMonth()->format('Ym');
         $agentBill = $this->getAgentBill($userId,$subMonth);
         // 判断是否已经结算
-        if ($agentBill->divide_status == AgentBill::DIVIDE_STATUS_DIVIDED) {
+        if (!$agentBill || $agentBill->divide_status == AgentBill::DIVIDE_STATUS_DIVIDED) {
             return;
         }
         // 获取分成
@@ -117,12 +117,12 @@ class AgentService
         if ($agentBill) {
             $divide = $this->getDivideAmount($agentBill->sales_volume);
         }
-        // 获取销量对应的奖金数
-        if ($divide <= 0) {
-            return;
-        }
         // 修改月账单为已结算
         $this->updateAgentBill($agentBill->id,$divide);
+        // 获取销量对应的奖金数
+//        if ($divide <= 0) {
+//            return;
+//        }
         // 增加代理商余额
         if ($divide > 0) {
             $this->incAgentBalance($userId, $divide);
