@@ -146,11 +146,12 @@ class OrderService
             // 订单对应的商品
             $goodsList = OrderGoods::with('goods')->where('order_no',$this->order->order_no)->get();
             // 处理商品的数据统计
-            $billName = '';
+            $billName = [];
             foreach ($goodsList as $goods) {
                 $this->goodsService->dealGoodsCount($goods->goods_id, $goods->product_count, $goods->property_id);
-                $billName .= $goods->goods->name;
+                in_array($goods->goods->name, $billName) ? '' : $billName[] = $goods->goods->name;
             }
+            $billName = implode($billName,',');
             // 更新资金流水记录表
             $this->saveBillInfo($this->order->user_id, $billName, $this->order->order_amount_total, UserBill::AMOUNT_TYPE_EXPEND,
                 UserBill::BILL_STATUS_NORMAL, UserBill::BILL_TYPE_BUY);

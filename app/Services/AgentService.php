@@ -21,8 +21,6 @@ use Illuminate\Support\Facades\Storage;
 class AgentService
 {
 
-    protected $agentConsume = 0;
-
     protected $userId;
 
     public function __construct($userId = '')
@@ -32,7 +30,8 @@ class AgentService
 
     public function agentConsumeCon()
     {
-        return SysParams::where('code','agentConsumeCon')->getField('content');
+        $count = SysParams::where('code','agentConsumeCon')->value('value');
+        return $count ? $count : 0;
     }
 
     /**
@@ -53,7 +52,7 @@ class AgentService
     {
         // 检查消费金额是否满足条件
         if (!$this->checkConsume()) {
-            $msg = "消费满".$this->agentConsume."元才能申请团队";
+            $msg = "消费满".$this->agentConsumeCon()."元才能申请团队";
             return ['code' => 1, 'msg' => $msg];
         }
 
@@ -77,7 +76,7 @@ class AgentService
     public function statistics($userId)
     {
         // 本月销量
-        $sales = $this->getCurrentMonthSales($userId);
+        $sales = $this->getAgentBill($userId);
         $total = $divide = 0;
         if ($sales) {
             $total = $sales->sales_volume;
@@ -90,11 +89,14 @@ class AgentService
         return $data;
     }
 
-    public function getCurrentMonthSales($userId)
+    public function getAgentBill($userId,$month = null)
     {
+        if ($month == null) {
+            $month = Carbon::now()->format('Ym');
+        }
         return AgentBill::where([
             'user_id' => $userId,
-            'month'   => Carbon::now()->format('Ym')
+            'month'   => $month
         ])->first();
     }
 
@@ -104,25 +106,44 @@ class AgentService
      */
     public function agentOrderSettle($userId)
     {
-        $endAt = Carbon::now()->subMonth()->lastOfMonth();
-        // TODO 判断是否已经结算
-        // 获取上月的销量
-        $salesAmount = $this->getSalesAmount($userId, $endAt);
-        $total = $salesAmount['total'];
-        $list = $salesAmount['list'];
-        // 获取销量对应的奖金数
-        $divideAmount = $this->getDivideAmount($total);
-        if ($divideAmount <= 0) {
+        $subMonth = Carbon::now()->subMonth()->format('Ym');
+        $agentBill = $this->getAgentBill($userId,$subMonth);
+        // 判断是否已经结算
+        if ($agentBill->divide_status == AgentBill::DIVIDE_STATUS_DIVIDED) {
             return;
         }
-        // 修改代理订单状态为已提成
-        $this->setDivided($list);
+        // 获取分成
+        $divide = 0;
+        if ($agentBill) {
+            $divide = $this->getDivideAmount($agentBill->sales_volume);
+        }
+        // 获取销量对应的奖金数
+        if ($divide <= 0) {
+            return;
+        }
+        // 修改月账单为已结算
+        $this->updateAgentBill($agentBill->id,$divide);
         // 增加代理商余额
-        if ($divideAmount > 0) {
-            $this->incAgentBalance($userId, $divideAmount);
+        if ($divide > 0) {
+            $this->incAgentBalance($userId, $divide);
         }
         // 保存提成账单
-        $this->saveAgentDivideBill($userId, $divideAmount);
+        $this->saveAgentDivideBill($userId, $divide);
+        return;
+    }
+
+    /**
+     * 更新代理商的分成账单
+     * @param $id
+     * @param $amount
+     * @return mixed
+     */
+    public function updateAgentBill($id,$amount)
+    {
+        $bill = AgentBill::find($id);
+        $bill->divide_status = AgentBill::DIVIDE_STATUS_DIVIDED;
+        $bill->divide_amount = $amount;
+        return $bill->save();
     }
 
     /**
@@ -158,14 +179,6 @@ class AgentService
         return  AgentOrderMaps::whereIn('order_no',$orders)->update([
                 'status_divide'=>AgentOrderMaps::STATUS_DIVIDE_SETTLED
             ]);
-//        return AgentOrderMaps::with('order')
-//            ->where('agent_id',$userId)
-//            ->where('status',AgentOrderMaps::STATUS_SETTLED) // 订单已完成
-//            ->where('status_divide',AgentOrderMaps::STATUS_DIVIDE_UNSETTLE) // 未参与分成的订单
-//            ->where('created_at','<=',$endAt)
-//            ->update([
-//                'status_divide'=>AgentOrderMaps::STATUS_DIVIDE_SETTLED
-//            ]);
     }
 
     /**
@@ -487,7 +500,7 @@ class AgentService
 
         // 检查消费金额是否满足条件
         if (!$this->checkConsume()) {
-            $msg = "消费满".$this->agentConsume."元才能申请团队";
+            $msg = "消费满".$this->agentConsumeCon()."元才能申请团队";
             return ['code' => 1, 'msg' => $msg];
         }
 
@@ -574,7 +587,7 @@ class AgentService
     {
         $orderService = new OrderService();
         $amount = $orderService->getUserOrderConsumeAmount();
-        if ($amount >= $this->agentConsume) {
+        if ($amount >= $this->agentConsumeCon()) {
             return true;
         }
         return false;

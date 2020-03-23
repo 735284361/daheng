@@ -119,10 +119,24 @@ class TestController extends Controller
 
 
 //        echo Carbon::now()->format('Ym');
-        $agent = new AgentService();
+//        $agent = new AgentService();
 //        $agent->saveAgentBill('8',100);
 
-        return AgentMember::with('agent')->where('user_id',9)->first();
+//        return AgentMember::with('agent')->where('user_id',9)->first();
+
+//        echo Carbon::now()->subMonth()->format('Ym');
+
+//        echo AgentService::agentConsumeCon();
+
+        $goodsList = OrderGoods::with('goods')->where('order_no','GM2020032318495276752')->get();
+//        $goodsList = $goodsList->toArray();
+        $billName = [];
+        foreach ($goodsList as $goods) {
+            in_array($goods->goods->name, $billName) ? '' : $billName[] = $goods->goods->name;
+
+        }
+        $billName = implode($billName,',');
+        dd($billName);
     }
 
 }

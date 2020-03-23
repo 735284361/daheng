@@ -20,9 +20,12 @@ class DivideController extends Controller
         $this->agentService = new AgentService();
     }
 
+    /**
+     * 代理商分成
+     * @throws \Throwable
+     */
     public function divide()
     {
-//        if (Carbon::now() == Carbon::now()->firstOfMonth()) {
         if (Carbon::today() != Carbon::now()->firstOfMonth()) {
             $agentList = Agent::where('status',Agent::STATUS_NORMAL)->get();
             foreach ($agentList as $agent) {
@@ -35,6 +38,11 @@ class DivideController extends Controller
             }
         }
         return;
+    }
+
+    public function teamDivide()
+    {
+
     }
 
 }

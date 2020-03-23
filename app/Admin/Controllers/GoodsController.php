@@ -135,6 +135,7 @@ class GoodsController extends AdminController
 //        $form->text('description', __('Description'));
         $form->decimal('price', __('商品价格'))->default(0.00)->rules(['required']);
         $form->decimal('line_price', __('划线价格'))->default(0.00)->rules(['required']);
+        $form->decimal('dist_price', __('分成价格'))->default(0.00)->rules(['required'])->help('当该商品为单规格时，此分成价格有效');
         $form->number('stock', __('商品库存'))->default(0)->rules(['required']);
         $form->select('category_id', __('商品分类'))->options(function() {
             $categories = GoodsCategory::where('status',GoodsCategory::STATUS_ENABLE)->get(['id','name'])->toArray();

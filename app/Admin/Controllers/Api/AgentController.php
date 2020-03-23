@@ -33,6 +33,12 @@ class AgentController extends Controller
         return ['code' => $code];
     }
 
+    /**
+     * 更新代理团队状态
+     * @param Request $request
+     * @return array
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function updateTeamStatus(Request $request)
     {
         $this->validate($request,['id' => 'required|integer','status' => 'required']);
