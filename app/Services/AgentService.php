@@ -7,6 +7,7 @@ use App\Models\AgentBill;
 use App\Models\AgentMember;
 use App\Models\AgentOrderMaps;
 use App\Models\AgentTeam;
+use App\Models\AgentTeamBill;
 use App\Models\AgentTeamUser;
 use App\Models\DivideRate;
 use App\Models\Order;
@@ -89,6 +90,12 @@ class AgentService
         return $data;
     }
 
+    /**
+     * 获取代理商账单
+     * @param $userId
+     * @param null $month
+     * @return mixed
+     */
     public function getAgentBill($userId,$month = null)
     {
         if ($month == null) {
@@ -96,6 +103,23 @@ class AgentService
         }
         return AgentBill::where([
             'user_id' => $userId,
+            'month'   => $month
+        ])->first();
+    }
+
+    /**
+     * 获取团队账单
+     * @param $teamId
+     * @param null $month
+     * @return mixed
+     */
+    public function getAgentTeamBill($teamId,$month = null)
+    {
+        if ($month == null) {
+            $month = Carbon::now()->format('Ym');
+        }
+        return AgentTeamBill::where([
+            'team_id' => $teamId,
             'month'   => $month
         ])->first();
     }
@@ -132,6 +156,39 @@ class AgentService
         return;
     }
 
+    public function agentTeamSettle($teamId)
+    {
+        $subMonth = Carbon::now()->subMonth()->format('Ym');
+        $agentTeamBill = $this->getAgentTeamBill($teamId,$subMonth);
+        // 判断是否已经结算
+        if ($agentTeamBill && $agentTeamBill->divide_status == AgentTeamBill::DIVIDE_STATUS_DIVIDED) {
+            return;
+        }
+
+        $teamInfo = $this->getTeamLeaderInfo($teamId);
+
+        // 获取销售总额
+        $salesList = $this->getTeamSalesVolume($teamId,$subMonth);
+
+        $salesVolume = $salesList->sum('sales_volume'); // 团队销售总额
+        $divideAmount = $salesList->sum('divide_amount'); // 已经分成金额
+        // 获取分成
+        $divideTotalAmount = $this->getDivideAmount($salesVolume);
+        $divide = $divideTotalAmount - $divideAmount;
+        $divide < 0 ? $divide = 0 : '';
+        // 保存团队结算记录
+        $userId = $teamInfo->user_id;
+        $this->saveAgentTeamBill($teamId, $userId, $subMonth,$salesVolume, $divideTotalAmount, $divide);
+
+        // 增加队长余额
+        if ($divide > 0) {
+            $this->incAgentBalance($userId, $divide);
+        }
+        // 保存提成账单
+        $this->saveAgentDivideBill($userId, $divide,2);
+        return;
+    }
+
     /**
      * 更新代理商的分成账单
      * @param $id
@@ -150,13 +207,19 @@ class AgentService
      * 保存代理分成订单流水
      * @param $userId
      * @param $amount
+     * @param int $billType
      * @return mixed
      */
-    private function saveAgentDivideBill($userId, $amount)
+    private function saveAgentDivideBill($userId, $amount, $billType = 1)
     {
         $agent = Agent::where('user_id',$userId)->first();
 
-        $billName = date('n',strtotime('-1 month')).'月份销售分成';
+        $billName = date('n',strtotime('-1 month'));
+        if ($billType == 1) {
+            $billName .= '月份销售奖金';
+        } else if ($billType == 2) {
+            $billName .= '月份团队销售奖金';
+        }
         return $agent->bill()->create([
             'user_id' => $userId,
             'bill_name' => $billName,
@@ -164,6 +227,20 @@ class AgentService
             'amount_type' => UserBill::AMOUNT_TYPE_INCOME,
             'status' => UserBill::BILL_STATUS_NORMAL,
             'bill_type' => UserBill::BILL_TYPE_DIVIDE
+        ]);
+    }
+
+    private function saveAgentTeamBill($teamId, $userId, $month, $salesVolume,$divideTotalAmount,$divideRemainAmount)
+    {
+        $teamBill = new AgentTeamBill();
+        return $teamBill->create([
+            'team_id' => $teamId,
+            'user_id' => $userId,
+            'month' => $month,
+            'sales_volume' => $salesVolume,
+            'divide_status' => AgentTeamBill::DIVIDE_STATUS_DIVIDED,
+            'divide_total_amount' => $divideTotalAmount,
+            'divide_remain_amount' => $divideRemainAmount,
         ]);
     }
 
@@ -716,5 +793,26 @@ class AgentService
         }
 
         return $query->get();
+    }
+
+    /**
+     * 获取团队总销量
+     * @param $teamId
+     * @param null $month
+     * @return mixed
+     */
+    public function getTeamSalesVolume($teamId, $month = null)
+    {
+        if ($month == null) {
+            $month = Carbon::now()->format('Ym');
+        }
+        $list = AgentTeamUser::whereHas('agent',function($query) {
+            $query->where('status',Agent::STATUS_NORMAL);
+        })->rightJoin('agent_bills', function ($join) use ($month) {
+            $join->on('agent_bills.user_id', '=', 'agent_team_users.user_id')
+                ->where('agent_bills.month', $month);
+        })->where('team_id',$teamId)->get();
+
+        return $list;
     }
 }

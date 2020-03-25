@@ -31,7 +31,7 @@ class AgentBill extends Model
         ];
 
         if ($ind !== null) {
-            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::STATUS_UNDIVIDED];
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::DIVIDE_STATUS_UNDIVIDED];
         }
         return $arr;
     }

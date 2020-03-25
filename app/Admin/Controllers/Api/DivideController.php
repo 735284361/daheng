@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers\Api;
 
 use App\Models\Agent;
+use App\Models\AgentTeam;
 use App\Services\AgentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -27,15 +28,21 @@ class DivideController extends Controller
     public function divide()
     {
         if (Carbon::today() != Carbon::now()->firstOfMonth()) {
-            $agentList = Agent::where('status',Agent::STATUS_NORMAL)->get();
-            foreach ($agentList as $agent) {
-                // 结算上个月最后一天之前的数据
-                $userId = $agent->user_id;
-                DB::transaction(function () use ($userId) {
+            DB::transaction(function () {
+                // 代理商结算
+                $agentList = Agent::where('status',Agent::STATUS_NORMAL)->get();
+                foreach ($agentList as $agent) {
                     // 奖金结算
-                    $this->agentService->agentOrderSettle($userId);
-                });
-            }
+                    $this->agentService->agentOrderSettle($agent->user_id);
+                }
+
+                // 团队队长奖金结算
+                $teamList = AgentTeam::where('status',AgentTeam::STATUS_NORMAL)->get();
+                foreach ($teamList as $team) {
+                    // 奖金结算
+                    $this->agentService->agentTeamSettle($team->id);
+                }
+            });
         }
         return;
     }
@@ -43,13 +50,13 @@ class DivideController extends Controller
     public function teamDivide()
     {
         if (Carbon::today() != Carbon::now()->firstOfMonth()) {
-            $agentList = Agent::where('status',Agent::STATUS_NORMAL)->get();
-            foreach ($agentList as $agent) {
+            $teamList = AgentTeam::where('status',AgentTeam::STATUS_NORMAL)->get();
+            foreach ($teamList as $team) {
                 // 结算上个月最后一天之前的数据
-                $userId = $agent->user_id;
-                DB::transaction(function () use ($userId) {
+                $teamId = $team->id;
+                DB::transaction(function () use ($teamId) {
                     // 奖金结算
-                    $this->agentService->agentOrderSettle($userId);
+                    $this->agentService->agentTeamSettle($teamId);
                 });
             }
         }
