@@ -18,6 +18,7 @@ class CreateAgentTables extends Migration
             $table->integer('user_id')->comment('用户编号');
             $table->integer('status')->default(0)->comment('代理状态0 申请，1 正常，-1 禁用，-2 审核未通过');
             $table->string('qrcode')->nullable()->comment('代理商二维码');
+            $table->tinyInteger('level')->default(1)->comment('代理层级');
             $table->timestamps();
         });
 

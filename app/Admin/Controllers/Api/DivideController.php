@@ -47,20 +47,4 @@ class DivideController extends Controller
         return;
     }
 
-    public function teamDivide()
-    {
-        if (Carbon::today() != Carbon::now()->firstOfMonth()) {
-            $teamList = AgentTeam::where('status',AgentTeam::STATUS_NORMAL)->get();
-            foreach ($teamList as $team) {
-                // 结算上个月最后一天之前的数据
-                $teamId = $team->id;
-                DB::transaction(function () use ($teamId) {
-                    // 奖金结算
-                    $this->agentService->agentTeamSettle($teamId);
-                });
-            }
-        }
-        return;
-    }
-
 }

@@ -49,8 +49,10 @@ class OrderService
         $productCount = $goodsCollect->sum('number');
 
         // 生成订单商品
-        $amountTotal = 0;
+        $amountTotal = 0; // 商品总金额
+        $commissionFee = 0; // 佣金总金额
         $goodsList = [];
+        $userId = auth('api')->id();
 //        $body = Goods::find($goods[0]['goodsId'])->value('name');
         for ($i = 0; $i < count($goods); $i++) {
             // 获取商品属性
@@ -61,9 +63,10 @@ class OrderService
             }
             // 计算订单总价
             $amountTotal += $goods[$i]['number'] * $sku->price;
+            $commissionFee += $goods[$i]['number'] * $sku->dist_price;
             // 订单包含的商品
             $good['order_no'] = $orderNo;
-            $good['user_id'] = auth('api')->id();
+            $good['user_id'] = $userId;
             $good['goods_id'] = $goods[$i]['goodsId'];
             $good['sku'] = $goods[$i]['propertyChildName'];
             $good['property_id'] = $goods[$i]['propertyChildIds'];
@@ -80,6 +83,11 @@ class OrderService
 
         // 订单总金额
         $totalFee = $amountTotal + $logisticsFee;
+        // 如果该用户不是代理商的顾客 则清零 分成费用
+        if (!AgentService::getUsersAgent($userId)) {
+            $commissionFee = 0;
+        }
+        $commissionRemainFee = $amountTotal - $commissionFee;
 
         DB::beginTransaction();
         $order = new Order();
@@ -90,6 +98,8 @@ class OrderService
         $order->product_amount_total = $amountTotal;
         $order->logistics_fee = $logisticsFee;
         $order->order_amount_total = $totalFee;
+        $order->commission_fee = $commissionFee;
+        $order->commission_remain_fee = $commissionRemainFee;
         $order->remark = $request->remark;
         $orderRes = $order->save();
 

@@ -14,6 +14,7 @@ class CreateGoodsContents extends Migration
     public function up()
     {
         Schema::create('goods_contents', function (Blueprint $table) {
+            $table->increments('id');
             $table->integer('goods_id')->comment('商品ID');
             $table->text('content')->comment('商品介绍');
         });

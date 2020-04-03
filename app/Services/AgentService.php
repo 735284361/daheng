@@ -23,10 +23,16 @@ class AgentService
 {
 
     protected $userId;
+    protected $msg;
 
     public function __construct($userId = '')
     {
         $this->userId = $userId == '' ? auth('api')->id() : '';
+    }
+
+    public function getErrorMsg()
+    {
+        return $this->msg;
     }
 
     public function agentConsumeCon()
@@ -51,13 +57,20 @@ class AgentService
      */
     public function applyAgent()
     {
+        $userId = auth('api')->id();
+
         // 检查消费金额是否满足条件
-        if (!$this->checkConsume()) {
-            $msg = "消费满".$this->agentConsumeCon()."元才能申请团队";
-            return ['code' => 1, 'msg' => $msg];
+        if (!$this->checkConsume($userId)) {
+            return ['code' => 1, 'msg' => $this->msg];
         }
 
-        $agent = Agent::firstOrCreate(['user_id'=>auth('api')->id()]);
+        $agentInfo = $this->getAgentInfo($userId);
+
+        if ($agentInfo) {
+            return ['code' => 1, 'msg' => '不能重复申请'];
+        }
+
+        $agent = Agent::firstOrCreate(['user_id'=>$userId]);
         if ($agent->wasRecentlyCreated) {
             AdminMsgService::sendAgentApplyMsg();
         }
@@ -67,6 +80,75 @@ class AgentService
         } else {
             return ['code' => 1, 'msg' => '申请失败'];
         }
+    }
+
+    /**
+     * 顾客身份信息
+     * @param $userId
+     * @return mixed
+     */
+    public function getCustomerInfo($userId)
+    {
+        return AgentMember::where('user_id',$userId)->first();
+    }
+
+    /**
+     * 检查代理商申请权限
+     * @param $userId
+     * @return bool
+     */
+    public function checkApplyAgentCon($userId)
+    {
+        // 消费限制
+        if (!$this->checkConsume()) {
+            $this->msg = "消费满".$this->agentConsumeCon()."元才能申请团队";
+            return false;
+        }
+
+        // 顾客层级限制
+        $customerLevel = $this->getCustomerLevel($userId);
+        if ($customerLevel == 3) { // 三级顾客 无申请权限
+            $this->msg = "暂无申请权限";
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 判断用户顾客的层级
+     * @param $userId
+     * @return int
+     */
+    public function getCustomerLevel($userId)
+    {
+        // 顾客层级限制
+        $customer = $this->getCustomerInfo($userId);
+        if ($customer) { // 如果是顾客
+            // 判断用户的代理属于几级代理
+            $level = $this->getAgentLevel($customer->agent_id);
+            if ($level == 2) {
+                return 3;
+            } else {
+                return 2;
+            }
+        } else {
+            return 1;
+        }
+    }
+
+    /**
+     * 获取代理商的层级
+     * @param $userId
+     * @return int
+     */
+    public function getAgentLevel($userId)
+    {
+        $agent = $this->getAgentInfo($userId);
+        // 如果
+        if ($agent) {
+            return $agent->level;
+        }
+        return 0;
     }
 
     /**
@@ -410,22 +492,29 @@ class AgentService
     public static function saveAgentOrderMap(Order $order)
     {
         // 代理
-        $agentInfo = AgentMember::with('agent')->where('user_id',$order->user_id)->first();
-        if ($agentInfo && $agentInfo->agent->status == Agent::STATUS_NORMAL) { // 如果存在代理关系 则进入代理流程
-            // 佣金计算
-            $orderGoods = OrderGoods::where('order_no',$order->order_no)->get();
-            $commission = 0;
-            foreach ($orderGoods as $goods) {
-                $commission += $goods->product_count * $goods->dist_price;
-            }
-            // 添加代理订单关系
-            $agentOrder = new AgentOrderMaps();
-            $agentOrder->agent_id = $agentInfo->agent_id;
-            $agentOrder->order_no = $order->order_no;
-            $agentOrder->commission = $commission;
-            $agentOrder->save();
+        $agentInfo = self::getUsersAgent($order->user_id);
+        if (!$agentInfo) return;
+        // 添加代理订单关系
+        $agentOrder = new AgentOrderMaps();
+        $agentOrder->agent_id = $agentInfo->agent_id;
+        $agentOrder->order_no = $order->order_no;
+        $agentOrder->commission = $order->commission_fee;;
+        $agentOrder->save();
+    }
+
+    /**
+     * 获取用户所属代理商的信息
+     * @param $userId
+     * @return AgentMember|bool|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|null
+     */
+    public static function getUsersAgent($userId)
+    {
+        // 代理
+        $agentInfo = AgentMember::with('agent')->where('user_id',$userId)->first();
+        if ($agentInfo && $agentInfo->agent->status == Agent::STATUS_NORMAL) {
+            return $agentInfo;
         }
-        return;
+        return false;
     }
 
     /**
@@ -458,7 +547,7 @@ class AgentService
             AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('order_number');
             AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('amount',$agentOrderMaps->commission);
             // 增加代理商的销售额
-            $this->saveAgentBill($agentOrderMaps->agent_id,$agentOrderMaps->order->product_amount_total);
+            $this->saveAgentBill($agentOrderMaps->agent_id,$agentOrderMaps->order->commission_remain_fee);
         }
         return;
     }
@@ -537,6 +626,22 @@ class AgentService
     public function updateAgentStatus($id, $status)
     {
         $agent = Agent::find($id);
+
+        // 如果状态从申请状态改为正常状态
+        if ($agent->status == Agent::STATUS_APPLY && $status == Agent::STATUS_NORMAL) {
+            $userId = $agent->user_id;
+            $customerLevel = $this->getCustomerLevel($userId);
+            if ($customerLevel == 1) { // 一级顾客直接 创建团队
+                $this->addTeam($userId);
+            } elseif ($customerLevel == 2) { // 二级顾客 加入团队
+                $customer = $this->getCustomerInfo($userId);
+                $team = $this->getTeamLeaderInfo($customer->agent_id);
+                $this->addTeamUser($team->id,$userId);
+            } elseif ($customerLevel == 3) { // 三级顾客 无权限
+                return false;
+            }
+         }
+
         $agent->status = $status;
         $res = $agent->save();
 
@@ -565,7 +670,7 @@ class AgentService
     }
 
     /**
-     * 申请团队
+     * 申请团队 弃用
      * @return array
      */
     public function applyTeam()
@@ -602,7 +707,18 @@ class AgentService
     }
 
     /**
-     * 加入团队
+     * 增加团队
+     * @param $userId
+     * @return mixed
+     */
+    public function addTeam($userId)
+    {
+        // 创建团队
+        return AgentTeam::firstOrCreate(['user_id'=>$userId]);
+    }
+
+    /**
+     * 加入团队 弃用
      * @param $teamId
      * @return array
      */
@@ -640,11 +756,12 @@ class AgentService
     /**
      * 添加队员信息
      * @param $teamId
+     * @param $userId
      * @return mixed
      */
-    public function addTeamUser($teamId)
+    public function addTeamUser($teamId, $userId)
     {
-        return AgentTeamUser::firstOrCreate(['user_id'=>$this->userId],['user_id'=>$this->userId,'team_id'=>$teamId]);
+        return AgentTeamUser::firstOrCreate(['user_id'=>$this->userId],['user_id'=>$userId,'team_id'=>$teamId]);
     }
 
     /**
@@ -755,17 +872,20 @@ class AgentService
     /**
      * 获取团队队长信息
      * @param null $teamId
+     * @param null $userId
      * @return AgentTeam|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|null
      */
-    public function getTeamLeaderInfo($teamId = null)
+    public function getTeamLeaderInfo($teamId = null, $userId = null)
     {
         $query = AgentTeam::with(array('user_info' => function($query){
             $query->select('id','nickname','avatar');
         }));
-        if ($teamId == null) {
-            $query->where('user_id',$this->userId);
-        } else {
+        if ($teamId != null) {
             $query->where('id',$teamId);
+        } else if ($userId != null) {
+            $query->where('user_id',$userId);
+        } else {
+            $query->where('user_id',$this->userId);
         }
 
         return $query->first();

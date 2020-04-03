@@ -20,8 +20,10 @@ class CreateOrderTables extends Migration
             $table->integer('user_id')->comment('用户ID');
             $table->integer('product_count')->comment('商品数量');
             $table->double('product_amount_total',10,2)->comment('商品总价');
-            $table->integer('logistics_fee')->default(0)->comment('运费金额');
+            $table->double('logistics_fee',10,2)->default(0)->comment('运费金额');
             $table->double('order_amount_total',10,2)->comment('实际付款金额');
+            $table->double('commission_fee',10,2)->default(0)->comment('佣金');
+            $table->double('commission_remain_fee',10,2)->default(0)->comment('佣金结余费用');
             $table->timestamp('order_settlement_time')->nullable()->comment('订单结算时间');
             $table->integer('order_settlement_status')->default(0)->comment('订单结算状态 0未结算 1已结算');
             $table->integer('after_status')->default(0)->comment('用户售后状态 0 未发起售后 1 申请售后 -1 售后已取消 2 处理中 200 处理完毕');

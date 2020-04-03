@@ -50,6 +50,13 @@ class AgentController extends Controller
         }
     }
 
+    public function getAgentViewRight()
+    {
+        $userId = auth('api')->id();
+        if ($this->agentService->getAgentInfo($userId)) return true;
+        return $this->agentService->checkApplyAgentCon($userId);
+    }
+
     /**
      * 申请代理商
      * @return array

@@ -138,11 +138,14 @@ class TestController extends Controller
 //        $billName = implode($billName,',');
 //        dd($billName);
 
-        $agentService = new AgentService();
-        $list = $agentService->getTeamSalesVolume('10','202002');
-        $salesVolume = $list->sum('sales_volume');
-        $divideAmount = $list->sum('divide_amount');
-        dd($list);
+//        $agentService = new AgentService();
+//        $list = $agentService->getTeamSalesVolume('10','202002');
+//        $salesVolume = $list->sum('sales_volume');
+//        $divideAmount = $list->sum('divide_amount');
+//        dd($list);
+
+        // 代理
+        $agentInfo = AgentMember::whereHas('agent')->where('user_id',9)->first();
     }
 
 }
