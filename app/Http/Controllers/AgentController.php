@@ -54,13 +54,13 @@ class AgentController extends Controller
     {
         $userId = auth('api')->id();
         if ($this->agentService->getAgentInfo($userId)) {
-            return 0;
+            return 1; // 代理商
         }
         $applyCon = $this->agentService->checkApplyAgentCon($userId);
         if ($applyCon) {
-            return 0;
+            return 2; // 可申请
         } else {
-            return 1;
+            return 0; // 不可申请
         }
     }
 
