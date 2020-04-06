@@ -25,7 +25,9 @@ class ShopController extends Controller
     public function lists(Request $request)
     {
         $categoryId = $request->input('categoryId',"");
+        $recommend = $request->input('recommend',false);
         $categoryId == "" ? '' : $maps['category_id'] = $categoryId;
+        $recommend ? $maps['recommend_status'] = Goods::RECOMMEND_STATUS_YES : '';
         $maps['status'] = Goods::STATUS_ONLINE;
         $data =  Goods::where($maps)->orderBy('sort','asc')->orderBy('number_score','desc')->get();
         if ($data) {
