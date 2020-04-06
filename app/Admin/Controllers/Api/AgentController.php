@@ -5,6 +5,7 @@ namespace App\Admin\Controllers\Api;
 use App\Services\AgentService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class AgentController extends Controller
 {
@@ -22,12 +23,15 @@ class AgentController extends Controller
      * @param Request $request
      * @return array
      * @throws \Illuminate\Validation\ValidationException
+     * @throws \Throwable
      */
     public function updateStatus(Request $request)
     {
         $this->validate($request,['id' => 'required|integer','status' => 'required']);
 
-        $res = $this->agentService->updateAgentStatus($request->id,$request->status);
+        DB::transaction(function () use($request, &$res) {
+            $res = $this->agentService->updateAgentStatus($request->id,$request->status);
+        });
 
         $res ? $code = 0 : $code = 1;
         return ['code' => $code];

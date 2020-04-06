@@ -144,7 +144,7 @@ class TestController extends Controller
 //        $divideAmount = $list->sum('divide_amount');
 //        dd($list);
 
-        
+
         // 代理
         $agentInfo = AgentMember::whereHas('agent')->where('user_id',9)->first();
     }

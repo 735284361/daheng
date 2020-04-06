@@ -53,8 +53,15 @@ class AgentController extends Controller
     public function getAgentViewRight()
     {
         $userId = auth('api')->id();
-        if ($this->agentService->getAgentInfo($userId)) return true;
-        return $this->agentService->checkApplyAgentCon($userId);
+        if ($this->agentService->getAgentInfo($userId)) {
+            return 0;
+        }
+        $applyCon = $this->agentService->checkApplyAgentCon($userId);
+        if ($applyCon) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
 
     /**

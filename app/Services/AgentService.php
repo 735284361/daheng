@@ -632,7 +632,8 @@ class AgentService
             $userId = $agent->user_id;
             $customerLevel = $this->getCustomerLevel($userId);
             if ($customerLevel == 1) { // 一级顾客直接 创建团队
-                $this->addTeam($userId);
+                $team = $this->addTeam($userId);
+                $this->addTeamUser($team->id,$userId);
             } elseif ($customerLevel == 2) { // 二级顾客 加入团队
                 $customer = $this->getCustomerInfo($userId);
                 $team = $this->getTeamLeaderInfo($customer->agent_id);
@@ -649,7 +650,7 @@ class AgentService
     }
 
     /**
-     * 更新团队状态
+     * 更新团队状态 弃用
      * @param $id
      * @param $status
      * @return mixed
@@ -698,7 +699,7 @@ class AgentService
         if ($team->wasRecentlyCreated) {
             // 同时处理用户代理商数据
             $this->applyAgent();
-            $this->addTeamUser($team->id);
+            $this->addTeamUser($team->id,auth('api')->id());
             AdminMsgService::sendAgentTeamApplyMsg();
             return ['code' => 0, 'msg' => '申请成功'];
         } else {
@@ -761,7 +762,7 @@ class AgentService
      */
     public function addTeamUser($teamId, $userId)
     {
-        return AgentTeamUser::firstOrCreate(['user_id'=>$this->userId],['user_id'=>$userId,'team_id'=>$teamId]);
+        return AgentTeamUser::firstOrCreate(['user_id'=>$userId],['user_id'=>$userId,'team_id'=>$teamId]);
     }
 
     /**
@@ -781,7 +782,8 @@ class AgentService
     {
         $orderService = new OrderService();
         $amount = $orderService->getUserOrderConsumeAmount();
-        if ($amount >= $this->agentConsumeCon()) {
+        $consume= $this->agentConsumeCon();
+        if ($amount >= $consume) {
             return true;
         }
         return false;
@@ -847,18 +849,30 @@ class AgentService
         $data['team'] = $teamInfo;
 
         // 判断是否是队长
+//        if ($myTeam->user_id == $teamInfo->user_id) {
+//            $data['isTeamLeader'] = true;
+//            // 计算销售统计信息
+//            $userList = $this->getTeamUsersList($teamId);
+//            // 销售总额
+//            $totalAmount = $userList->sum('sales_volume');
+//            $divide = $this->getDivideAmount($totalAmount);
+//            $data['sales_total']['amount'] = $totalAmount;
+//            $data['sales_total']['divide'] = $divide;
+//        } else {
+//            $userList = $this->getTeamUsersList($teamId, $myTeam->user_id);
+//        }
+
+        // 所有成员
         if ($myTeam->user_id == $teamInfo->user_id) {
             $data['isTeamLeader'] = true;
-            // 计算销售统计信息
-            $userList = $this->getTeamUsersList($teamId);
-            // 销售总额
-            $totalAmount = $userList->sum('sales_volume');
-            $divide = $this->getDivideAmount($totalAmount);
-            $data['sales_total']['amount'] = $totalAmount;
-            $data['sales_total']['divide'] = $divide;
-        } else {
-            $userList = $this->getTeamUsersList($teamId, $myTeam->user_id);
         }
+        // 计算销售统计信息
+        $userList = $this->getTeamUsersList($teamId);
+        // 销售总额
+        $totalAmount = $userList->sum('sales_volume');
+        $divide = $this->getDivideAmount($totalAmount);
+        $data['sales_total']['amount'] = $totalAmount;
+        $data['sales_total']['divide'] = $divide;
 
         $userList->map(function($item) {
             $item->sales_volume = (integer)$item->sales_volume;
