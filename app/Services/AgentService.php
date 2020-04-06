@@ -59,15 +59,15 @@ class AgentService
     {
         $userId = auth('api')->id();
 
-        // 检查消费金额是否满足条件
-        if (!$this->checkConsume($userId)) {
-            return ['code' => 1, 'msg' => $this->msg];
-        }
-
         $agentInfo = $this->getAgentInfo($userId);
 
         if ($agentInfo) {
             return ['code' => 1, 'msg' => '不能重复申请'];
+        }
+
+        $applyCon = $this->checkApplyAgentCon($userId);
+        if (!$applyCon) {
+            return ['code' => 0, 'msg' => $this->msg];
         }
 
         $agent = Agent::firstOrCreate(['user_id'=>$userId]);
@@ -477,12 +477,21 @@ class AgentService
             return ['code' => 1, 'msg' => '你已经是代理商，不能加入他人的代理'];
         }
         // 加入代理
-
         $agentMember = new AgentMember();
         $agentMember->agent_id = $agentId;
         $agentMember->user_id = $userId;
         $agentMember->save();
         return ['code' => 0, 'msg' => '加入成功'];
+    }
+
+    /**
+     * 移除代理商的成员
+     * @param $userId
+     * @return mixed
+     */
+    public function removeAgentMember($userId)
+    {
+        return AgentMember::where('user_id',$userId)->delete();
     }
 
     /**
@@ -634,10 +643,17 @@ class AgentService
             if ($customerLevel == 1) { // 一级顾客直接 创建团队
                 $team = $this->addTeam($userId);
                 $this->addTeamUser($team->id,$userId);
+                $agent->level = 1;
             } elseif ($customerLevel == 2) { // 二级顾客 加入团队
+                // 顾客信息
                 $customer = $this->getCustomerInfo($userId);
-                $team = $this->getTeamLeaderInfo($customer->agent_id);
+                // 顾客所在团队信息
+                $team = $this->getTeamLeaderInfo(null,$customer->agent_id);
+                // 添加团队成员
                 $this->addTeamUser($team->id,$userId);
+                // 移除代理商顾客成员
+                $this->removeAgentMember($userId);
+                $agent->level = 2;
             } elseif ($customerLevel == 3) { // 三级顾客 无权限
                 return false;
             }
