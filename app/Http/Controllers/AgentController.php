@@ -50,6 +50,10 @@ class AgentController extends Controller
         }
     }
 
+    /**
+     * 代理模块
+     * @return int
+     */
     public function getAgentViewRight()
     {
         $userId = auth('api')->id();
