@@ -52,6 +52,16 @@ class AgentService
     }
 
     /**
+     * 获取代理用户信息
+     * @param $userId
+     * @return Agent|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|null
+     */
+    public function getAgentUserInfo($userId)
+    {
+        return Agent::with('user')->where('user_id',$userId)->first();
+    }
+
+    /**
      * 申请代理商
      * @return mixed
      */
@@ -438,7 +448,7 @@ class AgentService
             $qrcode = $agent->qrcode;
         } else {
             $app = \EasyWeChat::miniProgram();
-            $response = $app->app_code->get('pages/distribution/accept/index?id='.auth('api')->id());
+            $response = $app->app_code->get('pages/distribution/accept/index?id='.$userId);
             $path = storage_path('app/public/qrcode');
             if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
                 $filename = $response->saveAs($path, uniqid().'.png');

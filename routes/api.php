@@ -83,8 +83,10 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('qrcode','AgentController@getQrcode');
             Route::any('inviteMember','AgentController@inviteMember')->name('agent.inviteMember');
             Route::get('orders','AgentController@orders');
+            Route::get('getAgentUserInfo','AgentController@getAgentUserInfo');
         });
 
+        // 团队
         Route::group(['prefix' => 'agentTeam'], function() {
             Route::post('applyTeam','AgentController@applyTeam');
             Route::get('teamInfo','AgentController@teamInfo');

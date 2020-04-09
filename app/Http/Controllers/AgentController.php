@@ -96,6 +96,18 @@ class AgentController extends Controller
     }
 
     /**
+     * 代理商用户信息
+     * @param Request $request
+     * @return Agent|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|null
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function getAgentUserInfo(Request $request)
+    {
+        $this->validate($request,['id'=>'exists:agents,user_id']);
+        return $this->agentService->getAgentUserInfo($request->id);
+    }
+
+    /**
      * 加入代理商的成员
      * @param Request $request
      * @return array
