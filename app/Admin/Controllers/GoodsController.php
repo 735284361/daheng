@@ -152,7 +152,7 @@ class GoodsController extends AdminController
 //        $form->number('number_fav', __('收藏数量'))->default(0);
         $form->number('number_orders', __('订单数量'))->default(0);
         $form->number('number_views', __('浏览数量'))->default(0);
-        $form->number('number_reputation', __('评论数量'))->default(0)->readonly();
+        $form->number('number_reputation', __('评论数量'))->default(100)->readonly();
         $form->number('number_sells', __('销售数量'))->default(0)->readonly();
         $form->select('status', __('商品状态'))->default(GoodsCategory::STATUS_DISABLE)->options(self::$statusArr)->required();
         $form->image('pic_url',__('商品头图'))->required();
