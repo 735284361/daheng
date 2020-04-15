@@ -448,7 +448,7 @@ class AgentService
             $qrcode = $agent->qrcode;
         } else {
             $app = \EasyWeChat::miniProgram();
-            $response = $app->app_code->get('pages/distribution/accept/index?id='.$userId);
+            $response = $app->app_code->get('/pages/distribution/accept/index?id='.$userId);
             $path = storage_path('app/public/qrcode');
             if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
                 $filename = $response->saveAs($path, uniqid().'.png');
