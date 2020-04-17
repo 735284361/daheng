@@ -108,6 +108,9 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('withdraw/apply','WithdrawController@apply');
         });
     });
+
+    // 商品分享
+    Route::get('share/goods','ShareController@goods')->name('share.goods');
 });
 
 

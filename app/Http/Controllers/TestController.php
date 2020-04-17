@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\CompleteOrder;
 use App\Models\AgentMember;
 use App\Models\AgentOrderMaps;
+use App\Models\Goods;
 use App\Models\Order;
 use App\Models\OrderGoods;
 use App\Notifications\VerificationCode;
@@ -16,6 +17,7 @@ use App\Services\UserAccountService;
 use App\User;
 use Carbon\Carbon;
 use Faker\Generator;
+use iBrand\Miniprogram\Poster\MiniProgramShareImg;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -144,9 +146,89 @@ class TestController extends Controller
 //        $divideAmount = $list->sum('divide_amount');
 //        dd($list);
 
-        echo 123;
+//        echo 123;
+//        $goods = Goods::find(2);
+//        $url = route('share.goods');
+//        $result = MiniProgramShareImg::run($goods, $url, true);
+//        return $result;
+//        $url = 'https://www.baidu.com/';
+        $url = route('share.goods');
+        $result = MiniProgramShareImg::generateShareImage($url);
+
         // 代理
-        $agentInfo = AgentMember::whereHas('agent')->where('user_id',9)->first();
+//        $agentInfo = AgentMember::whereHas('agent')->where('user_id',9)->first();
+    }
+
+    /** @test */
+    public function TestConfig()
+    {
+        $config = config('filesystems.disks');
+
+        $this->assertArrayHasKey('MiniProgramShare', $config);
+
+        $this->assertArrayHasKey('qiniu', $config);
+    }
+
+    /** @test */
+    public function TestGenerateShareImage()
+    {
+        config(['ibrand.miniprogram-poster.width' => '1300px']);
+
+        $url    = 'https://www.ibrand.cc/';
+        $result = MiniProgramShareImg::generateShareImage($url);
+        $this->assertTrue(Storage::disk('MiniProgramShare')->exists($result['path']));
+
+        $result = MiniProgramShareImg::generateShareImage('');
+        $this->assertFalse($result);
+    }
+
+    /** @test */
+    public function TestShareImageV2()
+    {
+        config(['ibrand.miniprogram-poster.width' => '1300px']);
+
+        $url   = 'https://www.ibrand.cc/';
+        $goods = GoodsTestModel::find(1);
+
+        //1. first build.
+        $result  = MiniProgramShareImg::run($goods, $url);
+        $oldPath = $result['path'];
+        $this->assertTrue(Storage::disk('MiniProgramShare')->exists($result['path']));
+        $this->assertEquals(1, count($goods->posters));
+
+        //2. rebuild and delete old.
+        $result   = MiniProgramShareImg::run($goods, $url, true);
+        $oldPath2 = $result['path'];
+        $this->assertTrue(Storage::disk('MiniProgramShare')->exists($result['path']));
+        $this->assertFalse(Storage::disk('MiniProgramShare')->exists($oldPath));
+        $this->assertEquals(1, count($goods->posters));
+
+        //3. rebuild but not delete old.
+        $this->app['config']->set('ibrand.miniprogram-poster.delete', false);
+        $result = MiniProgramShareImg::run($goods, $url, true);
+        $this->assertTrue(Storage::disk('MiniProgramShare')->exists($result['path']));
+        $this->assertTrue(Storage::disk('MiniProgramShare')->exists($oldPath2));
+
+        $poster = Poster::find(1);
+        $this->assertEquals(GoodsTestModel::class, get_class($poster->posterable));
+    }
+
+    /** @test */
+    public function TestSaveToQiNiu()
+    {
+        config(['ibrand.miniprogram-poster.default.storage' => 'qiniu']);
+
+        $config = config('ibrand.miniprogram-poster');
+        $this->assertSame($config['default']['storage'], 'qiniu');
+
+        $url    = 'https://www.ibrand.cc/';
+        $result = MiniProgramShareImg::generateShareImage($url);
+        $this->assertTrue(Storage::disk('qiniu')->exists($result['path']));
+
+        $goods  = GoodsTestModel::find(1);
+        $result = MiniProgramShareImg::run($goods, $url);
+        $this->assertTrue(Storage::disk('qiniu')->exists($result['path']));
+        $this->assertEquals(1, count($goods->posters));
     }
 
 }

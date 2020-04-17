@@ -14,6 +14,7 @@
         "codingyu/ueditor": "^3.0",
         "encore/laravel-admin": "^1.7",
         "fideloper/proxy": "^4.0",
+        "ibrand/laravel-miniprogram-poster": "~2.0",
         "ichynul/row-table": "^1.1",
         "jacobcyl/ali-oss-storage": "^2.1",
         "jadekun/sku": "^1.0",
