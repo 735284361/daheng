@@ -173,6 +173,7 @@ class TestController extends Controller
         $xcxurl =  base_path().'/public/upload/images/5e393507cdb47.png';
 //        $img = ShareService::getGoodsImageMaker($goods,$user,$xcxurl);
 
+        
         $agent = new AgentService();
         $xcxurl = $agent->getQrCode(auth('api')->id());
         $img = ShareService::getAgentCode($user,$xcxurl);
