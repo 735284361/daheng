@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Agent;
+use App\Models\Goods;
 use App\Services\AgentService;
+use App\Services\ShareService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -87,12 +89,17 @@ class AgentController extends Controller
     public function getQrCode()
     {
         $this->checkIsAgent();
-        $data = $this->agentService->getQrCode(auth('api')->id());
-        if ($data) {
-            return ['code' => 0, 'data' => $data];
-        } else {
-            return ['code' => 1];
-        }
+//        $data = $this->agentService->getQrCode(auth('api')->id());
+//        if ($data) {
+//            return ['code' => 0, 'data' => $data];
+//        } else {
+//            return ['code' => 1];
+//        }
+
+        $user = auth()->user();
+        $agent = new AgentService();
+        $xcxurl = $agent->getQrCode(auth('api')->id());
+        return ShareService::getAgentCode($user,$xcxurl);
     }
 
     /**

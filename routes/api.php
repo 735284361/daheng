@@ -23,6 +23,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::get('test','TestController@test');
 
+Route::middleware('auth:api')->get('auth_test','TestController@auth_test');
+
 Route::group(['prefix' => 'v1'], function () {
     // 登录注册
     Route::any('/wechat/login', 'WeChatController@login');

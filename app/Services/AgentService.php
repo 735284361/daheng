@@ -444,20 +444,23 @@ class AgentService
     public function getQrCode($userId)
     {
         $agent = $this->getAgentInfo($userId);
-        if ($agent && $agent->qrcode) {
-            $qrcode = $agent->qrcode;
-        } else {
-            $app = \EasyWeChat::miniProgram();
-            $response = $app->app_code->get('/pages/distribution/accept/index?id='.$userId);
-            $path = storage_path('app/public/qrcode');
-            if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
-                $filename = $response->saveAs($path, uniqid().'.png');
+        if ($agent) {
+            if ($agent->qrcode) {
+                $qrcode = $agent->qrcode;
+            } else {
+                $app = \EasyWeChat::miniProgram();
+                $response = $app->app_code->get('/pages/distribution/accept/index?id='.$userId);
+                $path = storage_path('app/public/qrcode');
+                if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+                    $filename = $response->saveAs($path, uniqid().'.png');
+                }
+                $qrcode = 'qrcode/'.$filename;
+                $agent->qrcode = $qrcode;
+                $agent->save();
             }
-            $qrcode = 'qrcode/'.$filename;
-            $agent->qrcode = $qrcode;
-            $agent->save();
+            return storage_path('app/public/'.$qrcode);
         }
-        return asset('storage/'.$qrcode);
+        return false;
     }
 
     /**
