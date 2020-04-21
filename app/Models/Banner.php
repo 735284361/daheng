@@ -14,9 +14,7 @@ class Banner extends Model
 
     public function getPicUrlAttribute($value)
     {
-        $url = Storage::disk(config('filesystems.default'))->url($value);
-        dd($url);
-        return $url;
+        return Storage::disk(config('filesystems.default'))->url($value);
     }
 
     /**

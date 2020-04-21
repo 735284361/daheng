@@ -33,6 +33,8 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('config/value','SysParamController@value');
     // 轮播
     Route::get('banner/list','BannerController@getList');
+    // icon
+    Route::get('icon/list','IconController@lists');
     // 商城
     Route::get('shop/goods/list','ShopController@lists');
     Route::get('shop/goods/detail','ShopController@detail');
