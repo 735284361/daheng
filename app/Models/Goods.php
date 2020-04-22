@@ -51,17 +51,13 @@ class Goods extends Model
     // 获取-商品列表图
     public function getPicUrlAttribute($value)
     {
-        return Storage::disk(config('filesystems.default'))->url($value);
+        return getStorageUrl($value);
     }
 
     // 获取-商品详情轮播
     public function getPicsAttribute($value)
     {
-        $list = json_decode($value,true);
-        $list = array_map(function($value) {
-            return Storage::disk(config('filesystems.default'))->url($value);
-        },$list);
-        return $list;
+        return json_decode($value, true);
     }
 
     // 设置-商品详情轮播

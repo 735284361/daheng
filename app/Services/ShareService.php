@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Goods;
+use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 
 class ShareService
@@ -11,7 +13,7 @@ class ShareService
     public static function getGoodsImageMaker($goods, $user, $xcxurl) {
         // 背景
         $background = [
-            base_path().'/public/static/share/goods_share_bg0.png',
+            base_path().'/public/static/share/goods_share_bg1.png',
             base_path().'/public/static/share/goods_share_bg1.png',
             base_path().'/public/static/share/goods_share_bg1.png'
         ];
@@ -45,18 +47,16 @@ class ShareService
 
         // 商品图片区域
         $bodyimage = Image::canvas(533, 475, '#eee');
-        $bodyimage2 = Image::canvas(531, 308, '#fff');
 
-        $goodsimage = Image::make($goods['pic_url'])
-            ->resize(308, 308);
+        $pic = getStorageUrl($goods['pics'][0]);
+        $goodsimage = Image::make($pic)
+            ->resize(531, 354);
 
-        $bodyimage2->insert($goodsimage, 'top-left', 112);
-        $bodyimage->insert($bodyimage2, 'top-left', 1, 1);
+        $bodyimage->insert($goodsimage, 'top-left', 1, 1);
 
         $bodybuttomimage = Image::canvas(531, 164, '#fff');
 
-//        $strings =  $this->mbStrSplit($goods['name'], 18);
-        $strings[] = $goods['name'];
+        $strings =  self::mbStrSplit($goods['name'], 18);
 
         $i = 0; //top position of string
         if (count($strings) == 1) {
@@ -68,7 +68,7 @@ class ShareService
             });
         } else {
             foreach($strings as $key => $string) {
-                if ($key == 2) {
+                if ($key >= 2) {
                     break;
                 }
                 // 标题部分
@@ -244,6 +244,28 @@ class ShareService
 //        return $img;
     }
 
+    /**
+     * 字符截取
+     * @param $str
+     * @param $len
+     * @return array
+     */
+    public static function mbStrSplit($str, $len)
+    {
+        $strLen = Str::length($str);
+        $count = ceil($strLen / $len);
+        $arr = [];
+        for ($i = 0; $i < $count; $i++) {
+            $arr[] =  mb_substr($str, $i * $len, $len, 'utf8');
+        }
+        return $arr;
+    }
+
+    /**
+     * 表情过滤
+     * @param $str
+     * @return string
+     */
     public static function filterEmoji($str)
     {
         $str = preg_replace_callback(
@@ -254,6 +276,22 @@ class ShareService
             $str);
 
         return trim($str);
+    }
+
+    public static function getGoodsShareQrCode($id, $uid)
+    {
+        $goods = Goods::find($id);
+        if ($goods) {
+            $app = \EasyWeChat::miniProgram();
+            $response = $app->app_code->get('/pages/goods-details/index?id='.$id.'&user_id='.$uid);
+            $path = storage_path('app/public/share/goods_qrcode/');
+            if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+                $filename = $response->saveAs($path, uniqid().'.png');
+            }
+            $qrcode = 'share/goods_qrcode/'.$filename;
+            return storage_path('app/public/'.$qrcode);
+        }
+        return false;
     }
 
 }

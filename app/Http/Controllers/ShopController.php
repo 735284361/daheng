@@ -9,6 +9,7 @@ use App\Services\GoodsService;
 use App\Services\ShippingFeeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ShopController extends Controller
 {
@@ -54,6 +55,12 @@ class ShopController extends Controller
                 $data['properties'] = null;
             }
             $data['sku_arr'] = array_column($data['sku_arr'],'sku');
+
+            $pics = $data['pics'];
+            $pics = array_map(function($value) {
+                return getStorageUrl($value);
+            },$pics);
+            $data['pics'] = $pics;
         }
         // 增加商品浏览量
         $this->goodsService->incViewsCount($id);
