@@ -12,6 +12,10 @@ class Icon extends Model
     const STATUS_ON = 0; // 在线
     const STATUS_OFF = 1; // 下线
 
+    public function category()
+    {
+        return $this->belongsTo(GoodsCategory::class,'category_id','id');
+    }
 
     public function getIconImgAttribute($value)
     {
