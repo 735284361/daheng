@@ -225,20 +225,18 @@ class AgentService
         $subMonth = Carbon::now()->subMonth()->format('Ym');
         $agentBill = $this->getAgentBill($userId,$subMonth);
         // 判断是否已经结算
-        if (!$agentBill || $agentBill->divide_status == AgentBill::DIVIDE_STATUS_DIVIDED) {
+        if ($agentBill && $agentBill->divide_status == AgentBill::DIVIDE_STATUS_DIVIDED) {
             return;
+        } else {
+            $agentBill = $this->saveAgentBill($userId,0,$subMonth);
         }
         // 获取分成
         $divide = 0;
         if ($agentBill) {
             $divide = $this->getDivideAmount($agentBill->sales_volume);
+            // 修改月账单为已结算
+            $this->updateAgentBill($agentBill->id,$divide);
         }
-        // 修改月账单为已结算
-        $this->updateAgentBill($agentBill->id,$divide);
-        // 获取销量对应的奖金数
-//        if ($divide <= 0) {
-//            return;
-//        }
         // 增加代理商余额
         if ($divide > 0) {
             $this->incAgentBalance($userId, $divide);
@@ -597,18 +595,21 @@ class AgentService
      * 增加代理商的销售数据
      * @param $agentId
      * @param $account
+     * @param null $month
      * @return mixed
      */
-    private function saveAgentBill($agentId, $account)
+    private function saveAgentBill($agentId, $account, $month = null)
     {
-        $bill = AgentBill::firstOrNew(['user_id'=>$agentId,'month'=>Carbon::now()->format('Ym')]);
+        $month ? '' : $month = Carbon::now()->format('Ym');
+        $bill = AgentBill::firstOrNew(['user_id'=>$agentId,'month'=>$month]);
         if ($bill) {
             $salesVolume = $bill->sales_volume + $account;
         } else {
             $salesVolume = $account;
         }
         $bill->sales_volume = $salesVolume;
-        return $bill->save();
+        $bill->save();
+        return $bill;
     }
 
     /**
