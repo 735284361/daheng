@@ -27,7 +27,8 @@ class OrderRequest extends FormRequest
             //
             'goodsJsonStr' => 'required|json',
             'name' => 'required',
-            'phone' => 'required|regex:/^1[345789][0-9]{9}$/',
+//            'phone' => 'required|regex:/^1[345789][0-9]{9}$/',
+            'phone' => 'required',
             'province' => 'required',
             'city' => 'required',
             'county' => 'required',
