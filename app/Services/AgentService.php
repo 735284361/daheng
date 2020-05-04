@@ -508,14 +508,38 @@ class AgentService
     public static function saveAgentOrderMap(Order $order)
     {
         // 代理
-        $agentInfo = self::getUsersAgent($order->user_id);
-        if (!$agentInfo) return;
+        $Agent = new AgentService();
+        $agentId = $Agent->getCommissionUserId($order->user_id);
+        if (!$agentId) return;
         // 添加代理订单关系
         $agentOrder = new AgentOrderMaps();
-        $agentOrder->agent_id = $agentInfo->agent_id;
+        $agentOrder->agent_id = $agentId;
         $agentOrder->order_no = $order->order_no;
         $agentOrder->commission = $order->commission_fee;;
         $agentOrder->save();
+    }
+
+    /**
+     * 判断用户的订单是否满足分成流程
+     * @param $userId
+     * @return bool
+     */
+    public function getCommissionUserId($userId)
+    {
+        // 如果是顾客
+        $agentInfo = self::getUsersAgent($userId);
+        if ($agentInfo) {
+            return $agentInfo->agent_id;
+        } else {
+            // 如果自己是代理商 切状态正常
+            $agentInfo = $this->getAgentInfo($userId);
+            if ($agentInfo && $agentInfo->status == Agent::STATUS_NORMAL) {
+                return $agentInfo->user_id;
+            } else {
+                return false;
+            }
+        }
+
     }
 
     /**

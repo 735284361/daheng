@@ -23,6 +23,9 @@ Route::group([
     $router->resource('feedback', FeedbackController::class);
     $router->resource('agent-teams', AgentTeamController::class);
     $router->resource('icons', IconController::class);
+    $router->resource('user-bills', UserBillController::class);
+    $router->resource('agent-bills', AgentBillController::class);
+    $router->resource('agent-team-bills', AgentTeamBillController::class);
 
     // 订单
     $router->group(['order' => 'delivery'], function($router) {

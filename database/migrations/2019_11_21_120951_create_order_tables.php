@@ -16,6 +16,7 @@ class CreateOrderTables extends Migration
         Schema::create('order', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('order_no')->comment('订单编号');
+            $table->string('order_name')->comment('订单名称');
             $table->string('escrow_trade_no')->comment('第三方支付流水号');
             $table->integer('user_id')->comment('用户ID');
             $table->integer('product_count')->comment('商品数量');

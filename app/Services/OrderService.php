@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Requests\OrderRequest;
 use App\Jobs\CloseOrder;
 use App\Jobs\CompleteOrder;
+use App\Models\Agent;
 use App\Models\Goods;
 use App\Models\Order;
 use App\Models\OrderAddress;
@@ -47,13 +48,17 @@ class OrderService
         // 商品数量
         $goodsCollect = collect($goods);
         $productCount = $goodsCollect->sum('number');
+        // 商品编号数组
+        $goodsId = array_unique(array_column($goods,'goodsId'));
 
         // 生成订单商品
         $amountTotal = 0; // 商品总金额
         $commissionFee = 0; // 佣金总金额
         $goodsList = [];
         $userId = auth('api')->id();
-//        $body = Goods::find($goods[0]['goodsId'])->value('name');
+        // 订单名称
+        $body = Goods::whereIn('id',$goodsId)->get();
+        $body = $body->implode('name', ',');
         for ($i = 0; $i < count($goods); $i++) {
             // 获取商品属性
             $sku = $this->goodsService->getSku($goods[$i]['goodsId'],$goods[$i]['propertyChildIds']);
@@ -83,8 +88,9 @@ class OrderService
 
         // 订单总金额
         $totalFee = $amountTotal + $logisticsFee;
+        $AgentService = new AgentService();
         // 如果该用户不是代理商的顾客 则清零 分成费用
-        if (!AgentService::getUsersAgent($userId)) {
+        if (!$AgentService->getCommissionUserId($userId)) {
             $commissionFee = 0;
         }
         $commissionRemainFee = $amountTotal - $commissionFee;
@@ -93,6 +99,7 @@ class OrderService
         $order = new Order();
         // 添加订单记录
         $order->order_no = $orderNo;
+        $order->order_name = $body;
         $order->user_id = auth('api')->id();
         $order->product_count = $productCount;
         $order->product_amount_total = $amountTotal;
@@ -120,11 +127,10 @@ class OrderService
             'postal_code' => $request->postal_code
         ]);
         // 发起支付
-        $payParams = $this->payService->getPayParams($orderNo, $totalFee);
+        $payParams = $this->payService->getPayParams($orderNo, $totalFee, $body);
 
         if ($orderRes && $orderGoodsRes && $orderEventRes &&
             $orderAddressRes && $payParams['code'] == 0) {
-
             // 定时关闭订单
             CloseOrder::dispatch($order);
             DB::commit();
@@ -156,14 +162,11 @@ class OrderService
             // 订单对应的商品
             $goodsList = OrderGoods::with('goods')->where('order_no',$this->order->order_no)->get();
             // 处理商品的数据统计
-            $billName = [];
             foreach ($goodsList as $goods) {
                 $this->goodsService->dealGoodsCount($goods->goods_id, $goods->product_count, $goods->property_id);
-                in_array($goods->goods->name, $billName) ? '' : $billName[] = $goods->goods->name;
             }
-            $billName = implode($billName,',');
             // 更新资金流水记录表
-            $this->saveBillInfo($this->order->user_id, $billName, $this->order->order_amount_total, UserBill::AMOUNT_TYPE_EXPEND,
+            $this->saveBillInfo($this->order->user_id, $this->order->order_name, $this->order->order_amount_total, UserBill::AMOUNT_TYPE_EXPEND,
                 UserBill::BILL_STATUS_NORMAL, UserBill::BILL_TYPE_BUY);
             // 保存订单和代理的关系
             AgentService::saveAgentOrderMap($this->order);
@@ -191,7 +194,7 @@ class OrderService
                 return ['code' => 1,'msg' => '订单失效'];
             }
             // 获取支付信息
-            $payInfo = $this->payService->getPayParams($order->order_no, $order->order_amount_total);
+            $payInfo = $this->payService->getPayParams($order->order_no, $order->order_amount_total,$order->order_name);
             if ($payInfo['code'] == 0) {
                 return ['code' => 0,'msg' => 'Success','data' => $payInfo['result']];
             }
@@ -280,6 +283,9 @@ class OrderService
             $status = Order::STATUS_RECEIVED;
             // 保存订单
             $this->updateOrderStatus($status);
+            // 订单分成流程
+            $agentService = new AgentService();
+            $agentService->orderCommission($this->order->order_no);
             // 支付成功 进入消息发送系统
             $this->sendMsg($status);
         });
@@ -310,9 +316,6 @@ class OrderService
             $status = Order::STATUS_COMPLETED;
             // 更新订单状态
             $this->updateOrderStatus($status, $remark);
-            // 订单分成流程
-            $agentService = new AgentService();
-            $agentService->orderCommission($this->order->order_no);
             // 通知服务
             $this->sendMsg($status);
             return;

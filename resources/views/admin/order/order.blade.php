@@ -119,6 +119,14 @@
                 <tr><td class="col-xs-1">邮编：</td><td>{{$data['address']['postal_code']}}</td></tr>
                 <tr><td class="col-xs-1">快递公司：</td><td>{{$data['address']['delivery_company']}}</td></tr>
                 <tr><td class="col-xs-1">快递单号：</td><td>{{$data['address']['delivery_number']}}</td></tr>
+                <tr>
+                    <td class="col-xs-1">备注：</td>
+                    <td>
+                        @foreach($data['goods'] as $goods)
+                            {{$goods['name']}}&nbsp;&nbsp;{{$goods['pivot']['sku']}} * {{$goods['pivot']['product_count']}}份;&nbsp;
+                        @endforeach
+                    </td>
+                </tr>
             </table>
         </div>
         <!-- /.table-responsive -->

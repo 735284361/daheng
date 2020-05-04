@@ -44,7 +44,7 @@
 
 <div class="box box-default">
     <div class="box-header with-border">
-        <h3 class="box-title">代理成员</h3>
+        <h3 class="box-title">顾客</h3>
     </div>
 
     <!-- /.box-header -->
