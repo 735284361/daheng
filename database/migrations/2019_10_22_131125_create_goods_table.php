@@ -19,9 +19,10 @@ class CreateGoodsTable extends Migration
             $table->integer('store_id')->comment('商家ID');
             $table->string('name')->comment('商品名称');
             $table->string('description')->comment('描述');
-            $table->decimal('price')->default(0)->comment('价格');
-            $table->decimal('line_price')->default(0)->nullable()->comment('划线价');
+            $table->double('price',10,2)->default(0)->comment('价格');
+            $table->double('line_price',10,2)->default(0)->nullable()->comment('划线价');
             $table->integer('stock')->default(0)->comment('库存');
+            $table->double('dis_price',10,2)->default(0)->comment('分成价格');
             $table->integer('category_id')->comment('商品分类');
             $table->tinyInteger('recommend_status')->default(20)->comment('是否推荐');
             $table->integer('sort')->default(255)->comment('排序');

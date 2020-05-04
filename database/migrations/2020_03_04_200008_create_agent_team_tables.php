@@ -28,10 +28,10 @@ class CreateAgentTeamTables extends Migration
             $table->integer('team_id')->comment('团队ID');
             $table->integer('user_id')->comment('团队编号');
             $table->string('month')->comment('账单月份');
-            $table->integer('sales_volume')->default(0)->comment('团队销售总额');
+            $table->double('sales_volume',10,2)->default(0)->comment('团队销售总额');
             $table->integer('divide_status')->default(0)->comment('分成状态 0-未分成；1-已分成');
-            $table->integer('divide_total_amount')->default(0)->comment('奖金总额');
-            $table->integer('divide_remain_amount')->default(0)->comment('奖金剩余额 此数值对应每月队长的特殊提成');
+            $table->double('divide_total_amount',10,2)->default(0)->comment('奖金总额');
+            $table->double('divide_remain_amount',10,2)->default(0)->comment('奖金剩余额 此数值对应每月队长的特殊提成');
             $table->timestamps();
         });
 
@@ -48,9 +48,9 @@ class CreateAgentTeamTables extends Migration
             $table->increments('id');
             $table->integer('user_id')->comment('用户ID');
             $table->string('month')->comment('账单月份');
-            $table->integer('sales_volume')->default(0)->comment('销售额');
+            $table->double('sales_volume',10,2)->default(0)->comment('销售额');
             $table->integer('divide_status')->default(0)->comment('分成状态 0-未分成；1-已分成');
-            $table->integer('divide_amount')->default(0)->comment('分成金额');
+            $table->double('divide_amount',10,2)->default(0)->comment('分成金额');
             $table->timestamps();
         });
 

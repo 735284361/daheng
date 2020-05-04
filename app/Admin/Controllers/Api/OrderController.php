@@ -37,6 +37,9 @@ class OrderController extends Controller
             case 'SET_PAID' : // 设置为已支付
                 $res = $this->orderService->paySuccess($order, 'admin');
                 break;
+            case 'SET_RECEIVED' : // 设置为确认收货
+                $res = $this->orderService->confirmOrder($order, 'admin');
+                break;
             case 'SET_CLOSED' : // 订单关闭
                 $res = $this->orderService->closeOrder($order, 'admin');
                 break;

@@ -13,7 +13,10 @@
             <div class="col-md-12">
                 @if ($data['status'] == App\Models\Order::STATUS_UNPAID)
                     <button class="btn btn-success" onclick="updateOrderStatus('设置为已支付', '即将修改该笔订单状态为已付款，请确保您已经线下收款, 是否继续?', 'SET_PAID')">设为已支付</button>
-                @elseif ($data['status'] != App\Models\Order::STATUS_COMPLETED)
+                @elseif ($data['status'] == App\Models\Order::STATUS_PAID || $data['status'] == App\Models\Order::STATUS_SHIPPED)
+                    <button class="btn btn-success" onclick="delivery()">发货</button>
+                    <button class="btn btn-success" onclick="updateOrderStatus('设置为确认收货', '即将修改该笔订单状态为确认收货，设置后订单状态将不能更改，是否继续？', 'SET_RECEIVED')">设置为确认收货</button>
+                @elseif ($data['status'] == App\Models\Order::STATUS_RECEIVED)
                     <button class="btn btn-success" onclick="delivery()">发货</button>
                     <button class="btn btn-success" onclick="updateOrderStatus('设置为交易成功', '即将修改该笔订单状态为交易成功，设置后订单状态将不能更改，是否继续？', 'SET_COMPLETED')">设为交易成功</button>
                 @endif

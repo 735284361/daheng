@@ -42,7 +42,7 @@ class CreateOrderTables extends Migration
             $table->string('sku')->nullable()->comment('商品规格');
             $table->integer('property_id')->nullable()->comment('规格ID');
             $table->integer('product_count')->nullable()->comment('商品数量');
-            $table->integer('product_price')->nullable()->comment('商品单价');
+            $table->double('product_price',10,2)->nullable()->comment('商品单价');
             $table->decimal('dist_price')->nullable()->comment('单个商品佣金');
             $table->integer('score')->default(0)->comment('评分');
             $table->string('comment')->nullable()->comment('评价');
