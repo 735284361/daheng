@@ -508,5 +508,25 @@ class OrderService
             ->sum('order_amount_total');
     }
 
+    /**
+     * 获取用户支付成功的金额
+     * @param string $userId
+     * @return mixed
+     */
+    public function getUserPaidConsumeAmount($userId = '')
+    {
+        $userId == '' ? $userId = auth('api')->id() : '';
+
+        $status = [
+            Order::STATUS_PAID,
+            Order::STATUS_SHIPPED,
+            Order::STATUS_RECEIVED,
+            Order::STATUS_COMPLETED,
+        ];
+        return Order::where('user_id',$userId)
+            ->whereIn('status', $status)
+            ->sum('order_amount_total');
+    }
+
 
 }

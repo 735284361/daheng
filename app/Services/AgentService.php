@@ -583,7 +583,7 @@ class AgentService
                 UserBill::BILL_STATUS_NORMAL,
                 UserBill::BILL_TYPE_COMMISSION
             );
-            
+
             // 增加用户代理的消费数据
             AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('order_number');
             AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('amount',$agentOrderMaps->commission);
@@ -832,7 +832,7 @@ class AgentService
     public function checkConsume()
     {
         $orderService = new OrderService();
-        $amount = $orderService->getUserOrderConsumeAmount();
+        $amount = $orderService->getUserPaidConsumeAmount();
         $consume= $this->agentConsumeCon();
         if ($amount >= $consume) {
             return true;
