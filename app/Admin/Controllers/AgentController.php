@@ -31,12 +31,13 @@ class AgentController extends AdminController
 
         $grid->model()->orderBy('id','desc');
 
-        $grid->column('id', __('编号'));
-        $grid->column('user_id', __('用户编号'));
-        $grid->column('user.nickname', __('用户昵称'));
-        $grid->column('status', __('代理商状态'))->using(Agent::getStatus());
+        $grid->column('id', __('编号'))->sortable();
+        $grid->column('user_id', __('用户编号'))->sortable();
+        $grid->column('user.nickname', __('用户昵称'))->sortable();
+        $grid->column('level', __('代理层级'))->sortable();
+        $grid->column('status', __('代理商状态'))->using(Agent::getStatus())->sortable();
 //        $grid->column('qrcode', __('代理二维码'));
-        $grid->column('created_at', __('创建时间'));
+        $grid->column('created_at', __('创建时间'))->sortable();
 //        $grid->column('updated_at', __('Updated at'));
 
         $grid->disableCreateButton();

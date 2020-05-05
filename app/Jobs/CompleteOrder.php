@@ -39,7 +39,7 @@ class CompleteOrder implements ShouldQueue
     {
         // 进入订单完成流程
         $orderService = new OrderService();
-        $orderService->completeOrder($this->order);
+        $orderService->completeOrder($this->order,'sys');
         return;
     }
 }

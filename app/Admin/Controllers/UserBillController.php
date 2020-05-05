@@ -51,7 +51,6 @@ class UserBillController extends AdminController
         $grid->column('updated_at', __('更新日期'))->sortable();
 
         $grid->disableCreateButton();
-        $grid->expandFilter();
 
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -74,10 +73,7 @@ class UserBillController extends AdminController
             });
         });
 
-        $grid->actions(function($actions) {
-            $actions->disableDelete();
-            $actions->disableEdit();
-        });
+        $grid->disableActions();
 
         return $grid;
     }
