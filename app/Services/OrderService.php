@@ -59,6 +59,7 @@ class OrderService
         // 订单名称
         $body = Goods::whereIn('id',$goodsId)->get();
         $body = $body->implode('name', ',');
+        $body = mb_substr($body, 0, 25, 'utf8');
         for ($i = 0; $i < count($goods); $i++) {
             // 获取商品属性
             $sku = $this->goodsService->getSku($goods[$i]['goodsId'],$goods[$i]['propertyChildIds']);
