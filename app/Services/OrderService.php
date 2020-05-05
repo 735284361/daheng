@@ -62,6 +62,9 @@ class OrderService
         for ($i = 0; $i < count($goods); $i++) {
             // 获取商品属性
             $sku = $this->goodsService->getSku($goods[$i]['goodsId'],$goods[$i]['propertyChildIds']);
+            if (!$sku) {
+                return ['code' => 1, 'msg' => '商品发生变化，请重新购买'];
+            }
             // 判断商品库存
             if ($goods[$i]['number'] > $sku->stock) {
                 return ['code' => 1, 'msg' => '商品库存不足'];

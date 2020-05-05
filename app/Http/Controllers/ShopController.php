@@ -102,6 +102,9 @@ class ShopController extends Controller
         $this->validate($request,['goods_id'=>'required|integer','property_id'=>'nullable|integer']);
         // 商品库存信息
         $stock = $this->goodsService->getSku($request->goods_id,$request->property_id);
+        if (!$stock) {
+            return ['code' => 1, 'msg' => 'false', 'data' => 0];
+        }
         // 商品状态
         $goods = Goods::find($request->goods_id);
         $isOnline = false;
