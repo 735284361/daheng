@@ -412,11 +412,21 @@ class AgentService
     {
         $data = AgentOrderMaps::where('agent_id',$agentId)->get('order_no');
         $order = $data->pluck('order_no');
-        $list = Order::with('goods')->join(
+        $status = [
+            Order::STATUS_PAID,
+            Order::STATUS_SHIPPED,
+            Order::STATUS_RECEIVED,
+            Order::STATUS_COMPLETED
+        ];
+        $list = Order::with('address')->with('goods')->join(
             'agent_order_maps',
             'order.order_no',
             'agent_order_maps.order_no'
-        )->select('order.*','agent_order_maps.commission')->whereIn('order.order_no',$order)->get();
+        )->select('order.*','agent_order_maps.commission')
+            ->whereIn('order.order_no',$order)
+            ->whereIn('order.status',$status)
+            ->orderBy('pay_time','desc')
+            ->get();
         return $list;
     }
 
