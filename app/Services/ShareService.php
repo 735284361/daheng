@@ -163,7 +163,7 @@ class ShareService
     public static function getAgentCode($user, $xcxurl) {
         // 背景
         $background = [
-            base_path().'/public/static/share/goods_share_bg0.png',
+            base_path().'/public/static/share/goods_share_bg1.png',
             base_path().'/public/static/share/goods_share_bg1.png',
             base_path().'/public/static/share/goods_share_bg1.png'
         ];

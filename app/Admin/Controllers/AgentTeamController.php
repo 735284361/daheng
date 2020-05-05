@@ -32,7 +32,7 @@ class AgentTeamController extends AdminController
         $grid = new Grid(new AgentTeam);
 
         $grid->model()->orderBy('id','desc');
-        
+
         $grid->column('id', __('编号'));
         $grid->column('user_id', __('用户编号'));
         $grid->column('user_info.nickname', __('用户'));
