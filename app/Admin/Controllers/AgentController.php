@@ -41,14 +41,14 @@ class AgentController extends AdminController
         $grid->column('created_at', __('创建时间'))->sortable();
 //        $grid->column('updated_at', __('Updated at'));
 
-//        $grid->column('顾客列表', '标题')->modal('顾客列表', function ($model) {
-//
-//            $comments = $model->members()->take(10)->get()->map(function ($comment) {
-//                return $comment->only(['user_id','amount','order_number','created_at']);
-//            });
-//
-//            return new Table(['用户编号', '消费金额', '订单数量','加入时间'], $comments->toArray());
-//        });
+        $grid->column('顾客列表', '标题')->modal('顾客列表', function ($model) {
+
+            $comments = $model->members()->take(10)->get()->map(function ($comment) {
+                return $comment->only(['user_id','amount','order_number','created_at']);
+            });
+
+            return new Table(['用户编号', '消费金额', '订单数量','加入时间'], $comments->toArray());
+        });
 
         $grid->disableCreateButton();
         $grid->expandFilter();

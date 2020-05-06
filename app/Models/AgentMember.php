@@ -9,10 +9,10 @@ class AgentMember extends Model
 {
     // 代理商下属成员
 
-    public function getCreatedAtAttribute($value)
-    {
-        return Carbon::parse($value)->toDateString();
-    }
+//    public function getCreatedAtAttribute($value)
+//    {
+//        return Carbon::parse($value)->toDateString();
+//    }
 
     // 成员的用户信息
     public function user()

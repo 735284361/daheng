@@ -52,6 +52,7 @@
         <div class="table-responsive">
             <table class="table table-striped">
                 <th class="row">
+                    <td class="col-xs-3">头像</td>
                     <td class="col-xs-3">成员昵称</td>
                     <td class="col-xs-3">消费金额</td>
                     <td class="col-xs-3">订单数量</td>
@@ -60,6 +61,7 @@
 
                 @foreach($data['members'] as $member)
                     <tr class="row">
+                        <td><img src="{{$member['user']['avatar']}}" alt=""></td>
                         <td>{{$member['user']['nickname']}}</td>
                         <td>{{$member['amount']}}</td>
                         <td>{{$member['order_number']}}</td>
