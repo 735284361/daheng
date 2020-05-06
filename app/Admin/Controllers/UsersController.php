@@ -28,7 +28,7 @@ class UsersController extends AdminController
 
         $grid->model()->orderBy('id','desc');
 
-        $grid->column('id', __('ID'));
+        $grid->column('id', __('用户编号'));
         $grid->column('nickname', __('用户名'));
 //        $grid->column('union_id', __('Union id'));
 //        $grid->column('open_id', __('Open id'));
@@ -40,6 +40,26 @@ class UsersController extends AdminController
 //        $grid->column('remember_token', __('Remember token'));
         $grid->column('created_at', __('创建时间'));
         $grid->column('updated_at', __('修改时间'));
+
+        $grid->disableCreateButton();
+        $grid->expandFilter();
+
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $filter->column(1/2,function ($filter) {
+                $filter->like('id','用户编号');
+                $filter->like('nickname','昵称');
+            });
+
+            $filter->column(1/2,function ($filter) {
+                $filter->between('created_at','创建时间')->datetime();
+            });
+        });
+
+        $grid->actions(function($actions) {
+            $actions->disableEdit();
+            $actions->disableDelete();
+        });
 
         return $grid;
     }

@@ -48,6 +48,18 @@ class OrderController extends AdminController
 
         $grid->model()->orderBy('id','desc');
 
+//        $grid->header(function ($query) {// 查询出已支付状态的订单总金额
+//            $data = $query->sum('order_amount_total');
+//
+//            $html = <<<html
+//                <div>总收入:<div class="label">$data</div> 元</div>
+//html;
+//
+//
+//
+//            return $html;
+//        });
+
         $grid->column('order_no', __('订单号'));
         $grid->column('user_id', __('用户编号'))->sortable();
         $grid->column('address.name', __('姓名'))->sortable();
@@ -68,7 +80,7 @@ class OrderController extends AdminController
         $grid->column('created_at', __('下单时间'))->sortable();
 
         $grid->disableCreateButton();
-        $grid->expandFilter();
+//        $grid->expandFilter();
 
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
