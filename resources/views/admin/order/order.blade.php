@@ -126,7 +126,7 @@
                     <td class="col-xs-1">备注：</td>
                     <td>
                         @foreach($data['goods'] as $goods)
-                            {{$goods['name']}}&nbsp;&nbsp;{{$goods['pivot']['sku']}} * {{$goods['pivot']['product_count']}}份;&nbsp;
+                            {{$goods['name']}}&nbsp;&nbsp;{{str_replace(['口味:','规格:','重量:'], '', $goods['pivot']['sku'])}} * {{$goods['pivot']['product_count']}};<br>
                         @endforeach
                     </td>
                 </tr>

@@ -86,7 +86,6 @@ class OrderController extends AdminController
         });
 
         $grid->actions(function($actions) {
-            $actions->disableDelete();
             $actions->disableEdit();
         });
 
