@@ -54,18 +54,18 @@
                 <th class="row">
                     <td class="col-xs-3">头像</td>
                     <td class="col-xs-3">成员昵称</td>
-                    <td class="col-xs-3">消费金额</td>
-                    <td class="col-xs-3">订单数量</td>
-                    <td class="col-xs-3">创建时间</td>
+{{--                    <td class="col-xs-3">消费金额</td>--}}
+{{--                    <td class="col-xs-3">订单数量</td>--}}
+{{--                    <td class="col-xs-3">创建时间</td>--}}
                 </th>
 
                 @foreach($data['members'] as $member)
                     <tr class="row">
-                        <td><img src="{{$member['user']['avatar']}}" alt=""></td>
+                        <td><img src="{{$member['user']['avatar']}}" style="width: 30px" alt=""></td>
                         <td>{{$member['user']['nickname']}}</td>
-                        <td>{{$member['amount']}}</td>
-                        <td>{{$member['order_number']}}</td>
-                        <td>{{$member['created_at']}}</td>
+{{--                        <td>{{$member['amount']}}</td>--}}
+{{--                        <td>{{$member['order_number']}}</td>--}}
+{{--                        <td>{{$member['created_at']}}</td>--}}
                     </tr>
                 @endforeach
             </table>
