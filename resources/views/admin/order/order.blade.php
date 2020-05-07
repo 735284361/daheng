@@ -232,6 +232,7 @@
                 '<h5 class="text-left">快递公司</h5>' +
                 '<select id="company" class="swal2-input">' +
                     '<option value="顺丰快递">顺丰快递</option>' +
+                    '<option value="京东快递">京东快递</option>' +
                     '<option value="韵达快递">韵达快递</option>' +
                 '</select>' +
                 '<h5 class="text-left">快递单号</h5>' +
