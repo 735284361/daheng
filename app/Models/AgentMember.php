@@ -20,6 +20,11 @@ class AgentMember extends Model
         return $this->belongsTo(\App\User::class,'user_id','id');
     }
 
+    public function agentInfo()
+    {
+        return $this->belongsTo(\App\User::class,'agent_id','id');
+    }
+
     public function agent()
     {
         return $this->belongsTo(Agent::class,'agent_id','user_id');
