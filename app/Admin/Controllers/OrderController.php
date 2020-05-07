@@ -48,17 +48,17 @@ class OrderController extends AdminController
 
         $grid->model()->orderBy('id','desc');
 
-//        $grid->header(function ($query) {// 查询出已支付状态的订单总金额
-//            $data = $query->sum('order_amount_total');
-//
-//            $html = <<<html
-//                <div>总收入:<div class="label">$data</div> 元</div>
-//html;
-//
-//
-//
-//            return $html;
-//        });
+        $grid->header(function ($query) {// 查询出已支付状态的订单总金额
+            $total = $query->sum('order_amount_total');
+            $commissionFee = $query->sum('commission_fee');
+
+            $html = <<<html
+                <span class="label label-success">总收入：<span>$total</span> 元</span>
+                <span class="label label-info">总佣金：<span>$commissionFee</span> 元</span>
+html;
+
+            return $html;
+        });
 
         $grid->column('order_no', __('订单号'));
         $grid->column('user_id', __('用户编号'))->sortable();
@@ -92,7 +92,7 @@ class OrderController extends AdminController
 
             $filter->column(1/2,function ($filter) {
                 $filter->equal('address.phone','手机号');
-                $filter->equal('status','状态')->select(Order::getStatus());
+                $filter->equal('status','状态')->multipleSelect(Order::getStatus());
                 $filter->between('created_at','下单时间')->datetime();
             });
         });
