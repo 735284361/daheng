@@ -43,7 +43,7 @@ class CloseOrder implements ShouldQueue
         }
         // 订单处理
         $orderService = new OrderService();
-        $orderService->closeOrder($this->order);
+        $orderService->closeOrder($this->order,'sys');
         return;
     }
 }
