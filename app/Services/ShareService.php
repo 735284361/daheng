@@ -13,9 +13,9 @@ class ShareService
     public static function getGoodsImageMaker($goods, $user, $xcxurl) {
         // 背景
         $background = [
-            base_path().'/public/static/share/goods_share_bg1.png',
-            base_path().'/public/static/share/goods_share_bg1.png',
-            base_path().'/public/static/share/goods_share_bg1.png'
+            base_path().'/public/static/share/goods_share_bg2.png',
+            base_path().'/public/static/share/goods_share_bg2.png',
+            base_path().'/public/static/share/goods_share_bg2.png',
         ];
 
         // 字体
@@ -163,9 +163,9 @@ class ShareService
     public static function getAgentCode($user, $xcxurl) {
         // 背景
         $background = [
-            base_path().'/public/static/share/goods_share_bg1.png',
-            base_path().'/public/static/share/goods_share_bg1.png',
-            base_path().'/public/static/share/goods_share_bg1.png'
+            base_path().'/public/static/share/goods_share_bg2.png',
+            base_path().'/public/static/share/goods_share_bg2.png',
+            base_path().'/public/static/share/goods_share_bg2.png'
         ];
 
         // 字体
@@ -175,7 +175,7 @@ class ShareService
         ];
 
         // 商品宣传
-        $intro_path = base_path().'/public/static/share/agent_share_intro.jpeg';
+        $intro_path = base_path().'/public/static/share/agent_share_bg3.jpeg';
 
         $font_path = $font_paths[rand(0, 1)];
         $img = Image::make($background[rand(0,2)])->resize(640, 1000);

@@ -168,19 +168,25 @@ class TestController extends Controller
 
     public function auth_test()
     {
-        $id = 2;
+
+        // 商品码
+//        $id = 10;
+//        $user = auth()->user();
+//        $goods = Goods::find($id);
+////        $xcxurl =  base_path().'/public/upload/images/5e393507cdb47.png';
+//
+//        $xcxurl = ShareService::getGoodsShareQrCode(2,auth('api')->id());
+//        $img = ShareService::getGoodsImageMaker($goods,$user,$xcxurl);
+//        return $img->response('png');
+
+
+        // 分销码
+
         $user = auth()->user();
-        $goods = Goods::find($id);
-//        $xcxurl =  base_path().'/public/upload/images/5e393507cdb47.png';
-
-        $xcxurl = ShareService::getGoodsShareQrCode(2,auth('api')->id());
-        $img = ShareService::getGoodsImageMaker($goods,$user,$xcxurl);
-        return $img->response('png');
-
-//        $agent = new AgentService();
-//        $xcxurl = $agent->getQrCode(auth('api')->id());
-//        $img = ShareService::getAgentCode($user,$xcxurl);
-//        return $img;
+        $agent = new AgentService();
+        $xcxurl = $agent->getQrCode(auth('api')->id());
+        $img = ShareService::getAgentCode($user,$xcxurl);
+        return $img;
     }
 
 }
