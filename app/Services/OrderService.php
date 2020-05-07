@@ -320,6 +320,9 @@ class OrderService
             $status = Order::STATUS_COMPLETED;
             // 更新订单状态
             $this->updateOrderStatus($status, $remark);
+            // 订单分成流程
+            $agentService = new AgentService();
+            $agentService->orderCommission($this->order->order_no);
             // 通知服务
             $this->sendMsg($status);
             return;

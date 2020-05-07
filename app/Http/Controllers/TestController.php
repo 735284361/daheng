@@ -184,9 +184,11 @@ class TestController extends Controller
 
         $user = auth()->user();
         $agent = new AgentService();
-        $xcxurl = $agent->getQrCode(auth('api')->id());
-        $img = ShareService::getAgentCode($user,$xcxurl);
-        return $img;
+        $userId = '100051';
+        $xcxurl = $agent->getQrCode($userId);
+        return $xcxurl;
+//        $img = ShareService::getAgentCode($user,$xcxurl);
+//        return $img;
     }
 
 }
