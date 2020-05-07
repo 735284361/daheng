@@ -3,12 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
     //
 
+    use SoftDeletes;
+
     protected $table = 'order';
+
+    protected $dates = ['delete_at'];
 
     const STATUS_UNPAID = 0; // 未付款
     const STATUS_PAID = 1; // 已付款
