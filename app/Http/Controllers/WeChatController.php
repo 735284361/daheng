@@ -14,6 +14,8 @@ class WeChatController extends Controller
     public function login(Request $request)
     {
         $code = $request->get('code');
+        $nickName = $request->get('nickName');
+        $avatarUrl = $request->get('avatarUrl');
         $miniProgram = \EasyWeChat::miniProgram();
         //获取openid session_key
         $data = $miniProgram->auth->session($code);
@@ -36,6 +38,8 @@ class WeChatController extends Controller
         } else {
             // 该用户存在 覆盖用户之前登录信息
             $user->session_key = $sessionKey;
+            $user->nickname = $nickName;
+            $user->avatar = $avatarUrl;
             $user->save();
 
             // 用主表Users 创建token
