@@ -52,7 +52,7 @@ class AgentController extends Controller
         }
     }
 
-    public function getOnlyArCode(Request $request)
+    public function getOnlyQrCode(Request $request)
     {
         $userId = $request->id;
         return $this->agentService->getOnlyQrCode($userId);
