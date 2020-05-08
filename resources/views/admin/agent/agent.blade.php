@@ -102,7 +102,7 @@
                     <tr class="row">
                         <td>{{$order['order']['user']['nickname']}}</td>
                         <td>{{$order['order_no']}}</td>
-                        <td>{{$order['user_id']}}</td>
+                        <td>{{$order['order']['user_id']}}</td>
                         <td>{{App\Models\Order::getStatus($order['order']['status'])}}</td>
                         <td>{{$order['commission']}}</td>
                         <td>{{App\Models\AgentOrderMaps::getStatus($order['status'])}}</td>
