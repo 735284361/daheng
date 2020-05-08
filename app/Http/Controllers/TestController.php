@@ -155,15 +155,17 @@ class TestController extends Controller
 //        return $result;
 //        $url = 'https://cqyldh.oss-cn-chengdu.aliyuncs.com/images/2ad26007701fd8db8b48884132373e2d.jpeg';
 //        $url = route('share.goods');
-        $user = auth('api')->user();
-        $goods = Goods::find(2);
-        $xcxurl =  base_path().'/public/upload/images/5e393507cdb47.png';
-//        $img = $this->getGoodsImageMaker($goods,$share,$xcxurl);
-        $img = ShareService::getGoodsImageMaker($goods,$user,$xcxurl);
-        return $img->response('png');
+        // 小程序码海报
+//        $user = auth('api')->user();
+//        $goods = Goods::find(2);
+//        $xcxurl =  base_path().'/public/upload/images/5e393507cdb47.png';
+////        $img = $this->getGoodsImageMaker($goods,$share,$xcxurl);
+//        $img = ShareService::getGoodsImageMaker($goods,$user,$xcxurl);
+//        return $img->response('png');
 
         // 代理
 //        $agentInfo = AgentMember::whereHas('agent')->where('user_id',9)->first();
+
     }
 
     public function auth_test()
@@ -184,11 +186,115 @@ class TestController extends Controller
 
         $user = auth()->user();
         $agent = new AgentService();
-        $userId = '100051';
-        $xcxurl = $agent->getQrCode($userId);
+        $userId = '100635';
+        $xcxurl = $agent->getOnlyQrCode($userId);
         return $xcxurl;
-//        $img = ShareService::getAgentCode($user,$xcxurl);
+        $img = ShareService::getAgentCode($user,$xcxurl);
 //        return $img;
     }
+
+    public function addDeliverOrder()
+    {
+        $app = \EasyWeChat::miniProgram();
+        $access_token = $app->access_token;
+        $openid = 'opjVL5GvAS-NsWVFQ6CxaOtpXAMU';
+        $delivery_id = 'TEST';
+        $order_id = 'GM2020050617020393547';
+
+        $sender = [
+            'name' => '大亨',
+            'mobile' => '18380448817',
+            'province' => '重庆市',
+            'city' => '重庆市',
+            'area' => '江北',
+            'address' => '观音桥22号楼2201'
+        ];
+
+        $receiver = [
+            'name' => '饶后海',
+            'mobile' => '17600296638',
+            'province' => '北京市',
+            'city' => '北京市',
+            'area' => '朝阳区',
+            'address' => '长楹星座1栋2201'
+        ];
+
+        $detail_list = [
+            [
+                'name' => '商品1',
+                'count' => '2'
+            ],
+            [
+                'name' => '商品2',
+                'count' => '5'
+            ]
+        ];
+        $cargo = [
+            'count' => 7,
+            'weight' => 2,
+            'space_x' => 100,
+            'space_y' => 100,
+            'space_z' => 100,
+            'detail_list' => $detail_list
+        ];
+
+        $shop = [
+            'wxa_path' => '/pages/home/index',
+            'img_url' => 'https://cqyldh.oss-cn-chengdu.aliyuncs.com/images/%E6%8B%9B%E7%89%8C%E8%BE%A3%E8%BE%A3.jpg',
+            'goods_name' => '原味鸭掌',
+            'goods_count' => '12'
+        ];
+
+        $insured = [
+            'use_insured' => 0,
+            'insured_value' => 0,
+        ];
+
+        $service = [
+            'service_type' => '1',
+            'service_name' => 'test_service_name'
+        ];
+
+        $expect_time = time() + 12 * 3600;
+        // 生成运单
+        $data = [
+            'access_token' => $access_token,
+            'add_source' => '0',
+            'order_id' => $order_id,
+            'openid' => $openid,
+            'delivery_id' => $delivery_id,
+            'biz_id' => 'test_biz_id',
+            'custom_remark' => '这是订单备注',
+            'sender' => $sender,
+            'receiver' => $receiver,
+            'cargo' => $cargo,
+            'shop' => $shop,
+            'insured' => $insured,
+            'service' => $service,
+            'expect_time' => $expect_time,
+        ];
+        return $app->express->createWaybill($data);
+    }
+
+    public function getDeliverInfo()
+    {
+        $app = \EasyWeChat::miniProgram();
+        $access_token = $app->access_token;
+        $openid = 'opjVL5GvAS-NsWVFQ6CxaOtpXAMU';
+        $delivery_id = 'TEST';
+        $order_id = 'GM2020050617020393547';
+        $waybill_id = 'GM2020050617020393547_1588906184_waybill_id';
+
+        $data = [
+            'access_token' => $access_token,
+            'order_id' => $order_id,
+            'openid' => $openid,
+            'delivery_id' => $delivery_id,
+            'waybill_id' => $waybill_id
+        ];
+        return $app->express->getWaybillTrack($data);
+    }
+
+
 
 }

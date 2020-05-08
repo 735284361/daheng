@@ -52,6 +52,12 @@ class AgentController extends Controller
         }
     }
 
+    public function getOnlyArCode(Request $request)
+    {
+        $userId = $request->id;
+        return $this->agentService->getOnlyQrCode($userId);
+    }
+
     /**
      * 代理模块
      * @return int

@@ -22,6 +22,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 
 Route::get('test','TestController@test');
+Route::get('test1','TestController@addDeliverOrder');
+Route::get('test2','TestController@getDeliverInfo');
 
 Route::middleware('auth:api')->get('auth_test','TestController@auth_test');
 
@@ -115,6 +117,7 @@ Route::group(['prefix' => 'v1'], function () {
 
     // 商品分享
     Route::get('share/goods','ShareController@goods')->name('share.goods');
+    Route::get('getOnlyQrCode','AgentController@getOnlyQrCode');
 });
 
 
