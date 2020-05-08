@@ -90,10 +90,11 @@
                 <th class="row">
                     <td>成员昵称</td>
                     <td>订单编号</td>
+                    <td>用户编号</td>
                     <td>订单状态</td>
                     <td>每单分成金额</td>
                     <td>每单分成状态</td>
-                    <td>月度奖金分成状态</td>
+{{--                    <td>月度奖金分成状态</td>--}}
                     <td>订单日期</td>
                 </th>
 
@@ -101,10 +102,11 @@
                     <tr class="row">
                         <td>{{$order['order']['user']['nickname']}}</td>
                         <td>{{$order['order_no']}}</td>
+                        <td>{{$order['user_id']}}</td>
                         <td>{{App\Models\Order::getStatus($order['order']['status'])}}</td>
                         <td>{{$order['commission']}}</td>
                         <td>{{App\Models\AgentOrderMaps::getStatus($order['status'])}}</td>
-                        <td>{{App\Models\AgentOrderMaps::getDivideStatus($order['status_divide'])}}</td>
+{{--                        <td>{{App\Models\AgentOrderMaps::getDivideStatus($order['status_divide'])}}</td>--}}
                         <td>{{$order['created_at']}}</td>
                     </tr>
                 @endforeach
