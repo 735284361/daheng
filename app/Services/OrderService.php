@@ -176,8 +176,6 @@ class OrderService
             AgentService::saveAgentOrderMap($this->order);
             // 支付成功 进入消息发送系统
             $this->sendMsg($status);
-            // 定时结束订单任务
-            CompleteOrder::dispatch($this->order);
         });
         return $exception ? false : true;
     }
@@ -245,6 +243,8 @@ class OrderService
             $this->saveDeliveryInfo($deliveryCompany, $deliveryNumber);
             // 支付成功 进入消息发送系统
             $this->sendMsg($status);
+            // 定时结束订单任务
+            CompleteOrder::dispatch($this->order);
         });
         return $exception ? false : true;
     }
