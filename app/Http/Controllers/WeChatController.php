@@ -95,6 +95,17 @@ class WeChatController extends Controller
         ]);
     }
 
+    public function bindPhone(Request $request)
+    {
+        $code = $request->code;
+        $iv = $request->iv;
+        $encryptedData = $request->encryptedData;
+        $miniProgram = \EasyWeChat::miniProgram();
+        $session = $miniProgram->auth->session($code);
+        $decryptedData = $miniProgram->encryptor->decryptData($session, $iv, $encryptedData);
+        return $decryptedData;
+    }
+
     public function profile()
     {
         return Auth::guard('api')->user();

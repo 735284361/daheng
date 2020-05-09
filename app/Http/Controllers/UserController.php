@@ -65,4 +65,10 @@ class UserController extends Controller
         return ['code' => 0, 'msg' => 'Success', 'data' => $types];
     }
 
+    public function bindPhone(Request $request)
+    {
+
+        $data = WeChatController::bindPhone($code, $iv, $encryptedData);
+    }
+
 }

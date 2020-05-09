@@ -13,17 +13,17 @@ class UserMsg extends Notification
 {
     use Queueable;
 
-    protected $project;
+    protected $data;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($project)
+    public function __construct($data)
     {
         //
-        $this->project = $project;
+        $this->data = $data;
     }
 
     /**
@@ -39,11 +39,7 @@ class UserMsg extends Notification
 
     public function toEasySms($notifiable)
     {
-        return (new EasySmsMessage)
-//            ->setContent('您的验证码为: 6379')
-//            ->setTemplate('SMS_183775355')
-//            ->setTemplate('3526558')
-            ->setData(['project' => $this->project]);
+        return (new EasySmsMessage)->setData($this->data);
     }
 
     /**

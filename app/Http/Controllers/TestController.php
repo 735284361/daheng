@@ -167,7 +167,11 @@ class TestController extends Controller
 //        $agentInfo = AgentMember::whereHas('agent')->where('user_id',9)->first();
 
 
-        echo Carbon::now()->subDays(5);
+//        echo Carbon::now()->subDays(5);
+
+        $Order = new OrderService();
+        $order = Order::find(161);
+        $Order->test($order,Order::STATUS_SHIPPED);
 
     }
 

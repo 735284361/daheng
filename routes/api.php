@@ -31,6 +31,7 @@ Route::group(['prefix' => 'v1'], function () {
     // 登录注册
     Route::any('/wechat/login', 'WeChatController@login');
     Route::any('/wechat/register', 'WeChatController@register');
+    Route::any('/wechat/bindPhone', 'WeChatController@bindPhone');
     // 系统参数
     Route::get('config/value','SysParamController@value');
     // 轮播
