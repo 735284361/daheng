@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\UserService;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -107,7 +108,7 @@ class WeChatController extends Controller
         $sessionKey = $sessionData['session_key'];
 
         $data = $app->encryptor->decryptData($sessionKey, $iv, $encryptedData);
-        return $data;
+        return UserService::bindPhone($data['phoneNumber']);
     }
 
     public function profile()

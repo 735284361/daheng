@@ -31,7 +31,6 @@ Route::group(['prefix' => 'v1'], function () {
     // 登录注册
     Route::any('/wechat/login', 'WeChatController@login');
     Route::any('/wechat/register', 'WeChatController@register');
-    Route::any('/wechat/bindPhone', 'WeChatController@bindPhone');
     // 系统参数
     Route::get('config/value','SysParamController@value');
     // 轮播
@@ -58,6 +57,7 @@ Route::group(['prefix' => 'v1'], function () {
     // 验证登录
     Route::group([ 'middleware'=>['auth:api']], function() {
 //        Route::get('test','TestController@test');
+        Route::any('/wechat/bindPhone', 'WeChatController@bindPhone');
         // 用户地址
         Route::group(['prefix' => 'address'], function() {
             Route::get('list','AddressController@lists');

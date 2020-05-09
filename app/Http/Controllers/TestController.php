@@ -15,6 +15,7 @@ use App\Services\MessageService;
 use App\Services\OrderService;
 use App\Services\ShareService;
 use App\Services\UserAccountService;
+use App\Services\UserService;
 use App\User;
 use Carbon\Carbon;
 use Faker\Generator;
@@ -169,15 +170,18 @@ class TestController extends Controller
 
 //        echo Carbon::now()->subDays(5);
 
-        $Order = new OrderService();
-        $order = Order::find(161);
-        $Order->test($order,Order::STATUS_SHIPPED);
+//        $Order = new OrderService();
+//        $order = Order::find(161);
+//        $Order->test($order,Order::STATUS_SHIPPED);
+
+        UserService::bindPhone('17600296638');
 
     }
 
     public function auth_test()
     {
 
+        return UserService::bindPhone('17600296610');
         // 商品码
 //        $id = 10;
 //        $user = auth()->user();
@@ -191,12 +195,12 @@ class TestController extends Controller
 
         // 分销码
 
-        $user = auth()->user();
-        $agent = new AgentService();
-        $userId = '100635';
-        $xcxurl = $agent->getOnlyQrCode($userId);
-        return $xcxurl;
-        $img = ShareService::getAgentCode($user,$xcxurl);
+//        $user = auth()->user();
+//        $agent = new AgentService();
+//        $userId = '100635';
+//        $xcxurl = $agent->getOnlyQrCode($userId);
+//        return $xcxurl;
+//        $img = ShareService::getAgentCode($user,$xcxurl);
 //        return $img;
     }
 

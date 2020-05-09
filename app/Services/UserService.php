@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Feedback;
+use App\User;
 use Illuminate\Http\Request;
 
 class UserService
@@ -18,9 +19,18 @@ class UserService
         return $feedback->save();
     }
 
-    public function bindPhone($phone)
+    public static function bindPhone($phone)
     {
+        $user = auth('api')->user();
 
+        $isExists = User::where('id','!=',$user->id)->where('phone','=',$phone)->exists();
+        if ($isExists) {
+            return ['code' => 1,'msg' => '该手机号已被使用'];
+        }
+
+        $user->phone = $phone;
+        $user->update();
+        return ['code' => 0,'msg' => '绑定成功'];
     }
 
 }
