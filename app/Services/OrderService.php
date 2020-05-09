@@ -514,9 +514,10 @@ class OrderService
     /**
      * 获取用户支付成功的金额
      * @param string $userId
+     * @param null $subDays
      * @return mixed
      */
-    public function getUserPaidConsumeAmount($userId = '')
+    public function getUserPaidConsumeAmount($userId = null,$subDays = null)
     {
         $userId == '' ? $userId = auth('api')->id() : '';
 
@@ -526,9 +527,15 @@ class OrderService
             Order::STATUS_RECEIVED,
             Order::STATUS_COMPLETED,
         ];
-        return Order::where('user_id',$userId)
-            ->whereIn('status', $status)
-            ->sum('order_amount_total');
+
+        $qeruy =  Order::where('user_id',$userId)
+            ->whereIn('status', $status);
+
+        if ($subDays) {
+            $qeruy->where('pay_time','>=',Carbon::now()->subDays());
+        }
+
+        return $qeruy->sum('order_amount_total');
     }
 
 

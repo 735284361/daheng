@@ -166,6 +166,9 @@ class TestController extends Controller
         // 代理
 //        $agentInfo = AgentMember::whereHas('agent')->where('user_id',9)->first();
 
+
+        echo Carbon::now()->subDays(5);
+
     }
 
     public function auth_test()

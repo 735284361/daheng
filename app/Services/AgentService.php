@@ -860,7 +860,7 @@ class AgentService
     public function checkConsume()
     {
         $orderService = new OrderService();
-        $amount = $orderService->getUserPaidConsumeAmount();
+        $amount = $orderService->getUserPaidConsumeAmount(null,1);
         $consume= $this->agentConsumeCon();
         if ($amount >= $consume) {
             return true;
