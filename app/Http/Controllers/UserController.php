@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Feedback;
 use App\Services\UserAccountService;
 use App\Services\UserService;
+use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -67,8 +70,15 @@ class UserController extends Controller
 
     public function bindPhone(Request $request)
     {
+        $userId = auth('api')->id();
+        $this->validate($request,[
+            'phone' => 'required|' . Rule::unique('users','phone')->ignore($userId)
+        ]);
+        $user = auth('api')->user();
 
-        $data = WeChatController::bindPhone($code, $iv, $encryptedData);
+        $user->phone = $request->phone;
+        $res = $user->update();
+        return $res;
     }
 
 }

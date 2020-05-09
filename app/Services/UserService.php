@@ -18,4 +18,9 @@ class UserService
         return $feedback->save();
     }
 
+    public function bindPhone($phone)
+    {
+
+    }
+
 }

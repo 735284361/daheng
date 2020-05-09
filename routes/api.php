@@ -113,6 +113,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('feedback','UserController@feedback');
             Route::get('feedback/types','UserController@getFeedBackTypes');
             Route::post('withdraw/apply','WithdrawController@apply');
+            Route::post('bindPhone','UserController@bindPhone');
         });
     });
 
