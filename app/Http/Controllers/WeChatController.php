@@ -102,7 +102,8 @@ class WeChatController extends Controller
         $encryptedData = $request->encryptedData;
         $miniProgram = \EasyWeChat::miniProgram();
         $session = $miniProgram->auth->session($code);
-        $decryptedData = $miniProgram->encryptor->decryptData($session, $iv, $encryptedData);
+        $sessionKey = $session['session_key'];
+        $decryptedData = $miniProgram->encryptor->decryptData($sessionKey, $iv, $encryptedData);
         return $decryptedData;
     }
 
