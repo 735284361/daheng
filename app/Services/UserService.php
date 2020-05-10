@@ -30,7 +30,7 @@ class UserService
 
         $user->phone = $phone;
         $user->update();
-        
+
         return ['code' => 0,'msg' => '绑定成功'];
     }
 

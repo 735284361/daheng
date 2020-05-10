@@ -102,10 +102,13 @@ class AgentController extends Controller
 //            return ['code' => 1];
 //        }
 
-        $user = auth()->user();
-        $agent = new AgentService();
-        $xcxurl = $agent->getQrCode(auth('api')->id());
-        return ShareService::getAgentCode($user,$xcxurl);
+
+        return $this->agentService->getOnlyQrCode(auth('api')->id());
+
+//        $user = auth()->user();
+//        $agent = new AgentService();
+//        $xcxurl = $agent->getQrCode(auth('api')->id());
+//        return ShareService::getAgentCode($user,$xcxurl);
     }
 
     /**
