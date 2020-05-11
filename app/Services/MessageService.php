@@ -30,7 +30,7 @@ class MessageService
     public static function orderMsg(Order $order, $status)
     {
         // 模板消息通知
-        
+
         // 发送支付成功消息
 //        TempMsgService::paySuccess($order);
 

@@ -554,20 +554,19 @@ class AgentService
      */
     public function getCommissionUserId($userId)
     {
-        // 如果是顾客
-        $agentInfo = self::getUsersAgent($userId);
-        if ($agentInfo) {
-            return $agentInfo->agent_id;
+        // 如果自己是代理商 且状态正常
+        $agentInfo = $this->getAgentInfo($userId);
+        if ($agentInfo && $agentInfo->status == Agent::STATUS_NORMAL) {
+            return $agentInfo->user_id;
         } else {
-            // 如果自己是代理商 切状态正常
-            $agentInfo = $this->getAgentInfo($userId);
-            if ($agentInfo && $agentInfo->status == Agent::STATUS_NORMAL) {
-                return $agentInfo->user_id;
+            // 如果是顾客
+            $agentInfo = self::getUsersAgent($userId);
+            if ($agentInfo) {
+                return $agentInfo->agent_id;
             } else {
                 return false;
             }
         }
-
     }
 
     /**
