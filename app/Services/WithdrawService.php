@@ -66,6 +66,9 @@ class WithdrawService
             // 减少用户账户余额 新增提现中的余额
             $userAccountService = new UserAccountService();
             $userAccountService->applyWithdraw($applyTotal);
+
+            // 短信提醒
+            AdminMsgService::sendWithdrawApplyMsg();
         });
         if (!is_null($exception)) {
             $this->errors = ['code' => 1,'msg' => '提现失败'];
