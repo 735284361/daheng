@@ -74,4 +74,39 @@ class UserBillService
             ->sum('amount');
     }
 
+
+    /**
+     * 存储资金流水
+     * @param $userId
+     * @param $billName
+     * @param $amount
+     * @param $amountType
+     * @param $status
+     * @param $billType
+     * @return mixed
+     */
+    public static function saveBillInfo($model, $userId, $billName, $amount, $amountType, $status, $billType)
+    {
+        return $model->bill()->create([
+            'user_id' => $userId,
+            'bill_name' => $billName,
+            'amount' => $amount,
+            'amount_type' => $amountType,
+            'status' => $status,
+            'bill_type' => $billType
+        ]);
+    }
+
+    /**
+     * 更新账单状态
+     * @param $id
+     * @param $status
+     * @return mixed
+     */
+    public static function updateBillStatus($model, $status)
+    {
+        $model->status = $status;
+        return $model->save();
+    }
+
 }

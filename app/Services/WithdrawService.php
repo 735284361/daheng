@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\UserAccount;
+use App\Models\UserBill;
 use App\Models\Withdraw;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -66,6 +67,10 @@ class WithdrawService
             // 减少用户账户余额 新增提现中的余额
             $userAccountService = new UserAccountService();
             $userAccountService->applyWithdraw($applyTotal);
+
+            // 更新资金流水记录表
+            UserBillService::saveBillInfo($this->withdraw,auth('api')->id(), '提现申请', $applyTotal, UserBill::AMOUNT_TYPE_EXPEND,
+                UserBill::BILL_STATUS_WAITING_INCOME, UserBill::BILL_TYPE_WITHDRAW);
 
             // 短信提醒
             AdminMsgService::sendWithdrawApplyMsg();
@@ -130,6 +135,10 @@ class WithdrawService
             // 处理提现中的余额
             $userAccountService = new UserAccountService($this->withdraw->user_id);
             $userAccountService->agreeWithdraw($this->withdraw->apply_total);
+
+            // 账单
+            $userBill = $this->withdraw->bill()->first();
+            UserBillService::updateBillStatus($userBill,UserBill::BILL_STATUS_NORMAL);
         });
         if (!$exception) {
             return ['code' => 0, 'msg' => '成功'];
@@ -194,6 +203,10 @@ class WithdrawService
             // 处理提现中的余额
             $userAccountService = new UserAccountService($this->withdraw->user_id);
             $userAccountService->refuseWithdraw($this->withdraw->apply_total);
+
+            // 更新账单
+            $userBill = $this->withdraw->bill()->first();
+            UserBillService::updateBillStatus($userBill,UserBill::BILL_STATUS_REFUSED);
         });
         if (!$exception) {
             return ['code' => 0, 'msg' => '成功'];

@@ -15,6 +15,12 @@ class Withdraw extends Model
     const STATUS_REFUSED = -1; // 审核失败
     const STATUS_WITHDRAW_FAIL = -2; // 提现失败
 
+    // 多态关联账单
+    public function bill()
+    {
+        return $this->morphMany(UserBill::class,'billable');
+    }
+
     public function logs()
     {
         return $this->hasMany(WithdrawLog::class,'withdraw_id','id');

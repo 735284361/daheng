@@ -15,6 +15,7 @@ class UserBill extends Model
     // 消费状态
     const BILL_STATUS_NORMAL = 1; // 正常
     const BILL_STATUS_WAITING_INCOME = 2; // 入账中
+    const BILL_STATUS_REFUSED = -1; // 拒绝
 
     // 账单分类
     const BILL_TYPE_BUY = 1; // 购物
@@ -35,6 +36,7 @@ class UserBill extends Model
         $arr = [
             self::BILL_STATUS_NORMAL => '正常',
             self::BILL_STATUS_WAITING_INCOME => '入账中',
+            self::BILL_STATUS_REFUSED => '提现失败',
         ];
 
         if ($ind !== null) {
