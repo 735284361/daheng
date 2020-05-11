@@ -118,36 +118,51 @@ class WithdrawService
         if ($this->withdraw->status != Withdraw::STATUS_APPLY) {
             return ['code' => 1, 'msg' => '该订单不支持提现'];
         }
-        // 查询提现状态
-        $queryData = $this->payService->queryBalanceOrder($this->withdraw->withdraw_order);
-        if ($queryData['return_code'] == 'SUCCESS' && $queryData['result_code'] == 'FAIL') {
-            $transData =  $this->payService->transferToBalance($this->withdraw->withdraw_order, $this->withdraw->apply_total, $this->withdraw->user_id, $remark);
-            if ($transData['return_code'] == 'SUCCESS') {
-                if ($transData['result_code'] == 'SUCCESS') {
-                    $exception = DB::transaction(function () use ($remark) {
-                        // 更新提现日志
-                        $this->updateWithdrawStatus(Withdraw::STATUS_COMPLETED);
-                        // 添加提现日志
-                        $this->saveWithdrawLog(Withdraw::STATUS_COMPLETED, $remark);
-                        // 处理提现中的余额
-                        $userAccountService = new UserAccountService($this->withdraw->user_id);
-                        $userAccountService->agreeWithdraw($this->withdraw->apply_total);
-                    });
-                    if (!$exception) {
-                        return ['code' => 0, 'msg' => '成功'];
-                    } else {
-                        return ['code' => 1, 'msg' => '失败'];
-                    }
-                } else {
-                    return ['code' => 1, 'msg' => $transData['err_code'].":".$transData['err_code_des']];
-                }
-            } else {
-                $this->withdraw->status = Withdraw::STATUS_COMPLETED;
-                return ['code' => 1, 'msg' => $transData['err_code'].":".$transData['err_code_des']];
-            }
+
+        $exception = DB::transaction(function () use ($remark) {
+            // 更新提现日志
+            $this->updateWithdrawStatus(Withdraw::STATUS_COMPLETED);
+            // 添加提现日志
+            $this->saveWithdrawLog(Withdraw::STATUS_COMPLETED, $remark);
+            // 处理提现中的余额
+            $userAccountService = new UserAccountService($this->withdraw->user_id);
+            $userAccountService->agreeWithdraw($this->withdraw->apply_total);
+        });
+        if (!$exception) {
+            return ['code' => 0, 'msg' => '成功'];
         } else {
-            return ['code' => 1, 'msg' => '已打款'];
+            return ['code' => 1, 'msg' => '失败'];
         }
+//        // 查询提现状态
+//        $queryData = $this->payService->queryBalanceOrder($this->withdraw->withdraw_order);
+//        if ($queryData['return_code'] == 'SUCCESS' && $queryData['result_code'] == 'FAIL') {
+//            $transData =  $this->payService->transferToBalance($this->withdraw->withdraw_order, $this->withdraw->apply_total, $this->withdraw->user_id, $remark);
+//            if ($transData['return_code'] == 'SUCCESS') {
+//                if ($transData['result_code'] == 'SUCCESS') {
+//                    $exception = DB::transaction(function () use ($remark) {
+//                        // 更新提现日志
+//                        $this->updateWithdrawStatus(Withdraw::STATUS_COMPLETED);
+//                        // 添加提现日志
+//                        $this->saveWithdrawLog(Withdraw::STATUS_COMPLETED, $remark);
+//                        // 处理提现中的余额
+//                        $userAccountService = new UserAccountService($this->withdraw->user_id);
+//                        $userAccountService->agreeWithdraw($this->withdraw->apply_total);
+//                    });
+//                    if (!$exception) {
+//                        return ['code' => 0, 'msg' => '成功'];
+//                    } else {
+//                        return ['code' => 1, 'msg' => '失败'];
+//                    }
+//                } else {
+//                    return ['code' => 1, 'msg' => $transData['err_code'].":".$transData['err_code_des']];
+//                }
+//            } else {
+//                $this->withdraw->status = Withdraw::STATUS_COMPLETED;
+//                return ['code' => 1, 'msg' => $transData['err_code'].":".$transData['err_code_des']];
+//            }
+//        } else {
+//            return ['code' => 1, 'msg' => '已打款'];
+//        }
     }
 
     /**
