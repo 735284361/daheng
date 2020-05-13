@@ -64,9 +64,11 @@ html;
         $grid->column('user_id', __('用户编号'))->sortable();
         $grid->column('address.name', __('姓名'))->sortable();
         $grid->column('address.phone', __('电话'));
-        $grid->column('product_count', __('商品数量'));
+        $grid->column('product_count', __('数量'));
         $grid->column('order_amount_total', __('订单金额'))->sortable();
-        $grid->column('orderAgent.commission', __('代理分成'));
+        $grid->column('agentInfo.nickname', __('代理昵称'))->sortable();
+        $grid->column('orderAgent.agent_id', __('代理编号'))->sortable();
+        $grid->column('orderAgent.commission', __('分成'));
         $grid->column('status', __('订单状态'))->using(Order::getStatus())->label([
             0 => 'default',
             1 => 'success',
@@ -87,7 +89,8 @@ html;
             $filter->column(1/2,function ($filter) {
                 $filter->like('order_no','订单号');
                 $filter->like('user_id','用户编号');
-                $filter->like('address.name','姓名');
+                $filter->like('address.name','用户姓名');
+                $filter->like('orderAgent.agent_id','代理编号');
             });
 
             $filter->column(1/2,function ($filter) {

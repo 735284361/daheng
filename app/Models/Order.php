@@ -78,6 +78,11 @@ class Order extends Model
         return $this->hasOne(AgentOrderMaps::class,'order_no','order_no');
     }
 
+    public function agentInfo()
+    {
+        return $this->hasOneThrough(\App\User::class,AgentOrderMaps::class,'order_no','id','order_no','agent_id');
+    }
+
     /**
      * 获取轮播图的状态
      * @param null $ind

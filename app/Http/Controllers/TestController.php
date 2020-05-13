@@ -174,7 +174,9 @@ class TestController extends Controller
 //        $order = Order::find(161);
 //        $Order->test($order,Order::STATUS_SHIPPED);
 
-        UserService::bindPhone('17600296638');
+//        UserService::bindPhone('17600296638');
+
+        return Order::with('agentInfo')->where(['order_no'=>'GM2020050621573816370'])->first();
 
     }
 
