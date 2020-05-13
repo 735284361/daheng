@@ -87,15 +87,16 @@ html;
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
             $filter->column(1/2,function ($filter) {
-                $filter->like('order_no','订单号');
+                $filter->like('order_no','订单编号');
                 $filter->like('user_id','用户编号');
                 $filter->like('address.name','用户姓名');
-                $filter->like('orderAgent.agent_id','代理编号');
+                $filter->equal('address.phone','手机号码');
             });
 
             $filter->column(1/2,function ($filter) {
-                $filter->equal('address.phone','手机号');
-                $filter->equal('status','状态')->multipleSelect(Order::getStatus());
+                $filter->like('orderAgent.agent_id','代理编号');
+                $filter->like('agentInfo.nickname','代理昵称');
+                $filter->equal('status','订单状态')->multipleSelect(Order::getStatus());
                 $filter->between('created_at','下单时间')->datetime();
             });
         });

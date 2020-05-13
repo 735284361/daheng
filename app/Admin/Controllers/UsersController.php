@@ -30,14 +30,11 @@ class UsersController extends AdminController
 
         $grid->column('id', __('用户编号'));
         $grid->column('nickname', __('用户名'));
-//        $grid->column('union_id', __('Union id'));
-//        $grid->column('open_id', __('Open id'));
-//        $grid->column('phone', __('Phone'));
-//        $grid->column('email', __('Email'));
-//        $grid->column('password', __('Password'));
-        $grid->column('avatar', __('头像'))->image('',100,100);
-//        $grid->column('session_key', __('Session key'));
-//        $grid->column('remember_token', __('Remember token'));
+        $grid->column('phone', __('电话'))->sortable();
+        $grid->column('avatar', __('头像'))->image('',50,50);
+        $grid->column('account.balance', __('余额'))->sortable();
+        $grid->column('account.withdrawn', __('已提现'))->sortable();
+        $grid->column('account.cash_in', __('提现中'))->sortable();
         $grid->column('created_at', __('创建时间'));
         $grid->column('updated_at', __('修改时间'));
 
@@ -48,10 +45,11 @@ class UsersController extends AdminController
             $filter->disableIdFilter();
             $filter->column(1/2,function ($filter) {
                 $filter->like('id','用户编号');
-                $filter->like('nickname','昵称');
+                $filter->like('nickname','用户昵称');
             });
 
             $filter->column(1/2,function ($filter) {
+                $filter->like('phone','用户电话');
                 $filter->between('created_at','创建时间')->datetime();
             });
         });
