@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\Order\View;
+use App\Models\AgentOrderMaps;
 use App\Models\Order;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
@@ -69,6 +70,7 @@ html;
         $grid->column('agentInfo.nickname', __('代理昵称'))->sortable();
         $grid->column('orderAgent.agent_id', __('代理编号'))->sortable();
         $grid->column('orderAgent.commission', __('分成'));
+//        $grid->column('orderAgent.status', __('分成状态'))->using(AgentOrderMaps::getStatus());
         $grid->column('status', __('订单状态'))->using(Order::getStatus())->label([
             0 => 'default',
             1 => 'success',
