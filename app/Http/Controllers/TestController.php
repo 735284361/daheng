@@ -35,7 +35,7 @@ class TestController extends Controller
 {
     //
 
-    public function test()
+    public function test(Request $request)
     {
         // 支付成功消息发送
 //        $order = Order::find(14);
@@ -73,7 +73,14 @@ class TestController extends Controller
 //        }
 
 //        $order = Order::find(11);
+//        $order = Order::where('order_no','GM2020050513203889880')->first();
 //        CompleteOrder::dispatch($order);
+//        $orderService = new OrderService();
+//        $orderService->confirmOrder($order);
+
+        $orderNo = $request->order_no;
+        $agentService = new AgentService();
+        $agentService->orderCommission($orderNo);
 
 //        $account = new UserAccountService();
 //        DB::enableQueryLog();
@@ -176,7 +183,7 @@ class TestController extends Controller
 
 //        UserService::bindPhone('17600296638');
 
-        return Order::with('agentInfo')->where(['order_no'=>'GM2020050621573816370'])->first();
+//        return Order::with('agentInfo')->where(['order_no'=>'GM2020050621573816370'])->first();
 
     }
 

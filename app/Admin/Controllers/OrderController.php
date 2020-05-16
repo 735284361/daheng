@@ -98,7 +98,7 @@ html;
             $filter->column(1/2,function ($filter) {
                 $filter->like('orderAgent.agent_id','代理编号');
                 $filter->like('agentInfo.nickname','代理昵称');
-                $filter->equal('status','订单状态')->multipleSelect(Order::getStatus());
+                $filter->in('status','订单状态')->multipleSelect(Order::getStatus());
                 $filter->between('created_at','下单时间')->datetime();
             });
         });

@@ -17,7 +17,9 @@ use App\Models\UserBill;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use SebastianBergmann\Environment\Console;
 
 class AgentService
 {
@@ -591,11 +593,13 @@ class AgentService
     public function orderCommission($orderNo)
     {
         // 订单分成流程
+        DB::enableQueryLog();
         $agentOrderMaps = AgentOrderMaps::with('order')
             ->where('order_no',$orderNo)
             ->where('status',AgentOrderMaps::STATUS_UNSETTLE)
             ->first();
-        if ($agentOrderMaps) {
+        Log::info('最近的数据查询:',DB::getQueryLog());
+        if ($agentOrderMaps !== null) {
             // 更新订单代理结算状态
             $this->setSettled($agentOrderMaps);
             // 增加代理商的账户余额
@@ -616,6 +620,8 @@ class AgentService
             AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('amount',$agentOrderMaps->commission);
             // 增加代理商的销售额
             $this->saveAgentBill($agentOrderMaps->agent_id,$agentOrderMaps->order->commission_remain_fee);
+        } else {
+            Log::info('未进行分成:');
         }
         return;
     }
