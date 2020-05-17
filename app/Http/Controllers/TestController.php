@@ -23,6 +23,7 @@ use iBrand\Miniprogram\Poster\MiniProgramShareImg;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
@@ -188,6 +189,12 @@ class TestController extends Controller
 
         // 重新统计用户消费
 //        $this->countMemberAmount();
+
+
+        $order = Order::where('order_no','GM2020051720212319985')->first();
+
+        Log::info('订单信息：',$order->toArray());
+        dd($order);
 
     }
 

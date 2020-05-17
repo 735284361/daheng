@@ -288,8 +288,7 @@ class OrderService
             // 保存订单
             $this->updateOrderStatus($status);
             // 订单分成流程
-            $agentService = new AgentService();
-            $agentService->orderCommission($this->order->order_no);
+            $this->orderCommission();
             // 支付成功 进入消息发送系统
             $this->sendMsg($status);
         });
@@ -321,8 +320,7 @@ class OrderService
             // 更新订单状态
             $this->updateOrderStatus($status, $remark);
             // 订单分成流程
-            $agentService = new AgentService();
-            $agentService->orderCommission($this->order->order_no);
+            $this->orderCommission();
             // 通知服务
             $this->sendMsg($status);
             return;
@@ -345,6 +343,16 @@ class OrderService
         // 更新订单日志
         $this->saveEventLog($status, $remark);
         return;
+    }
+
+    /**
+     * 订单分成
+     */
+    private function orderCommission()
+    {
+        // 订单分成流程
+        $agentService = new AgentService();
+        $agentService->orderCommission($this->order->order_no);
     }
 
     /**

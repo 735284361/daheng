@@ -23,6 +23,7 @@ class UserBill extends Model
     const BILL_TYPE_WITHDRAW = 3; // 提现
     const BILL_TYPE_COMMISSION = 4; // 佣金
     const BILL_TYPE_DIVIDE = 5; // 分成
+    const BILL_TYPE_REFUND = -1; // 退款
 
     protected $guarded = [];
 
@@ -65,7 +66,8 @@ class UserBill extends Model
             self::BILL_TYPE_RECHARGE => '现金充值',
             self::BILL_TYPE_WITHDRAW => '用户提现',
             self::BILL_TYPE_COMMISSION => '订单佣金',
-            self::BILL_TYPE_DIVIDE => '销售分成'
+            self::BILL_TYPE_DIVIDE => '销售分成',
+            self::BILL_TYPE_REFUND => '退款',
         ];
 
         if ($ind !== null) {
