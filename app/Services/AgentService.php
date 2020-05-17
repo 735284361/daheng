@@ -618,11 +618,11 @@ class AgentService
 
             // 增加用户代理的消费数据
             AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('order_number');
-            AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('amount',$agentOrderMaps->commission);
+            AgentMember::where('user_id',$agentOrderMaps->order->user_id)->increment('amount',$agentOrderMaps->order->order_amount_total);
             // 增加代理商的销售额
             $this->saveAgentBill($agentOrderMaps->agent_id,$agentOrderMaps->order->commission_remain_fee);
         } else {
-            Log::info('未进行分成:');
+            Log::info('未进行分成');
         }
         return;
     }
