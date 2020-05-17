@@ -73,14 +73,14 @@ class TestController extends Controller
 //        }
 
 //        $order = Order::find(11);
-//        $order = Order::where('order_no','GM2020050513203889880')->first();
+        $order = Order::where('order_no','GM2020051120161728231')->first();
 //        CompleteOrder::dispatch($order);
-//        $orderService = new OrderService();
-//        $orderService->confirmOrder($order);
+        $orderService = new OrderService();
+        $orderService->confirmOrder($order);
 
-        $orderNo = $request->order_no;
-        $agentService = new AgentService();
-        $agentService->orderCommission($orderNo);
+//        $orderNo = $request->order_no;
+//        $agentService = new AgentService();
+//        $agentService->orderCommission($orderNo);
 
 //        $account = new UserAccountService();
 //        DB::enableQueryLog();

@@ -598,7 +598,7 @@ class AgentService
             ->where('order_no',$orderNo)
             ->where('status',AgentOrderMaps::STATUS_UNSETTLE)
             ->first();
-        Log::info('订单编号:',$orderNo);
+//        Log::info('订单编号:',$orderNo);
         Log::info('最近的数据查询:',DB::getQueryLog());
         if ($agentOrderMaps !== null) {
             // 更新订单代理结算状态
