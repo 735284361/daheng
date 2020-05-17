@@ -69,8 +69,12 @@ html;
         $grid->column('order_amount_total', __('订单金额'))->sortable();
         $grid->column('agentInfo.nickname', __('代理昵称'))->sortable();
         $grid->column('orderAgent.agent_id', __('代理编号'))->sortable();
-        $grid->column('orderAgent.commission', __('分成'))->sortable();
-        $grid->column('orderAgent.status', __('分成状态'))->using(AgentOrderMaps::getStatus())->sortable();
+        $grid->column('orderAgent.commission', __('分成'));
+        $grid->column('orderAgent.status', __('分成状态'))->using(AgentOrderMaps::getStatus())->label([
+            0 => 'default',
+            1 => 'success',
+            -1 => 'danger',
+        ]);
         $grid->column('status', __('订单状态'))->using(Order::getStatus())->label([
             0 => 'default',
             1 => 'success',
@@ -98,6 +102,7 @@ html;
             $filter->column(1/2,function ($filter) {
                 $filter->like('orderAgent.agent_id','代理编号');
                 $filter->like('agentInfo.nickname','代理昵称');
+                $filter->in('orderAgent.status','分成状态')->multipleSelect(AgentOrderMaps::getStatus());
                 $filter->in('status','订单状态')->multipleSelect(Order::getStatus());
                 $filter->between('created_at','下单时间')->datetime();
             });

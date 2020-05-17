@@ -187,7 +187,7 @@ class TestController extends Controller
 //        return Order::with('agentInfo')->where(['order_no'=>'GM2020050621573816370'])->first();
 
         // 重新统计用户消费
-        $this->countMemberAmount();
+//        $this->countMemberAmount();
 
     }
 
@@ -217,14 +217,20 @@ class TestController extends Controller
 //        return $img;
     }
 
-    public function countMemberAmount()
-    {
-
-        $agentOrderMaps = AgentOrderMaps::with('order')
-            ->where('status',AgentOrderMaps::STATUS_DIVIDE_SETTLED)
-            ->get();
-        dd($agentOrderMaps);
-    }
+    /**
+     * 批量重新统计顾客消费
+     */
+//    public function countMemberAmount()
+//    {
+//
+//        $agentOrderMaps = AgentOrderMaps::with('order')
+//            ->where('status',AgentOrderMaps::STATUS_DIVIDE_SETTLED)
+//            ->get();
+//        foreach ($agentOrderMaps as $order) {
+//            AgentMember::where('user_id',$order->order->user_id)->increment('amount',$order->order->order_amount_total);
+//        }
+//
+//    }
 
     public function addDeliverOrder()
     {
