@@ -78,9 +78,10 @@ class TestController extends Controller
 //        $orderService = new OrderService();
 //        $orderService->confirmOrder($order);
 
-        $orderNo = $request->order_no;
-        $agentService = new AgentService();
-        $agentService->orderCommission($orderNo);
+//        // 订单手动分成
+//        $orderNo = $request->order_no;
+//        $agentService = new AgentService();
+//        $agentService->orderCommission($orderNo);
 
 //        $account = new UserAccountService();
 //        DB::enableQueryLog();
@@ -185,6 +186,9 @@ class TestController extends Controller
 
 //        return Order::with('agentInfo')->where(['order_no'=>'GM2020050621573816370'])->first();
 
+        // 重新统计用户消费
+        $this->countMemberAmount();
+
     }
 
     public function auth_test()
@@ -211,6 +215,15 @@ class TestController extends Controller
 //        return $xcxurl;
 //        $img = ShareService::getAgentCode($user,$xcxurl);
 //        return $img;
+    }
+
+    public function countMemberAmount()
+    {
+
+        $agentOrderMaps = AgentOrderMaps::with('order')
+            ->where('status',AgentOrderMaps::STATUS_DIVIDE_SETTLED)
+            ->get();
+        dd($agentOrderMaps);
     }
 
     public function addDeliverOrder()
