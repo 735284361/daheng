@@ -600,6 +600,7 @@ class AgentService
             ->first();
         Log::info($orderNo);
         Log::info('最近的数据查询:',DB::getQueryLog());
+        DB::disableQueryLog();
         if ($agentOrderMaps !== null) {
             // 更新订单代理结算状态
             $this->setSettled($agentOrderMaps);
