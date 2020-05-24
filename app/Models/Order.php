@@ -23,6 +23,10 @@ class Order extends Model
     const STATUS_PAY_FAILED = -1; // 支付失败
     const STATUS_ORDER_CLOSE = -2; // 订单关闭
 
+    const EVENT_REFUND_ALL = 1; // 全部退款
+    const EVENT_REFUND_LOGISTICS = 2; // 运费退款
+    const EVENT_REFUND_GOODS = 3; // 部分商品退款
+
     const PRE_BUY = 'GM'; // 购买订单前缀
     const PRE_REFUND = 'TK'; // 退款订单前缀
     const PRE_WITHDRAW = 'TX'; // 提现
@@ -102,6 +106,25 @@ class Order extends Model
 
         if ($ind !== null) {
             return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::STATUS_UNPAID];
+        }
+        return $arr;
+    }
+
+    /**
+     * 订单日志
+     * @param null $ind
+     * @return array|mixed
+     */
+    public static function getEvents($ind = null)
+    {
+        $arr = [
+            self::EVENT_REFUND_ALL => '全部退款',
+            self::EVENT_REFUND_LOGISTICS => '运费退款',
+            self::EVENT_REFUND_GOODS => '商品退款',
+        ];
+
+        if ($ind !== null) {
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::EVENT_REFUND_ALL];
         }
         return $arr;
     }

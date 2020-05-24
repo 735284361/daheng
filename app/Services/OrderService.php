@@ -362,7 +362,7 @@ class OrderService
      * @param null $remark
      * @return mixed
      */
-    private function saveEventLog($event, $remark = null)
+    public function saveEventLog($event, $remark = null)
     {
         return $this->order->eventLogs()->create([
             'order_no' => $this->order->order_no,

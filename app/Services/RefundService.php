@@ -12,50 +12,6 @@ use Illuminate\Support\Facades\DB;
 class RefundService
 {
 
-//    public function refundLogisticsFee($orderNo, $refundFee, $refundDesc)
-//    {
-//        if ($refundFee <= 0) return ['code' => 1, 'msg' => '退款金额为0'];
-//        // 判断是否退过运费
-//        $refundType = RefundBill::REFUND_TYPE_LOGISTICS_FEE;
-//        $refundAmount = RefundBill::where([
-//            'order_no' => $orderNo,
-//            'refund_type' => $refundType
-//        ])->sum('refund_amount');
-//
-//        // 订单记录
-//        $order = Order::where(['order_no'=>$orderNo])->first();
-//
-//        // 剩余未退金额 大于等于需要退款的金额
-//        if ($order && ($order->logistics_fee - $refundAmount) >= $refundFee) {
-//            $exception = DB::transaction(function () use ($orderNo, $order, $refundFee, $refundType,  $refundDesc) {
-//                $refundNo = $this->getRefundNo();
-//                // 退款
-//                $this->refund($orderNo, $refundNo, $order->order_amount_total, $refundFee, $refundDesc);
-//                // 更新订单记录表
-//                $this->updateOrderRefundInfo($order, $refundFee);
-//                // 更新退款记录表
-//                $refundBill = $this->saveRefundBill($orderNo, $refundNo, $refundType, $refundFee, $refundDesc);
-//                // 用户退款账单
-//                $billName = $order->order_name.RefundBill::getRefundType($refundType);
-//                UserBillService::saveBillInfo(
-//                    $refundBill,
-//                    $order->user_id,
-//                    $billName,
-//                    $refundFee,
-//                    UserBill::AMOUNT_TYPE_INCOME,
-//                    UserBill::BILL_STATUS_NORMAL,
-//                    UserBill::BILL_TYPE_REFUND
-//                );
-//            });
-//            if (!is_null($exception)) {
-//                return ['code' => 1,'msg' => '退款失败'];
-//            }
-//            return ['code' => 0, 'msg' => '退款成功'];
-//        } else {
-//            return ['code' => 1, 'msg' => '退款金额超过可退金额'];
-//        }
-//    }
-
     public function refundFee($orderNo, $refundType, $refundDesc, $goodsArr = null)
     {
         // 订单信息
@@ -115,7 +71,7 @@ class RefundService
         // 退款
         $refundRes = $this->refund($orderNo, $refundNo, $order->order_amount_total, $refundTotalFee, $refundDesc);
         // 检查退款是否成功
-        if (true || $refundRes['return_code'] == 'SUCCESS' && $refundRes['result_code'] == 'SUCCESS') {
+        if ($refundRes['return_code'] == 'SUCCESS' && $refundRes['result_code'] == 'SUCCESS') {
             // 判断订单退款是否已完
             $exception = DB::transaction(function () use (
                 $orderNo,
@@ -133,6 +89,7 @@ class RefundService
                 }
                 // 更新订单记录表
                 $this->updateOrderRefundInfo($order, $refundTotalFee, $refundType, $refundCommissionFee);
+                // TODO:: 订单日志
                 // 更新退款记录表
                 $refundBill = $this->saveRefundBill($orderNo, $refundNo, $refundType, $refundTotalFee, $refundDesc);
                 // 更新代理分销信息
@@ -196,6 +153,7 @@ class RefundService
         // 判断是否完全退款
         if ($refundTotal == $order->order_amount_total) {
             $refundMark = 2;
+            $order->status = Order::STATUS_ORDER_CLOSE;
         }
         $order->refund_mark = $refundMark;
         $order->refund_amount = $refundTotal;
@@ -234,6 +192,12 @@ class RefundService
         $data = ['refund_commission_total' => $commissionTotal, 'refund_total' => $refundTotal];
         return ['code' => 0, 'data' => $data];
     }
+
+//    public function saveOrderEventLog()
+//    {
+//        $OrderService = new OrderService();
+//        $OrderService->saveEventLog();
+//    }
 
     /**
      * 更新订单商品表
@@ -301,7 +265,7 @@ class RefundService
     private function getRefundNo()
     {
         // 退款单号
-        return Order::getOrderNo('TK');
+        return Order::getOrderNo(Order::PRE_REFUND);
     }
 
     /**
@@ -318,6 +282,8 @@ class RefundService
     {
         $app = \EasyWeChat::payment();
 
+        $totalFee = $totalFee * 100;
+        $refundFee = $refundFee * 100;
         // 根据商户单号退款
         // 参数分别为：商户订单号、商户退款单号、订单金额、退款金额、其他参数
         return $app->refund->byOutTradeNumber($orderNo, $refundNumber, $totalFee, $refundFee,[
