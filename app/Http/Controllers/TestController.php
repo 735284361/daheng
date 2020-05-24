@@ -13,6 +13,7 @@ use App\Services\AdminMsgService;
 use App\Services\AgentService;
 use App\Services\MessageService;
 use App\Services\OrderService;
+use App\Services\RefundService;
 use App\Services\ShareService;
 use App\Services\UserAccountService;
 use App\Services\UserService;
@@ -79,7 +80,7 @@ class TestController extends Controller
 //        $orderService = new OrderService();
 //        $orderService->confirmOrder($order);
 
-//        // 订单手动分成
+        // 订单手动分成
 //        $orderNo = $request->order_no;
 //        $agentService = new AgentService();
 //        $agentService->orderCommission($orderNo);
@@ -191,10 +192,33 @@ class TestController extends Controller
 //        $this->countMemberAmount();
 
 
-        $order = Order::where('order_no','GM2020051720212319985')->first();
+//        $order = Order::where('order_no','GM2020051720212319985')->first();
+//
+//        Log::info('订单信息：',$order->toArray());
+//        dd($order);
 
-        Log::info('订单信息：',$order->toArray());
-        dd($order);
+        // 退款判断
+//        $orderNo = $request->order_no;
+//        $refundRes = $this->refund($orderNo);
+//        if ($refundRes['return_code'] == 'SUCCESS' && $refundRes['result_code'] == 'SUCCESS') {
+//
+//        } else {
+//            return ['code' => 1,'msg' => $refundRes['err_code_des']];
+//        }
+
+        $Refund = new RefundService();
+
+        $goodsArr = json_decode($request->goods_str,true);
+        return $Refund->refundFee($request->order_no, $request->refund_type, $request->refund_desc, $goodsArr);
+    }
+
+    public function refund($orderNo)
+    {
+        $refundNumber = date('YmdHis').rand(10000,99999);
+
+        $pay = \EasyWeChat::payment();
+
+        return $pay->refund->byOutTradeNumber($orderNo,$refundNumber,1,1);
 
     }
 

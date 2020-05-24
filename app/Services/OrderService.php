@@ -276,17 +276,18 @@ class OrderService
     /**
      * 确认收货
      * @param Order $order
+     * @param null $remark
      * @return bool
      * @throws \Throwable
      */
-    public function confirmOrder(Order $order)
+    public function confirmOrder(Order $order, $remark = null)
     {
         $this->order = $order;
 
-        $exception = DB::transaction(function() {
+        $exception = DB::transaction(function() use ($remark) {
             $status = Order::STATUS_RECEIVED;
             // 保存订单
-            $this->updateOrderStatus($status);
+            $this->updateOrderStatus($status, $remark);
             // 订单分成流程
             $this->orderCommission();
             // 支付成功 进入消息发送系统
