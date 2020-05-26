@@ -601,9 +601,12 @@ class AgentService
         Log::info($orderNo);
         Log::info('最近的数据查询:',DB::getQueryLog());
         DB::disableQueryLog();
-        if ($agentOrderMaps !== null && $agentOrderMaps->commission > 0) {
+        if ($agentOrderMaps !== null) {
             // 更新订单代理结算状态
             $this->setSettled($agentOrderMaps);
+            if ($agentOrderMaps->commission <= 0) {
+                return;
+            }
             // 增加代理商的账户余额
             $this->incAgentBalance($agentOrderMaps->agent_id, $agentOrderMaps->commission);
             // 更新代理商资金流水表
