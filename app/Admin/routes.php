@@ -32,6 +32,7 @@ Route::group([
     $router->group(['order' => 'delivery'], function($router) {
         $router->post('update-status','Api\OrderController@updateOrderStatus')->name('admin.order.update-status');
         $router->post('delivery','Api\OrderController@delivery')->name('admin.order.delivery');
+        $router->post('refund','Api\OrderController@refund')->name('admin.order.refund');
     });
 
     // 快递

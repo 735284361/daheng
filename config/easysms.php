@@ -34,12 +34,6 @@ return [
 //        'yunpian' => [
 //            'api_key' => 'e3ba9c48af0bb0c06ab186b73c2fb608',
 //        ],
-//
-//        'aliyun' => [
-//            'access_key_id' => 'LTAI4Fw6v9d3FNoKheoosLGK',
-//            'access_key_secret' => '5arnnVeiPbBKAfs2FgO4b8cfeqGvkZ',
-//            'sign_name' => '原卤大亨',
-//        ],
 
         'submail' => [
             'app_id' => '46638',

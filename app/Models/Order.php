@@ -23,9 +23,12 @@ class Order extends Model
     const STATUS_PAY_FAILED = -1; // 支付失败
     const STATUS_ORDER_CLOSE = -2; // 订单关闭
 
-    const EVENT_REFUND_ALL = 1; // 全部退款
-    const EVENT_REFUND_LOGISTICS = 2; // 运费退款
-    const EVENT_REFUND_GOODS = 3; // 部分商品退款
+    const REFUND_EVENT_ALL = 1; // 全部退款
+    const REFUND_EVENT_LOGISTICS = 2; // 运费退款
+    const REFUND_EVENT_GOODS = 3; // 部分商品退款
+
+    const EVENT_TYPE_NORMAL = 1; // 正常
+    const EVENT_TYPE_REFUND = 2; // 退款
 
     const PRE_BUY = 'GM'; // 购买订单前缀
     const PRE_REFUND = 'TK'; // 退款订单前缀
@@ -49,7 +52,7 @@ class Order extends Model
     {
         return $this->belongsToMany(Goods::class,'order_goods','order_no',
             'goods_id','order_no','id')
-            ->withPivot('sku', 'product_count','product_price','id','score','comment');
+            ->withPivot('sku', 'product_count','product_price','id','score','comment','refund_product_count','refund_total_amount');
     }
 
     // 订单地址
@@ -115,16 +118,34 @@ class Order extends Model
      * @param null $ind
      * @return array|mixed
      */
-    public static function getEvents($ind = null)
+    public static function getRefundEvents($ind = null)
     {
         $arr = [
-            self::EVENT_REFUND_ALL => '全部退款',
-            self::EVENT_REFUND_LOGISTICS => '运费退款',
-            self::EVENT_REFUND_GOODS => '商品退款',
+            self::REFUND_EVENT_ALL => '全部退款',
+            self::REFUND_EVENT_LOGISTICS => '运费退款',
+            self::REFUND_EVENT_GOODS => '部分商品退款',
         ];
 
         if ($ind !== null) {
-            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::EVENT_REFUND_ALL];
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::REFUND_EVENT_ALL];
+        }
+        return $arr;
+    }
+
+    /**
+     * 退款类型
+     * @param null $ind
+     * @return array|mixed
+     */
+    public static function getEventType($ind = null)
+    {
+        $arr = [
+            self::EVENT_TYPE_NORMAL => '正常',
+            self::EVENT_TYPE_REFUND => '退款',
+        ];
+
+        if ($ind !== null) {
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::EVENT_TYPE_NORMAL];
         }
         return $arr;
     }

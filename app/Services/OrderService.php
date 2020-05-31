@@ -357,16 +357,31 @@ class OrderService
     }
 
     /**
-     * 保存订单日志
+     * 保存退款日志
+     * @param Order $order
      * @param $event
      * @param null $remark
      * @return mixed
      */
-    public function saveEventLog($event, $remark = null)
+    public function saveRefundEventLog(Order $order,$event, $remark = null)
+    {
+        $this->order = $order;
+        return $this->saveEventLog($event, $remark, Order::EVENT_TYPE_REFUND);
+    }
+
+    /**
+     * 保存订单日志
+     * @param $event
+     * @param null $remark
+     * @param int $eventType
+     * @return mixed
+     */
+    private function saveEventLog($event, $remark = null, $eventType = 1)
     {
         return $this->order->eventLogs()->create([
             'order_no' => $this->order->order_no,
             'event' => $event,
+            'event_type' => $eventType,
             'remark' => $remark
         ]);
     }

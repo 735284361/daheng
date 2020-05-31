@@ -15,8 +15,8 @@ class OrderEventLog extends Model
      * @param $value
      * @return array|mixed
      */
-    public function getEventAttribute($value)
-    {
-        return Order::getStatus($value);
-    }
+//    public function getEventAttribute($value)
+//    {
+//        return Order::getStatus($value);
+//    }
 }

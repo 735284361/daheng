@@ -30,6 +30,10 @@ class RefundService
             return ['code' => 1,'msg' => '该订单已完成分成，无法进行退款'];
         }
 
+        if ($refundType == RefundBill::REFUND_TYPE_GOODS_FEE) {
+            if (empty($goodsArr)) return ['code' => 1,'msg' => '请选择需要退款的商品'];
+        }
+
         // 全部退款
         $refundTotalFee = 0;
         $refundCommissionFee = 0;
@@ -40,7 +44,7 @@ class RefundService
             }
             $refundTotalFee = $order->order_amount_total;
             $goodsArr = $this->getOrderGoods($orderNo);
-            $refundFeeInfo = $this->getOrderGoodsFeeInfo($goodsArr);
+            $refundFeeInfo = $this->getOrderGoodsFeeInfo($goodsArr, $orderNo);
             if ($refundFeeInfo['code'] == 0) {
                 $refundCommissionFee = $refundFeeInfo['data']['refund_commission_total'];
             } else {
@@ -57,7 +61,7 @@ class RefundService
             $refundTotalFee = $order->logistics_fee;
         } else {
             // 商品退款
-            $refundFeeInfo = $this->getOrderGoodsFeeInfo($goodsArr);
+            $refundFeeInfo = $this->getOrderGoodsFeeInfo($goodsArr, $orderNo);
             if ($refundFeeInfo['code'] == 0) {
                 $refundTotalFee = $refundFeeInfo['data']['refund_total'];
                 $refundCommissionFee = $refundFeeInfo['data']['refund_commission_total'];
@@ -69,9 +73,10 @@ class RefundService
         // 退款单号
         $refundNo = $this->getRefundNo();
         // 退款
-        $refundRes = $this->refund($orderNo, $refundNo, $order->order_amount_total, $refundTotalFee, $refundDesc);
+//        $refundRes = $this->refund($orderNo, $refundNo, $order->order_amount_total, $refundTotalFee, $refundDesc);
         // 检查退款是否成功
-        if ($refundRes['return_code'] == 'SUCCESS' && $refundRes['result_code'] == 'SUCCESS') {
+//        if ($refundRes['return_code'] == 'SUCCESS' && $refundRes['result_code'] == 'SUCCESS') {
+        if (true) {
             // 判断订单退款是否已完
             $exception = DB::transaction(function () use (
                 $orderNo,
@@ -89,11 +94,12 @@ class RefundService
                 }
                 // 更新订单记录表
                 $this->updateOrderRefundInfo($order, $refundTotalFee, $refundType, $refundCommissionFee);
-                // TODO:: 订单日志
                 // 更新退款记录表
                 $refundBill = $this->saveRefundBill($orderNo, $refundNo, $refundType, $refundTotalFee, $refundDesc);
                 // 更新代理分销信息
-                $this->updateAgentOrder($orderNo, $refundCommissionFee);
+                if ($refundType != RefundBill::REFUND_TYPE_LOGISTICS_FEE) {
+                    $this->updateAgentOrder($orderNo, $refundCommissionFee);
+                }
                 // 用户退款账单
                 $billName = $order->order_name.'-'.RefundBill::getRefundType($refundType);
                 // 保存资金流水
@@ -133,21 +139,25 @@ class RefundService
         switch ($refundType) {
             case RefundBill::REFUND_TYPE_ALL :
                 $order->refund_logistics_fee = $order->logistics_fee;
-                $order->logistics_fee = 0;
                 $order->commission_remain_fee = 0;
+                $event = Order::REFUND_EVENT_ALL;
                 break;
             case RefundBill::REFUND_TYPE_LOGISTICS_FEE :
                 $order->refund_logistics_fee = $order->logistics_fee;
-                $order->logistics_fee = 0;
+                $event = Order::REFUND_EVENT_LOGISTICS;
                 break;
             case RefundBill::REFUND_TYPE_GOODS_FEE :
-                // 剩余业绩 = 订单总金额 - 最终的提成费用 - 总共退款费用（可能含运费退款）
-                $order->commission_remain_fee = $order->product_amount_total - $commissionFee - ($refundTotal - $order->refund_logistics_fee);
+                // 剩余业绩 = 商品总金额 - 总共退款费用（可能含运费退款） + 被退掉的运费 - 最终的提成费用
+                $order->commission_remain_fee = $order->product_amount_total  - $refundTotal + $order->refund_logistics_fee - $commissionFee;
+                $event = Order::REFUND_EVENT_GOODS;
                 break;
             default :
                 break;
-
         }
+
+        // 订单日志
+        $orderService = new OrderService();
+        $orderService->saveRefundEventLog($order, $event,'退款：'.$refundAmount.'元');
 
         $refundMark = 1;
         // 判断是否完全退款
@@ -170,9 +180,10 @@ class RefundService
     /**
      * 获取需要退款的商品信息
      * @param $goodsArr
+     * @param $orderNo
      * @return array
      */
-    public function getOrderGoodsFeeInfo($goodsArr)
+    public function getOrderGoodsFeeInfo($goodsArr,$orderNo)
     {
         $commissionTotal = 0;
         $refundTotal = 0;
@@ -180,10 +191,13 @@ class RefundService
             $id = $goods['id'];
             $count = $goods['refund_count'];
 
-            $orderGoods = OrderGoods::find($id);
+            $orderGoods = OrderGoods::where(['order_no'=>$orderNo,'id'=>$id])->first();
+            if (!$orderGoods) {
+                return ['code' => 1,'msg' => '请选择正确的商品'];
+            }
 
             if ($orderGoods->refund_product_count + $count > $orderGoods->product_count) {
-                return ['code' => 1,'msg' => '超过最大退款数量'];
+                return ['code' => 1,'msg' => '超过最大可退商品数量'];
             }
             // 商品退费总额
             $commissionTotal += $orderGoods->dist_price * $count;
@@ -192,12 +206,6 @@ class RefundService
         $data = ['refund_commission_total' => $commissionTotal, 'refund_total' => $refundTotal];
         return ['code' => 0, 'data' => $data];
     }
-
-//    public function saveOrderEventLog()
-//    {
-//        $OrderService = new OrderService();
-//        $OrderService->saveEventLog();
-//    }
 
     /**
      * 更新订单商品表
@@ -211,8 +219,8 @@ class RefundService
 
             $orderGoods = OrderGoods::find($id);
             // 更新订单商品表
-            $orderGoods->refund_product_count = $count;
-            $orderGoods->refund_total_amount = $orderGoods->product_price * $count;
+            $orderGoods->refund_product_count = $orderGoods->refund_product_count + $count;
+            $orderGoods->refund_total_amount = $orderGoods->refund_total_amount + $orderGoods->product_price * $count;
 
             $orderGoods->update();
         }
@@ -230,7 +238,12 @@ class RefundService
         // 更新分销表
         $agentOrder = AgentOrderMaps::where(['order_no'=>$orderNo])->first();
         if ($agentOrder && $agentOrder->status == AgentOrderMaps::STATUS_DIVIDE_UNSETTLE) {
-            return AgentOrderMaps::where(['order_no'=>$orderNo])->decrement('commission',$commission);
+            // 佣金降为0的时候 处理订单为已结算状态
+            if ($agentOrder->commission == $commission) {
+                $agentOrder->status = AgentOrderMaps::STATUS_DIVIDE_SETTLED;
+            }
+            $agentOrder->commission = $agentOrder->commission - $commission;
+            return $agentOrder->save();
         }
         return true;
     }

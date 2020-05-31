@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\Order\View;
 use App\Models\AgentOrderMaps;
 use App\Models\Order;
+use App\Models\OrderEventLog;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -27,7 +28,9 @@ class OrderController extends AdminController
     {
         $data = Order::find($id);
 
-        $view = view('admin.order.order', compact('data'));
+        $eventLog = OrderEventLog::where('order_no',$data->order_no)->get();
+
+        $view = view('admin.order.order', ['data' => $data,'eventLogs' => $eventLog]);
         return $content
             ->title('订单')
             ->description('订单信息...')
