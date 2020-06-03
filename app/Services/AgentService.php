@@ -224,7 +224,7 @@ class AgentService
      */
     public function agentOrderSettle($userId)
     {
-        $subMonth = Carbon::now()->subMonth()->format('Ym');
+        $subMonth = getSubMonth();
         $agentBill = $this->getAgentBill($userId,$subMonth);
         // 判断是否已经结算
         if ($agentBill && $agentBill->divide_status == AgentBill::DIVIDE_STATUS_DIVIDED) {
@@ -250,7 +250,7 @@ class AgentService
 
     public function agentTeamSettle($teamId)
     {
-        $subMonth = Carbon::now()->subMonth()->format('Ym');
+        $subMonth = getSubMonth();
         $agentTeamBill = $this->getAgentTeamBill($teamId,$subMonth);
         // 判断是否已经结算
         if ($agentTeamBill && $agentTeamBill->divide_status == AgentTeamBill::DIVIDE_STATUS_DIVIDED) {

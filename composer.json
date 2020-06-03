@@ -58,7 +58,8 @@
         ],
         "files": [
             "app/Common/Common.php",
-            "app/Common/const.php"
+            "app/Common/const.php",
+            "app/Helpers/functions.php"
         ]
     },
     "autoload-dev": {

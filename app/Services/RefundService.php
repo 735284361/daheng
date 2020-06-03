@@ -73,10 +73,10 @@ class RefundService
         // 退款单号
         $refundNo = $this->getRefundNo();
         // 退款
-//        $refundRes = $this->refund($orderNo, $refundNo, $order->order_amount_total, $refundTotalFee, $refundDesc);
+        $refundRes = $this->refund($orderNo, $refundNo, $order->order_amount_total, $refundTotalFee, $refundDesc);
         // 检查退款是否成功
-//        if ($refundRes['return_code'] == 'SUCCESS' && $refundRes['result_code'] == 'SUCCESS') {
-        if (true) {
+        if ($refundRes['return_code'] == 'SUCCESS' && $refundRes['result_code'] == 'SUCCESS') {
+//        if (true) {
             // 判断订单退款是否已完
             $exception = DB::transaction(function () use (
                 $orderNo,
@@ -159,10 +159,10 @@ class RefundService
         $orderService = new OrderService();
         $orderService->saveRefundEventLog($order, $event,'退款：'.$refundAmount.'元');
 
-        $refundMark = 1;
+        $refundMark = Order::REFUND_MARK_PART;
         // 判断是否完全退款
         if ($refundTotal == $order->order_amount_total) {
-            $refundMark = 2;
+            $refundMark = Order::REFUND_MARK_ALL;
             $order->status = Order::STATUS_ORDER_CLOSE;
         }
         $order->refund_mark = $refundMark;

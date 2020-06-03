@@ -27,8 +27,8 @@ class DivideController extends Controller
      */
     public function divide()
     {
-        if (Carbon::today() != Carbon::now()->firstOfMonth()) {
-            DB::transaction(function () {
+        if (Carbon::today() == Carbon::now()->firstOfMonth()) {
+            $exception = DB::transaction(function () {
                 // 代理商结算
                 $agentList = Agent::where('status',Agent::STATUS_NORMAL)->get();
                 foreach ($agentList as $agent) {
@@ -43,8 +43,14 @@ class DivideController extends Controller
                     $this->agentService->agentTeamSettle($team->id);
                 }
             });
+
+            if ($exception) {
+                return ['code' => 0,'msg'=>'结算成功'];
+            } else {
+                return ['code' => 1,'msg'=>'结算失败'];
+            }
         }
-        return;
+        return ['code' => 1,'msg'=>'每月的第一天才能进行结算'];
     }
 
 }

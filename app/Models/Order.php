@@ -37,6 +37,9 @@ class Order extends Model
     const UNCOMMENTED = 0; // 未评论
     const COMMENTED = 1; // 已评论
 
+    const REFUND_MARK_NORMAL = 0; // 未评论
+    const REFUND_MARK_PART = 1; // 已评论
+    const REFUND_MARK_ALL = 2; // 已评论
     /**
      * 获取订单号
      * @param $pre
@@ -146,6 +149,25 @@ class Order extends Model
 
         if ($ind !== null) {
             return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::EVENT_TYPE_NORMAL];
+        }
+        return $arr;
+    }
+
+    /**
+     * 退款标志
+     * @param null $ind
+     * @return array|mixed
+     */
+    public static function getRefundMark($ind = null)
+    {
+        $arr = [
+            self::REFUND_MARK_NORMAL => '无退款',
+            self::REFUND_MARK_PART => '部分退款',
+            self::REFUND_MARK_ALL => '全部退款',
+        ];
+
+        if ($ind !== null) {
+            return array_key_exists($ind,$arr) ? $arr[$ind] : $arr[self::REFUND_MARK_NORMAL];
         }
         return $arr;
     }

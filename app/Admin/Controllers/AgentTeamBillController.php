@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Extensions\Tools\BtnDivide;
 use App\Models\AgentTeamBill;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
@@ -28,6 +29,23 @@ class AgentTeamBillController extends AdminController
 
         $grid->model()->orderBy('id','desc');
 
+        $grid->tools(function (Grid\Tools $tools) {
+            // excle 导入
+            $tools->append(new BtnDivide());
+        });
+
+        $grid->header(function ($query) {// 查询出已支付状态的订单总金额
+            $total = $query->sum('divide_total_amount');
+            $divideAmount = $query->sum('divide_remain_amount');
+
+            $html = <<<html
+                <span class="label label-success">团队总奖金：<span>$total</span> 元</span>
+                <span class="label label-info">队长结余奖金：<span>$divideAmount</span> 元</span>
+html;
+
+            return $html;
+        });
+
         $grid->column('id', __('编号'))->sortable();
 //        $grid->column('team_id', __('Team id'));
         $grid->column('user_id', __('用户编号'))->sortable();
@@ -40,8 +58,8 @@ class AgentTeamBillController extends AdminController
         ])->sortable();
         $grid->column('divide_total_amount', __('团队总奖金'))->sortable();
         $grid->column('divide_remain_amount', __('团队队长奖金'))->sortable();
-        $grid->column('created_at', __('创建时间'));
-        $grid->column('updated_at', __('更新时间'));
+        $grid->column('created_at', __('创建时间'))->sortable();
+//        $grid->column('updated_at', __('更新时间'));
 
         $grid->disableCreateButton();
         $grid->expandFilter();

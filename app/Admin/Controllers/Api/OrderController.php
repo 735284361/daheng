@@ -5,6 +5,7 @@ namespace App\Admin\Controllers\Api;
 use App\Models\Order;
 use App\Models\OrderEventLog;
 use App\Services\OrderService;
+use App\Services\RefundService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -75,7 +76,23 @@ class OrderController extends Controller
 
     public function refund(Request $request)
     {
+        $this->validate($request,[
+            'order_no' => 'required|string',
+            'refund_type' => 'required|integer',
+            'refund_desc' => 'required'
+        ]);
 
+        $refundService = new RefundService();
+        $goodsArr = $request->goods_str;
+        if ($goodsArr) {
+            $goodsArr = json_decode($goodsArr,true);
+        }
+        return $refundService->refundFee(
+            $request->order_no,
+            $request->refund_type,
+            $request->refund_desc,
+            $goodsArr
+        );
     }
 
 }

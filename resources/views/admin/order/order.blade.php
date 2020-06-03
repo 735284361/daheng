@@ -11,12 +11,13 @@
     <div class="box-body">
         <div class="container">
             <div class="col-md-12">
-                <button class="btn btn-success" onclick="refund('设置为已支付', '即将修改该笔订单状态为已付款，请确保您已经线下收款, 是否继续?', 'SET_PAID')">退款</button>
+{{--                <button class="btn btn-success" onclick="selectGoods()">退款</button>--}}
                 @if ($data['status'] == App\Models\Order::STATUS_UNPAID)
                     <button class="btn btn-success" onclick="updateOrderStatus('设置为已支付', '即将修改该笔订单状态为已付款，请确保您已经线下收款, 是否继续?', 'SET_PAID')">设为已支付</button>
                 @elseif ($data['status'] == App\Models\Order::STATUS_PAID || $data['status'] == App\Models\Order::STATUS_SHIPPED)
                     <button class="btn btn-success" onclick="delivery()">发货</button>
                     <button class="btn btn-success" onclick="updateOrderStatus('设置为确认收货', '即将修改该笔订单状态为确认收货，设置后订单状态将不能更改，是否继续？', 'SET_RECEIVED')">设置为确认收货</button>
+                    <button class="btn btn-danger" onclick="refund()">退款</button>
                 @elseif ($data['status'] == App\Models\Order::STATUS_RECEIVED)
                     <button class="btn btn-success" onclick="delivery()">发货</button>
                     <button class="btn btn-success" onclick="updateOrderStatus('设置为交易成功', '即将修改该笔订单状态为交易成功，设置后订单状态将不能更改，是否继续？', 'SET_COMPLETED')">设为交易成功</button>
@@ -31,50 +32,6 @@
 
 <div class="box box-default">
     <div class="box-header with-border">
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="input-group">
-                    <span class="input-group-addon">
-                        <input type="checkbox" aria-label="...">
-                    </span>
-                    <span class="input-group-addon" id="basic-addon3">
-                        Q弹翅尖&nbsp;/&nbsp;口味:麻辣 重量:小份180g&nbsp;/&nbsp;<span style="color:red">可退数量：1</span></span>
-                    <div class="input-group-btn">
-                        <input type="number" class="form-control" aria-label="..." value="1" max-value="2">
-                    </div>
-                </div><!-- /input-group -->
-            </div><!-- /.col-lg-6 -->
-        </div><!-- /.row -->
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="input-group">
-                    <span class="input-group-addon">
-                        <input type="checkbox" aria-label="...">
-                    </span>
-                    <span class="input-group-addon" id="basic-addon3">Q弹翅尖&nbsp;/&nbsp;口味:麻辣 重量:小份180g&nbsp;/&nbsp;可退数量：1</span>
-                    <div class="input-group-btn">
-                        <input type="number" class="form-control" aria-label="..." value="1" max-value="2">
-                    </div>
-                </div><!-- /input-group -->
-            </div><!-- /.col-lg-6 -->
-        </div><!-- /.row -->
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="input-group">
-                    <span class="input-group-addon">
-                        <input type="checkbox" aria-label="...">
-                    </span>
-                    <span class="input-group-addon" id="basic-addon3">Q弹翅尖&nbsp;/&nbsp;口味:麻辣 重量:小份180g&nbsp;/&nbsp;可退数量：1</span>
-                    <div class="input-group-btn">
-                        <input type="number" class="form-control" aria-label="..." value="1" max-value="2">
-                    </div>
-                </div><!-- /input-group -->
-            </div><!-- /.col-lg-6 -->
-        </div><!-- /.row -->
-    </div>
-</div>
-<div class="box box-default">
-    <div class="box-header with-border">
         <h3 class="box-title">订单信息</h3>
     </div>
 
@@ -83,6 +40,7 @@
             <div class="col-md-3">用户编号：{{$data['user_id']}}</div>
             <div class="col-md-3">订单编号：{{$data['order_no']}}</div>
             <div class="col-md-3">商品总价：{{$data['product_amount_total']}}</div>
+            <div class="col-md-3">退款标志：{{App\Models\Order::getRefundMark($data['refund_mark'])}}</div>
         </div>
         <div class="row" style="margin-bottom: 20px;">
             <div class="col-md-3">用户姓名：{{$data['address']['name']}}</div>
@@ -220,6 +178,27 @@
     <!-- /.box-body -->
 </div>
 
+{{-- 退款商品列表 --}}
+<div class="table-responsive" id="refund_goods_list" style="display: none">
+    <table class="table table-striped" id="refund_table">
+    <th class="row">
+        <td class="col-xs-1">选择</td>
+        <td class="col-xs-9">商品名称</td>
+        <td class="col-xs-2">退款数量</td>
+    </th>
+    @foreach($data['goods'] as $goods)
+        <tr class="row">
+            <td><input type="checkbox" value="{{$goods['pivot']['id']}}" @if ($goods['pivot']['product_count'] == $goods['pivot']['refund_product_count']) disabled @endif></td>
+            <td>{{$goods['name']}}&nbsp;/&nbsp;{{$goods['pivot']['sku']}}&nbsp;/&nbsp;<span style="color:red">可退数量：{{$goods['pivot']['product_count'] - $goods['pivot']['refund_product_count']}}</span></td>
+            <td><input type="number" class="form-control"
+                       onblur="checkCount(this,{{$goods['pivot']['product_count'] - $goods['pivot']['refund_product_count']}})"
+                       value="{{$goods['pivot']['product_count'] - $goods['pivot']['refund_product_count']}}"
+                       @if ($goods['pivot']['product_count'] == $goods['pivot']['refund_product_count']) disabled @endif></td>
+        </tr>
+    @endforeach
+    </table>
+</div>
+
 <script>
 
     let headers = {
@@ -227,6 +206,7 @@
         'Content-Type': 'application/json',
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     };
+    let refund_type,refund_desc;
 
     async function refund()
     {
@@ -244,15 +224,14 @@
                 '<input id="refund_desc" class="swal2-input" placeholder="同意退款">',
             focusConfirm: false,
             preConfirm: () => {
-                let refund_type = document.getElementById('refund_type').value;
-                let refund_desc = document.getElementById('refund_desc').value;
+                refund_type = document.getElementById('refund_type').value;
+                refund_desc = document.getElementById('refund_desc').value;
                 if (!refund_type) {
                     swal.showValidationError('请选择退款类型');
                     return
                 }
                 if (!refund_desc) {
                     refund_desc = '同意退款';
-                    return
                 }
                 return {
                     'order_no' : "{{$data['order_no']}}",
@@ -262,54 +241,60 @@
             }
         })
         if (formValues) {
-            console.log(formValues)
             if (formValues.refund_type == 3) {
                 selectGoods();
             } else {
-                refundApi()
+                refundApi(formValues)
             }
+        }
+    }
+
+    function checkCount(that,remainCount)
+    {
+        let count = $(that).val();
+        debugger
+        if (count > remainCount) {
+            Swal.fire('超过最大退款数量');
         }
     }
 
     async function selectGoods()
     {
+        let html = $('#refund_goods_list').html()
+        debugger
         const { value: formValues } = await Swal.fire({
-            title: '订单退款',
-            html:
-                '<h5 class="text-left">请选择退款类型</h5>' +
-                '<select id="refund_type" class="swal2-input">' +
-                '<option value="">请选择</option>' +
-                '<option value="1">全部退款</option>' +
-                '<option value="2">运费退款</option>' +
-                '<option value="3">部分商品退款</option>' +
-                '</select>' +
-                '<h5 class="text-left">备注</h5>' +
-                '<input id="refund_desc" class="swal2-input" placeholder="同意退款">',
+            title: '商品选择',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            width: '60%',
+            html: html,
             focusConfirm: false,
             preConfirm: () => {
-                let refund_type = document.getElementById('refund_type').value;
-                let refund_desc = document.getElementById('refund_desc').value;
-                if (!refund_type) {
-                    swal.showValidationError('请选择退款类型');
-                    return
-                }
-                if (!refund_desc) {
-                    refund_desc = '同意退款';
-                    return
+                let list = $("#refund_table input[type=checkbox]");
+                let goodsArr = new Array();
+                for (let i = 0; i < list.length; i++) {
+                    let obj = $(list[i])
+                    if (obj.prop('checked')) {
+                        let goods = new Object();
+                        goods['id'] = obj.val()
+                        goods['refund_count'] = obj.parent().siblings().children('input').val()
+                        goodsArr.push(goods)
+                    }
                 }
                 return {
                     'order_no' : "{{$data['order_no']}}",
                     'refund_type' : refund_type,
-                    'refund_desc' : refund_desc
+                    'refund_desc' : refund_desc,
+                    'goods_str' : JSON.stringify(goodsArr)
                 }
             }
         })
         if (formValues) {
-            console.log(formValues)
-            if (formValues.refund_type == 3) {
-            } else {
-                refundApi()
-            }
+            refundApi(formValues)
         }
     }
 
@@ -326,7 +311,8 @@
             cancelButtonText: '取消'
         }).then((result) => {
             if (result.value) {
-                Swal.fire(123);return
+                debugger
+                // Swal.fire(123);return
                 return new Promise(function (resolve, reject) {
                     $.ajax({
                         url: "{{route('admin.order.refund')}}", // Invalid URL on purpose
