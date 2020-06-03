@@ -42,19 +42,19 @@ html;
         });
 
         $grid->column('id', __('编号'));
-        $grid->column('user_id', __('用户编号'));
+        $grid->column('user_id', __('用户编号'))->sortable();
         $grid->column('user.nickname', __('用户昵称'));
         $grid->column('withdraw_order', __('订单号'));
-        $grid->column('apply_total', __('金额'));
+        $grid->column('apply_total', __('金额'))->sortable();
         $grid->column('status', __('状态'))->using(Withdraw::getStatus())->label([
             Withdraw::STATUS_APPLY => 'default',
             Withdraw::STATUS_PASSED => 'success',
             Withdraw::STATUS_COMPLETED => 'info',
             Withdraw::STATUS_REFUSED => 'primary',
             Withdraw::STATUS_WITHDRAW_FAIL => 'warning'
-        ]);;
-        $grid->column('created_at', __('申请时间'));
-        $grid->column('updated_at', __('更新时间'));
+        ])->sortable();
+        $grid->column('created_at', __('申请时间'))->sortable();
+        $grid->column('updated_at', __('更新时间'))->sortable();
 
         $grid->disableCreateButton();
 
