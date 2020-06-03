@@ -75,6 +75,7 @@
             cancelButtonText: '取消',
             showLoaderOnConfirm: true,
             inputPlaceholder: '备注',
+            inputValue: '提现申请入账'
         })
         if (!dismiss) {
             let values = {
