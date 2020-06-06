@@ -593,14 +593,10 @@ class AgentService
     public function orderCommission($orderNo)
     {
         // 订单分成流程
-        DB::enableQueryLog();
         $agentOrderMaps = AgentOrderMaps::with('order')
             ->where('order_no',$orderNo)
             ->where('status',AgentOrderMaps::STATUS_UNSETTLE)
             ->first();
-        Log::info($orderNo);
-        Log::info('最近的数据查询:',DB::getQueryLog());
-        DB::disableQueryLog();
         if ($agentOrderMaps !== null) {
             // 更新订单代理结算状态
             $this->setSettled($agentOrderMaps);
