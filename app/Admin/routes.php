@@ -27,6 +27,7 @@ Route::group([
     $router->resource('agent-bills', AgentBillController::class);
     $router->resource('agent-team-bills', AgentTeamBillController::class);
     $router->resource('agent-members', AgentMemberController::class);
+    $router->resource('order-goods', OrderGoodsController::class);
 
     // 订单
     $router->group(['order' => 'delivery'], function($router) {

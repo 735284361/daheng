@@ -63,7 +63,7 @@ class MessageService
                 }
                 break;
             default :
-                return;
+                break;
         }
 
         // 系统通知系统
