@@ -18,4 +18,9 @@ class OrderGoods extends Model
     {
         return $this->belongsTo(\App\User::class,'user_id','id')->select('id','nickname','avatar');
     }
+
+    public function orders()
+    {
+        return $this->belongsTo(Order::class,'order_no','order_no');
+    }
 }
