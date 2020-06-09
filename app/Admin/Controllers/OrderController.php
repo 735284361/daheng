@@ -70,10 +70,10 @@ html;
         $grid->column('address.phone', __('电话'));
         $grid->column('product_count', __('数量'));
         $grid->column('order_amount_total', __('订单金额'))->sortable();
-        $grid->column('agentInfo.nickname', __('代理昵称'))->sortable()->hide();
-        $grid->column('orderAgent.agent_id', __('代理编号'))->sortable()->hide();
-        $grid->column('orderAgent.commission', __('分成'))->hide();
-        $grid->column('orderAgent.status', __('分成状态'))->hide()->using(AgentOrderMaps::getStatus())->label([
+        $grid->column('agentInfo.nickname', __('代理昵称'))->sortable();
+        $grid->column('orderAgent.agent_id', __('代理编号'))->sortable();
+        $grid->column('orderAgent.commission', __('分成'));
+        $grid->column('orderAgent.status', __('分成状态'))->using(AgentOrderMaps::getStatus())->label([
             0 => 'default',
             1 => 'success',
             -1 => 'danger',
