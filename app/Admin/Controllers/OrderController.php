@@ -100,6 +100,7 @@ html;
                 $filter->like('user_id','用户编号');
                 $filter->like('address.name','用户姓名');
                 $filter->equal('address.phone','手机号码');
+                $filter->like('goods.name','商品名称');
             });
 
             $filter->column(1/2,function ($filter) {
