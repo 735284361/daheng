@@ -28,10 +28,10 @@ class UsersController extends AdminController
 
         $grid->model()->orderBy('id','desc');
 
-        $grid->column('id', __('用户编号'));
-        $grid->column('nickname', __('用户名'));
+        $grid->column('id', __('用户编号'))->sortable();
+        $grid->column('nickname', __('用户名'))->sortable();
         $grid->column('phone', __('电话'))->sortable();
-        $grid->column('avatar', __('头像'))->image('',50,50);
+        $grid->column('avatar', __('头像'))->image('123',50,50);
         $grid->column('account.balance', __('余额'))->sortable();
         $grid->column('account.withdrawn', __('已提现'))->sortable();
         $grid->column('account.cash_in', __('提现中'))->sortable();
