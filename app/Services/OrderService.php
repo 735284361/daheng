@@ -485,7 +485,7 @@ class OrderService
             ->where('user_id',auth('api')->id())
             ->whereIn('status',$status)
             ->orderBy('id','desc')
-            ->paginate(3);
+            ->paginate(10);
         return $list;
     }
 

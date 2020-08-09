@@ -77,7 +77,7 @@ class AddressController extends Controller
      * @param AddresssRequest $request
      * @return array
      */
-    public function postAddress(AddresssRequest $request)
+    public function postAddress(Request $request)
     {
         $res = $this->addressService->saveAddress($request->all());
         if ($res) {

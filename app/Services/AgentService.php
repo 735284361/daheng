@@ -444,7 +444,7 @@ class AgentService
             ->whereIn('order.order_no',$order)
             ->whereIn('order.status',$status)
             ->orderBy('pay_time','desc')
-            ->paginate(3);
+            ->paginate(10);
         return $list;
     }
 
