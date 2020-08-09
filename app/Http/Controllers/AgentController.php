@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Agent;
+use App\Models\AgentTeam;
 use App\Models\Goods;
 use App\Services\AgentService;
 use App\Services\ShareService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AgentController extends Controller
 {
@@ -154,10 +157,10 @@ class AgentController extends Controller
      * 获取代理商订单列表
      * @return array
      */
-    public function orders()
+    public function orders(Request $request)
     {
         $this->checkIsAgent();
-        $list = $this->agentService->agentOrderList(auth('api')->id());
+        $list = $this->agentService->agentOrderList(auth('api')->id(), $request->status);
         return ['code' => 0, 'data' => $list];
     }
 
@@ -237,6 +240,38 @@ class AgentController extends Controller
     {
         $this->validate($request,['id'=>'required|integer']);
         return $this->agentService->getTeamLeaderInfo($request->id);
+    }
+
+    /**
+     * 代理商分成
+     * @throws \Throwable
+     */
+    public function divide()
+    {
+        if (true || Carbon::today() == Carbon::now()->firstOfMonth()) {
+            $exception = DB::transaction(function () {
+                // 代理商结算
+                $agentList = Agent::where('status',Agent::STATUS_NORMAL)->get();
+                foreach ($agentList as $agent) {
+                    // 奖金结算
+                    $this->agentService->agentOrderSettle($agent->user_id);
+                }
+
+                // 团队队长奖金结算
+                $teamList = AgentTeam::where('status',AgentTeam::STATUS_NORMAL)->get();
+                foreach ($teamList as $team) {
+                    // 奖金结算
+                    $this->agentService->agentTeamSettle($team->id);
+                }
+            });
+
+            if (is_null($exception)) {
+                return ['code' => 0,'msg'=>'结算成功'];
+            } else {
+                return ['code' => 1,'msg'=>'结算失败'];
+            }
+        }
+        return ['code' => 1,'msg'=>'每月的第一天才能进行结算'];
     }
 
 }

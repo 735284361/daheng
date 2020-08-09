@@ -44,6 +44,8 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('shop/goods/goods_stock','ShopController@getGoodsStock');
     Route::get('shop/shipping/fee','ShopController@shippingFee');
     Route::get('shop/category/list','CategoryController@lists');
+    // 分成
+    Route::get('agent/divide','AgentController@divide');
 
     // 支付
     Route::group(['prefix' => '/pay'], function () {
@@ -82,7 +84,6 @@ Route::group(['prefix' => 'v1'], function () {
 
         // 代理商
         Route::group(['prefix' => 'agent'], function() {
-            Route::get('detail','AgentController@getAgentInfo');
             Route::get('viewAgentRight','AgentController@getAgentViewRight');
             Route::post('apply','AgentController@apply');
             Route::get('statistics','AgentController@statistics');

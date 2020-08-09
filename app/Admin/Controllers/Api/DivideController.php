@@ -44,7 +44,7 @@ class DivideController extends Controller
                 }
             });
 
-            if ($exception) {
+            if (is_null($exception)) {
                 return ['code' => 0,'msg'=>'结算成功'];
             } else {
                 return ['code' => 1,'msg'=>'结算失败'];

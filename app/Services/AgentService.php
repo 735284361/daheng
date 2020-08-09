@@ -410,16 +410,32 @@ class AgentService
      * @param $agentId
      * @return Order[]|array|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
-    public function agentOrderList($agentId)
+    public function agentOrderList($agentId, $status = 0)
     {
         $data = AgentOrderMaps::where('agent_id',$agentId)->get('order_no');
         $order = $data->pluck('order_no');
-        $status = [
-            Order::STATUS_PAID,
-            Order::STATUS_SHIPPED,
-            Order::STATUS_RECEIVED,
-            Order::STATUS_COMPLETED
-        ];
+        switch ($status) {
+            case 1:
+                $status = [
+                    Order::STATUS_PAID,
+                    Order::STATUS_SHIPPED,
+                ];
+                break;
+            case 2:
+                $status = [
+                    Order::STATUS_RECEIVED,
+                    Order::STATUS_COMPLETED
+                ];
+                break;
+            default:
+                $status = [
+                    Order::STATUS_PAID,
+                    Order::STATUS_SHIPPED,
+                    Order::STATUS_RECEIVED,
+                    Order::STATUS_COMPLETED
+                ];
+                break;
+        }
         $list = Order::with('address')->with('goods')->join(
             'agent_order_maps',
             'order.order_no',
@@ -428,7 +444,7 @@ class AgentService
             ->whereIn('order.order_no',$order)
             ->whereIn('order.status',$status)
             ->orderBy('pay_time','desc')
-            ->get();
+            ->paginate(3);
         return $list;
     }
 
