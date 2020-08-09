@@ -49,9 +49,9 @@ class OrderController extends Controller
      * 订单列表
      * @return array
      */
-    public function lists()
+    public function lists(Request $request)
     {
-        $list = $this->orderService->orderList();
+        $list = $this->orderService->orderList($request->status);
         if ($list) {
             return ['code' => 0, 'data' => $list];
         } else {

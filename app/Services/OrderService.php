@@ -443,20 +443,49 @@ class OrderService
      * 获取订单列表
      * @return Order[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
-    public function orderList()
+    public function orderList($status = 0)
     {
-        $status = [
-            Order::STATUS_UNPAID,
-            Order::STATUS_PAID,
-            Order::STATUS_SHIPPED,
-            Order::STATUS_RECEIVED,
-            Order::STATUS_COMPLETED
-        ];
+        switch ($status) {
+            case 1:
+                $status = [
+                    Order::STATUS_UNPAID,
+                ];
+                break;
+            case 2:
+                $status = [
+                    Order::STATUS_PAID,
+                ];
+                break;
+            case 3:
+                $status = [
+                    Order::STATUS_SHIPPED,
+                ];
+                break;
+            case 4:
+                $status = [
+                    Order::STATUS_RECEIVED,
+                ];
+                break;
+            case 5:
+                $status = [
+                    Order::STATUS_COMPLETED
+                ];
+                break;
+            default:
+                $status = [
+                    Order::STATUS_UNPAID,
+                    Order::STATUS_PAID,
+                    Order::STATUS_SHIPPED,
+                    Order::STATUS_RECEIVED,
+                    Order::STATUS_COMPLETED
+                ];
+                break;
+        }
         $list = Order::with('goods')
             ->where('user_id',auth('api')->id())
             ->whereIn('status',$status)
             ->orderBy('id','desc')
-            ->get();
+            ->paginate(3);
         return $list;
     }
 
