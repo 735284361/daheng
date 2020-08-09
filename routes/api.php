@@ -84,6 +84,7 @@ Route::group(['prefix' => 'v1'], function () {
 
         // 代理商
         Route::group(['prefix' => 'agent'], function() {
+            Route::get('detail','AgentController@getAgentInfo');
             Route::get('viewAgentRight','AgentController@getAgentViewRight');
             Route::post('apply','AgentController@apply');
             Route::get('statistics','AgentController@statistics');
