@@ -446,27 +446,27 @@ class OrderService
     public function orderList($status = 0)
     {
         switch ($status) {
-            case 1:
+            case 0:
                 $status = [
                     Order::STATUS_UNPAID,
                 ];
                 break;
-            case 2:
+            case 1:
                 $status = [
                     Order::STATUS_PAID,
                 ];
                 break;
-            case 3:
+            case 2:
                 $status = [
                     Order::STATUS_SHIPPED,
                 ];
                 break;
-            case 4:
+            case 3:
                 $status = [
                     Order::STATUS_RECEIVED,
                 ];
                 break;
-            case 5:
+            case 4:
                 $status = [
                     Order::STATUS_COMPLETED
                 ];
