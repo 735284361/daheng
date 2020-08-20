@@ -109,5 +109,6 @@ class AddressController extends Controller
         $this->validate($request,['id' => 'required|integer']);
         return $this->addressService->setDefault($request->id);
     }
+
     
 }
