@@ -110,5 +110,5 @@ class AddressController extends Controller
         return $this->addressService->setDefault($request->id);
     }
 
-    
+
 }

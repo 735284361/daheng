@@ -248,7 +248,7 @@ class AgentController extends Controller
      */
     public function divide()
     {
-        if (true || Carbon::today() == Carbon::now()->firstOfMonth()) {
+        if (Carbon::today() == Carbon::now()->firstOfMonth()) {
             $exception = DB::transaction(function () {
                 // 代理商结算
                 $agentList = Agent::where('status',Agent::STATUS_NORMAL)->get();
